@@ -13,7 +13,7 @@ export default function Configurator() {
   ];
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <div style={{ display: "flex", height: "100vh", width: "60vw" }}>
       {/* Left side: texture options */}
       <div
         style={{
@@ -54,7 +54,7 @@ export default function Configurator() {
           <Model textureURL={texture} />
 
           <OrbitControls enablePan={true} />
-          <Environment preset="studio" />
+          <Environment preset="apartment" />
         </Canvas>
       </div>
     </div>
