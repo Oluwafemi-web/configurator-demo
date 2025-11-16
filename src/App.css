@@ -39,3 +39,33 @@
 .read-the-docs {
   color: #888;
 }
+
+@media (max-width: 768px) {
+  .configurator-container {
+    flex-direction: column !important;
+  }
+  
+  .color-selectors-panel {
+    width: 100% !important;
+    flex-direction: row !important;
+    gap: 20px !important;
+    padding: 20px !important;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  
+  .canvas-container {
+    height: 400px !important;
+  }
+
+  .color-selector-wrapper {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .color-selector-label {
+    opacity: 1 !important;
+    position: static !important;
+    font-size: 12px !important;
+  }
+}

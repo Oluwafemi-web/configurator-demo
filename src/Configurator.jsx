@@ -9,6 +9,7 @@ function ColorSelector({ label, color, setColor, baseColor }) {
 
   return (
     <div
+      className="color-selector-wrapper"
       style={{
         display: "flex",
         alignItems: "center",
@@ -38,6 +39,7 @@ function ColorSelector({ label, color, setColor, baseColor }) {
         title={`Click to apply ${label} color`}
       />
       <span
+        className="color-selector-label"
         style={{
           opacity: isHovered ? 1 : 0,
           fontSize: "14px",
@@ -193,26 +195,6 @@ export default function Configurator() {
           </Canvas>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .configurator-container {
-            flex-direction: column !important;
-          }
-          
-          .color-selectors-panel {
-            width: 100% !important;
-            flex-direction: row !important;
-            gap: 20px !important;
-            padding: 20px !important;
-            border-bottom: 2px solid #e0e0e0;
-          }
-          
-          .canvas-container {
-            height: 400px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
