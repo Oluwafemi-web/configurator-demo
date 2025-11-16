@@ -190,7 +190,11 @@ export default function Configurator() {
               />
             )}
 
-            <OrbitControls enablePan={true} />
+            <OrbitControls
+              enablePan={true}
+              minPolarAngle={Math.PI / 4}
+              maxPolarAngle={(2 * Math.PI) / 4}
+            />
             <Environment preset="apartment" />
           </Canvas>
         </div>
