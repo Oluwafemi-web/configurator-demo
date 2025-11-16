@@ -137,6 +137,7 @@ export default function Configurator() {
       </h1>
 
       <div
+        className="configurator-container"
         style={{
           display: "flex",
           width: "90%",
@@ -149,6 +150,7 @@ export default function Configurator() {
       >
         {/* Left side: color selectors */}
         <div
+          className="color-selectors-panel"
           style={{
             width: "120px",
             display: "flex",
@@ -172,7 +174,7 @@ export default function Configurator() {
         </div>
 
         {/* Right side: 3D scene */}
-        <div style={{ flex: 1, height: "600px" }}>
+        <div className="canvas-container" style={{ flex: 1, height: "600px" }}>
           <Canvas camera={{ position: [2, 2, 2], fov: 45 }}>
             <ambientLight intensity={0.7} />
             <directionalLight position={[3, 3, 3]} intensity={0.5} />
@@ -191,6 +193,26 @@ export default function Configurator() {
           </Canvas>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .configurator-container {
+            flex-direction: column !important;
+          }
+          
+          .color-selectors-panel {
+            width: 100% !important;
+            flex-direction: row !important;
+            gap: 20px !important;
+            padding: 20px !important;
+            border-bottom: 2px solid #e0e0e0;
+          }
+          
+          .canvas-container {
+            height: 400px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
