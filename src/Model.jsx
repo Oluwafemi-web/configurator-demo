@@ -1,37 +1,63 @@
-import { useGLTF, useTexture } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { useEffect } from "react";
 import * as THREE from "three";
-export default function Model({ textureURL }) {
-  const { scene } = useGLTF("/models/TEST.glb");
 
-  // Load selected texture
-  const texture = useTexture(textureURL);
+export default function Model({ chairColor, pillowColor, feetColor }) {
+  const { scene } = useGLTF("/models/TEST_pieces_glb_separate.glb");
 
   useEffect(() => {
-    if (!texture) return;
-    const tex = texture;
-    tex.flipY = false;
-    tex.colorSpace = THREE.SRGBColorSpace;
+    // Apply colors to meshes based on their parent node names
+    // Nodes: "seat", "base", "backrest" (chair parts), "feet", "pillow"
+    // Only apply colors if they are set (not null)
 
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        const mat = child.material;
+    // Find nodes directly by name
+    const findNodeByName = (name) => {
+      let found = null;
+      scene.traverse((child) => {
+        if (child.name && child.name.toLowerCase() === name.toLowerCase()) {
+          found = child;
+        }
+      });
+      return found;
+    };
 
-        mat.map = tex;
-        mat.needsUpdate = true;
+    // Apply color to all meshes under a specific node (only if color is provided)
+    const applyColorToNode = (nodeName, color, metalness, roughness) => {
+      if (!color) return; // Don't apply if color is null/undefined
 
-        // IMPORTANT FIXES ⬇️
-        mat.color.set("#ffffff"); // remove tint
-        mat.metalness = 0; // fabric should not shine
-        mat.roughness = 0.9; // soft fabric reflectivity
-        mat.metalnessMap = null;
-
-        // Optional… If texture looks too large or small:
-        tex.repeat.set(2, 2);
-        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      const node = findNodeByName(nodeName);
+      if (node) {
+        node.traverse((child) => {
+          if (child.isMesh) {
+            const materials = Array.isArray(child.material)
+              ? child.material
+              : [child.material];
+            materials.forEach((mat) => {
+              if (mat) {
+                mat.color.set(color);
+                mat.metalness = metalness;
+                mat.roughness = roughness;
+                mat.needsUpdate = true;
+              }
+            });
+          }
+        });
       }
-    });
-  }, [texture]);
+    };
+
+    // Apply colors to specific nodes (only if colors are set)
+    if (pillowColor) {
+      applyColorToNode("pillow", pillowColor, 0, 0.9);
+    }
+    if (feetColor) {
+      applyColorToNode("feet", feetColor, 0.8, 0.2);
+    }
+    if (chairColor) {
+      applyColorToNode("seat", chairColor, 0, 0.9);
+      applyColorToNode("backrest", chairColor, 0, 0.9);
+      applyColorToNode("base", chairColor, 0, 0.9);
+    }
+  }, [chairColor, pillowColor, feetColor, scene]);
 
   return <primitive object={scene} scale={1} />;
 }
