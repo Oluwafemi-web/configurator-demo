@@ -830,7 +830,7 @@ export default function Configurator() {
                 enableZoom={true}
                 enablePan={true}
                 minPolarAngle={Math.PI / 4}
-                maxPolarAngle={(3 * Math.PI) / 4}
+                maxPolarAngle={(2 * Math.PI) / 4}
               />
             ) : (
               <OrbitControls
