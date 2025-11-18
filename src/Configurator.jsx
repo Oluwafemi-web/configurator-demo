@@ -108,25 +108,25 @@ export default function Configurator() {
   const getResolvedPosition = (chair) =>
     chair.customPosition ?? autoPositions.get(chair.id) ?? [0, 0, 0];
 
-  const findSnapTarget = (chair, pos) => {
+  const findSnapTarget = (draggedChair, pos) => {
     let nearest = null;
     let nearestDist = Infinity;
-    chairs.forEach((chair) => {
-      if (chair.id === chairId) return;
-      const chairPos = getResolvedPosition(chair);
+    chairs.forEach((otherChair) => {
+      if (otherChair.id === draggedChair.id) return;
+      const chairPos = getResolvedPosition(otherChair);
       const dx = chairPos[0] - pos.x;
       const dz = chairPos[2] - pos.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
       if (dist < nearestDist) {
         nearestDist = dist;
-        nearest = chair;
+        nearest = otherChair;
       }
     });
     if (!nearest || nearestDist >= SNAP_DISTANCE) return null;
     const neighborPos = getResolvedPosition(nearest);
     const direction = pos.x < neighborPos[0] ? -1 : 1;
     const neighborWidth = getModuleWidth(nearest);
-    const draggedWidth = getModuleWidth(chair);
+    const draggedWidth = getModuleWidth(draggedChair);
     const spacing = (neighborWidth + draggedWidth) / 2;
     return {
       neighborId: nearest.id,
