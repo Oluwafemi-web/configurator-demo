@@ -1,139 +1,18 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls, Environment, Line, Html } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { detectPartsFromModel } from "./utils/detectParts";
-
-const STAGES = {
-  landing: "landing",
-  selection: "selection",
-  builder: "builder",
-};
-
-const upholsteryTextures = [
-  {
-    id: "beige-upholstery",
-    label: "Beige_ulphostery",
-    path: "/textures/Ulphostery/Beige_ulphostery.jpg",
-  },
-  {
-    id: "black-upholstery",
-    label: "Black_ulphostery",
-    path: "/textures/Ulphostery/Black_ulphostery.jpg",
-  },
-  {
-    id: "blue-midnight-upholstery",
-    label: "Blu_Midnight_ulphostery",
-    path: "/textures/Ulphostery/Blu_Midnight_ulphostery.jpg",
-  },
-  {
-    id: "blue-upholstery",
-    label: "Blu_ulphostery",
-    path: "/textures/Ulphostery/Blu_ulphostery.jpg",
-  },
-  {
-    id: "gray-upholstery",
-    label: "Gray_ulphostery",
-    path: "/textures/Ulphostery/Gray_ulphostery.jpg",
-  },
-  {
-    id: "red-upholstery",
-    label: "Red_ulphostery",
-    path: "/textures/Ulphostery/Red_ulphostery.jpg",
-  },
-  {
-    id: "white-upholstery",
-    label: "White_ulphostery",
-    path: "/textures/Ulphostery/White_ulphostery.jpg",
-  },
-  {
-    id: "yellow-upholstery",
-    label: "Yellow_ulphostery",
-    path: "/textures/Ulphostery/Yellow_ulphostery.jpg",
-  },
-];
-
-const feetTextures = [
-  {
-    id: "metal-texture",
-    label: "METAL",
-    path: "/textures/metal_texture_FEET.jpg",
-  },
-  {
-    id: "wood-texture",
-    label: "WOOD",
-    path: "/textures/Wood_texture_FEET.jpg",
-  },
-];
-
-const SOFA_FAMILY_NAME = "Jump Sofa";
-
-const sofaCatalog = [
-  {
-    category: "POLTRONA",
-    items: [
-      {
-        id: "02D301",
-        name: "02D301",
-        description: "Modulo singolo",
-        dimensionsMetric: "92 x 114 x 70 CM",
-        dimensionsImperial: '36 1/4" x 44 7/8" x 27 1/2"',
-        modelPath: "/models/Jump_Sofa_GLB/Jump_Sofa_CENTER.glb",
-        fabricGroup: "POLTORONA",
-      },
-    ],
-  },
-  {
-    category: "DIVANO",
-    items: [
-      {
-        id: "02D303",
-        name: "02D303",
-        description: "Modulo DX",
-        dimensionsMetric: "114 x 215 x 70 CM",
-        dimensionsImperial: '44 7/8" x 84 5/8" x 27 1/2"',
-        modelPath: "/models/Jump_Sofa_GLB/Jump_Sofa_DX.glb",
-        fabricGroup: "DIVANO",
-      },
-    ],
-  },
-  {
-    category: "ELEMENTO",
-    items: [
-      {
-        id: "02D305",
-        name: "02D305",
-        description: "Modulo SX",
-        dimensionsMetric: "114 x 265 x 70 CM",
-        dimensionsImperial: '44 7/8" x 104 3/8" x 27 1/2"',
-        modelPath: "/models/Jump_Sofa_GLB/Jump_Sofa_SX.glb",
-        fabricGroup: "ELEMENTO",
-      },
-    ],
-  },
-];
-
-const VARIANT_CONFIG = [
-  {
-    key: "center",
-    title: "Modulo Centrale",
-    description: "Elemento centrale per creare sezioni lineari.",
-    badge: "CENTER",
-  },
-  {
-    key: "left",
-    title: "Modulo Sinistro",
-    description: "Terminale sinistro (modello DX).",
-    badge: "DX",
-  },
-  {
-    key: "right",
-    title: "Modulo Destro",
-    description: "Terminale destro (modello SX).",
-    badge: "SX",
-  },
-];
+import DraggableModule from "./DraggableModule";
+import {
+  STAGES,
+  upholsteryTextures,
+  feetTextures,
+  SOFA_FAMILY_NAME,
+  sofaCatalog,
+  VARIANT_CONFIG,
+} from "./constants";
 
 export default function Configurator() {
   const [stage, setStage] = useState(STAGES.landing);
@@ -153,6 +32,15 @@ export default function Configurator() {
   const [chairs, setChairs] = useState([]);
   const [showModuleMenu, setShowModuleMenu] = useState(false);
   const [viewMode, setViewMode] = useState("3d"); // "2d" or "3d"
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [draggingChairId, setDraggingChairId] = useState(null);
+  const [snapPreview, setSnapPreview] = useState(null);
+  const [selectedChairId, setSelectedChairId] = useState(null);
+  const [actionPanelPos, setActionPanelPos] = useState({ x: 0, y: 0 });
+  const [showActionPanel, setShowActionPanel] = useState(false);
+  const [rotationTargetId, setRotationTargetId] = useState(null);
+  const [isDragging2D, setIsDragging2D] = useState(false);
+  const canvasContainerRef = useRef(null);
 
   const sofaVariants = useMemo(() => {
     const variants = { center: null, left: null, right: null };
@@ -169,6 +57,169 @@ export default function Configurator() {
     });
     return variants;
   }, []);
+
+  const CHAIR_WIDTH = 1.14;
+  const SNAP_DISTANCE = 0.9;
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 2.5;
+  const ZOOM_STEP = 0.25;
+
+  const getModuleWidth = (chair) => {
+    const metric = chair?.sofa?.dimensionsMetric ?? "";
+    const firstValue = parseFloat(metric.split("x")[0]);
+    if (!Number.isFinite(firstValue)) return CHAIR_WIDTH;
+    return firstValue / 100;
+  };
+
+  const autoPositions = useMemo(() => {
+    const positionsMap = new Map();
+    const leftChairs = chairs.filter((c) => c.position === "left");
+    const centerChairs = chairs.filter((c) => c.position === "center");
+    const rightChairs = chairs.filter((c) => c.position === "right");
+
+    let leftOffset = 0;
+    for (let i = leftChairs.length - 1; i >= 0; i -= 1) {
+      const chair = leftChairs[i];
+      const width = getModuleWidth(chair);
+      const half = width / 2;
+      positionsMap.set(chair.id, [-(leftOffset + half), 0, 0]);
+      leftOffset += width;
+    }
+
+    let centerOffset = 0;
+    centerChairs.forEach((chair) => {
+      const width = getModuleWidth(chair);
+      const half = width / 2;
+      positionsMap.set(chair.id, [centerOffset + half, 0, 0]);
+      centerOffset += width;
+    });
+
+    let rightCursor = centerOffset > 0 ? centerOffset : 0;
+    rightChairs.forEach((chair) => {
+      const width = getModuleWidth(chair);
+      const half = width / 2;
+      positionsMap.set(chair.id, [rightCursor + half, 0, 0]);
+      rightCursor += width;
+    });
+
+    return positionsMap;
+  }, [chairs]);
+
+  const getResolvedPosition = (chair) =>
+    chair.customPosition ?? autoPositions.get(chair.id) ?? [0, 0, 0];
+
+  const findSnapTarget = (chair, pos) => {
+    let nearest = null;
+    let nearestDist = Infinity;
+    chairs.forEach((chair) => {
+      if (chair.id === chairId) return;
+      const chairPos = getResolvedPosition(chair);
+      const dx = chairPos[0] - pos.x;
+      const dz = chairPos[2] - pos.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = chair;
+      }
+    });
+    if (!nearest || nearestDist >= SNAP_DISTANCE) return null;
+    const neighborPos = getResolvedPosition(nearest);
+    const direction = pos.x < neighborPos[0] ? -1 : 1;
+    const neighborWidth = getModuleWidth(nearest);
+    const draggedWidth = getModuleWidth(chair);
+    const spacing = (neighborWidth + draggedWidth) / 2;
+    return {
+      neighborId: nearest.id,
+      neighborPosition: neighborPos,
+      snappedPosition: [
+        neighborPos[0] + direction * spacing,
+        0,
+        neighborPos[2],
+      ],
+      draggedWidth,
+    };
+  };
+
+  const handleDragStart = (chair) => {
+    if (viewMode !== "2d") return;
+    setDraggingChairId(chair.id);
+    setIsDragging2D(true);
+    setShowActionPanel(false);
+    setRotationTargetId(null);
+    setSnapPreview(null);
+  };
+
+  const handleDragMove = (chair, pos) => {
+    if (viewMode !== "2d") return;
+    const snap = findSnapTarget(chair, pos);
+    if (snap) {
+      setSnapPreview(snap);
+    } else {
+      setSnapPreview(null);
+    }
+  };
+
+  const handleDragEnd = (chair, pos) => {
+    if (viewMode !== "2d") return;
+    setDraggingChairId(null);
+    setIsDragging2D(false);
+    const snap = findSnapTarget(chair, pos);
+    const targetPosition = snap ? snap.snappedPosition : [pos.x, 0, pos.z];
+    setSnapPreview(null);
+    setChairs((prev) =>
+      prev.map((c) =>
+        c.id === chair.id ? { ...c, customPosition: targetPosition } : c
+      )
+    );
+  };
+
+  const handleSelectChair = (chair, event) => {
+    if (viewMode !== "2d" || draggingChairId) return;
+    event.stopPropagation();
+    const nativeEvent = event?.nativeEvent ?? event;
+    const containerRect = canvasContainerRef.current?.getBoundingClientRect();
+    if (containerRect && nativeEvent) {
+      setActionPanelPos({
+        x: nativeEvent.clientX - containerRect.left,
+        y: nativeEvent.clientY - containerRect.top,
+      });
+    }
+    setSelectedChairId(chair.id);
+    setShowActionPanel(true);
+    setRotationTargetId(null);
+  };
+
+  const handleRotateRequest = () => {
+    if (!selectedChairId) return;
+    setRotationTargetId(selectedChairId);
+    setShowActionPanel(false);
+  };
+
+  const handleRotateChange = (chairId, degrees) => {
+    setChairs((prev) =>
+      prev.map((chair) =>
+        chair.id === chairId
+          ? { ...chair, rotation: (degrees * Math.PI) / 180 }
+          : chair
+      )
+    );
+  };
+
+  const selectedChair =
+    chairs.find((chair) => chair.id === selectedChairId) ?? null;
+  const rotationTarget =
+    chairs.find((chair) => chair.id === rotationTargetId) ?? null;
+
+  const getActionPanelStyle = () => {
+    const width = 360;
+    const height = 200;
+    const container = canvasContainerRef.current;
+    const maxLeft = container ? container.clientWidth - width - 20 : 0;
+    const maxTop = container ? container.clientHeight - height - 20 : 0;
+    const left = Math.max(20, Math.min(actionPanelPos.x, maxLeft));
+    const top = Math.max(20, Math.min(actionPanelPos.y, maxTop));
+    return { width, height, left, top };
+  };
 
   // Detect parts from model when sofa is selected
   useEffect(() => {
@@ -204,6 +255,30 @@ export default function Configurator() {
       };
     }
   }, [showModuleMenu]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showActionPanel && !event.target.closest("[data-selection-menu]")) {
+        setShowActionPanel(false);
+        setSelectedChairId(null);
+      }
+    };
+    if (showActionPanel) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showActionPanel]);
+
+  useEffect(() => {
+    if (viewMode !== "2d") {
+      setShowActionPanel(false);
+      setRotationTargetId(null);
+      setSnapPreview(null);
+      setDraggingChairId(null);
+    }
+  }, [viewMode]);
 
   const availableParts = detectedParts.length > 0 ? detectedParts : [];
   const colorSelectors = useMemo(() => {
@@ -271,6 +346,13 @@ export default function Configurator() {
     selectedFeetOptionId,
   ]);
 
+  const handleZoomChange = (direction) => {
+    setZoomLevel((prev) => {
+      const next = direction === "in" ? prev + ZOOM_STEP : prev - ZOOM_STEP;
+      return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+    });
+  };
+
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
   const handleConfirmSelection = () => {
@@ -292,40 +374,10 @@ export default function Configurator() {
         pillowTexture: null,
         feetTexture: null,
         position: "center", // center, left, right
+        customPosition: null,
+        rotation: 0,
       },
     ]);
-  };
-
-  // Calculate contiguous positions: left modules to negative X, centers from 0+, right modules after centers
-  const getChairPosition = (chair) => {
-    const chairWidth = 1.14;
-    const leftChairs = chairs
-      .filter((c) => c.position === "left")
-      .sort((a, b) => a.id - b.id);
-    const centerChairs = chairs
-      .filter((c) => c.position === "center")
-      .sort((a, b) => a.id - b.id);
-    const rightChairs = chairs
-      .filter((c) => c.position === "right")
-      .sort((a, b) => a.id - b.id);
-
-    const positionsMap = new Map();
-
-    leftChairs.forEach((lc, idx) => {
-      const offset = leftChairs.length - idx;
-      positionsMap.set(lc.id, [-offset * chairWidth, 0, 0]);
-    });
-
-    centerChairs.forEach((cc, idx) => {
-      positionsMap.set(cc.id, [idx * chairWidth, 0, 0]);
-    });
-
-    const centerCount = Math.max(centerChairs.length, 1);
-    rightChairs.forEach((rc, idx) => {
-      positionsMap.set(rc.id, [(centerCount + idx) * chairWidth, 0, 0]);
-    });
-
-    return positionsMap.get(chair.id) ?? [0, 0, 0];
   };
 
   const handleAddChair = (sofa) => {
@@ -350,6 +402,8 @@ export default function Configurator() {
       pillowTexture: selectedPillowTexture,
       feetTexture: selectedFeetTexture,
       position: position,
+      customPosition: null,
+      rotation: 0,
     };
 
     setChairs((prev) => {
@@ -369,6 +423,13 @@ export default function Configurator() {
 
   const handleRemoveChair = (chairId) => {
     setChairs((prev) => prev.filter((chair) => chair.id !== chairId));
+  };
+
+  const handleRemoveLastChair = () => {
+    setChairs((prev) => {
+      if (prev.length === 0) return prev;
+      return prev.slice(0, -1);
+    });
   };
 
   const renderLandingScreen = () => (
@@ -667,20 +728,41 @@ export default function Configurator() {
             <directionalLight position={[3, 3, 3]} intensity={0.5} />
             {chairs.length > 0 ? (
               chairs.map((chair) => {
-                const position = getChairPosition(chair);
+                const resolvedPosition = getResolvedPosition(chair);
                 return (
-                  <Model
+                  <DraggableModule
                     key={chair.id}
-                    modelPath={chair.sofa.modelPath}
-                    chairTexturePath={
-                      chair.chairTexture || selectedChairTexture
+                    position={resolvedPosition}
+                    disabled={
+                      viewMode !== "2d" || rotationTargetId === chair.id
                     }
-                    pillowTexturePath={
-                      chair.pillowTexture || selectedPillowTexture
-                    }
-                    feetTexturePath={chair.feetTexture || selectedFeetTexture}
-                    position={position}
-                  />
+                    onDragStart={() => handleDragStart(chair)}
+                    onDrag={(pos) => handleDragMove(chair, pos)}
+                    onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
+                    onSelect={(event) => handleSelectChair(chair, event)}
+                  >
+                    <group
+                      rotation={[
+                        0,
+                        viewMode === "3d" ? chair.rotation || 0 : 0,
+                        0,
+                      ]}
+                    >
+                      <Model
+                        modelPath={chair.sofa.modelPath}
+                        chairTexturePath={
+                          chair.chairTexture || selectedChairTexture
+                        }
+                        pillowTexturePath={
+                          chair.pillowTexture || selectedPillowTexture
+                        }
+                        feetTexturePath={
+                          chair.feetTexture || selectedFeetTexture
+                        }
+                        position={[0, 0, 0]}
+                      />
+                    </group>
+                  </DraggableModule>
                 );
               })
             ) : selectedSofa ? (
@@ -691,17 +773,70 @@ export default function Configurator() {
                 feetTexturePath={selectedFeetTexture}
               />
             ) : null}
+            {snapPreview && viewMode === "2d" && (
+              <group>
+                <Line
+                  points={[
+                    [
+                      snapPreview.neighborPosition[0],
+                      0.05,
+                      snapPreview.neighborPosition[2],
+                    ],
+                    [
+                      snapPreview.snappedPosition[0],
+                      0.05,
+                      snapPreview.snappedPosition[2],
+                    ],
+                  ]}
+                  color="#222222"
+                  lineWidth={1}
+                  dashed
+                  dashSize={0.2}
+                  gapSize={0.12}
+                />
+                <mesh
+                  position={[
+                    snapPreview.snappedPosition[0],
+                    0.01,
+                    snapPreview.snappedPosition[2],
+                  ]}
+                >
+                  <boxGeometry
+                    args={[
+                      (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.9,
+                      0.005,
+                      (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.6,
+                    ]}
+                  />
+                  <meshStandardMaterial
+                    color="#111111"
+                    transparent
+                    opacity={0.15}
+                  />
+                </mesh>
+              </group>
+            )}
+            {rotationTarget && viewMode === "2d" && (
+              <RotationRing
+                position={getResolvedPosition(rotationTarget)}
+                angle={((rotationTarget.rotation || 0) * 180) / Math.PI}
+                onRotate={(deg) => handleRotateChange(rotationTarget.id, deg)}
+                onClose={() => setRotationTargetId(null)}
+              />
+            )}
             {viewMode === "3d" ? (
               <OrbitControls
+                enableRotate={true}
+                enableZoom={true}
                 enablePan={true}
                 minPolarAngle={Math.PI / 4}
                 maxPolarAngle={(3 * Math.PI) / 4}
               />
             ) : (
               <OrbitControls
-                enablePan={true}
-                enableRotate={true}
-                enableZoom={true}
+                enablePan={!isDragging2D}
+                enableRotate={false}
+                enableZoom={!isDragging2D}
                 minZoom={0.5}
                 maxZoom={3}
               />
@@ -786,6 +921,28 @@ export default function Configurator() {
             >
               <span style={{ fontSize: "18px" }}>+</span>
               <span>Aggiungi modulo</span>
+            </button>
+
+            <button
+              onClick={handleRemoveLastChair}
+              disabled={chairs.length === 0}
+              style={{
+                padding: "12px 24px",
+                borderRadius: "8px",
+                border: "2px solid #1b1b1b",
+                background: chairs.length === 0 ? "#f0f0f0" : "#fff",
+                color: chairs.length === 0 ? "#9c9c9c" : "#1b1b1b",
+                cursor: chairs.length === 0 ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              <span style={{ fontSize: "18px" }}>−</span>
+              <span>Rimuovi modulo</span>
             </button>
 
             {/* Module Selection Menu */}
