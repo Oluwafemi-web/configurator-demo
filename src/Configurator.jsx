@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, Line, Html } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { detectPartsFromModel } from "./utils/detectParts";
 import DraggableModule from "./DraggableModule";
 import {
@@ -90,12 +90,15 @@ export default function Configurator() {
     );
 
   const CHAIR_WIDTH = 1.14;
-  const SNAP_DISTANCE = 0.9;
+  const SNAP_DISTANCE = 0;
   const MIN_ZOOM = 0.5;
   const MAX_ZOOM = 2.5;
   const ZOOM_STEP = 0.25;
 
   const getModuleWidth = (chair) => {
+    if (chair?.meshWidth && Number.isFinite(chair.meshWidth)) {
+      return chair.meshWidth;
+    }
     const metric = chair?.sofa?.dimensionsMetric ?? "";
     const firstValue = parseFloat(metric.split("x")[0]);
     if (!Number.isFinite(firstValue)) return CHAIR_WIDTH;
@@ -203,6 +206,25 @@ export default function Configurator() {
       )
     );
   };
+
+  const handleModuleDimensions = useCallback((chairId, dims) => {
+    if (!dims || !Number.isFinite(dims.width)) return;
+    setChairs((prev) => {
+      let updated = false;
+      const next = prev.map((chair) => {
+        if (chair.id !== chairId) return chair;
+        if (chair.meshWidth && Math.abs(chair.meshWidth - dims.width) < 0.001) {
+          return chair;
+        }
+        updated = true;
+        return {
+          ...chair,
+          meshWidth: dims.width,
+        };
+      });
+      return updated ? next : prev;
+    });
+  }, []);
 
   const handleSelectChair = (chair, event) => {
     if (viewMode !== "2d" || draggingChairId) return;
@@ -412,6 +434,7 @@ export default function Configurator() {
       position: getVariantKeyFromModelPath(sofa?.modelPath) ?? "right",
       customPosition: null,
       rotation: 0,
+      meshWidth: null,
     }));
 
     setChairs(seededChairs);
@@ -432,6 +455,7 @@ export default function Configurator() {
       position: position,
       customPosition: null,
       rotation: 0,
+      meshWidth: null,
     };
 
     setChairs((prev) => {
@@ -806,6 +830,8 @@ export default function Configurator() {
                           chair.feetTexture || selectedFeetTexture
                         }
                         position={[0, 0, 0]}
+                        onDimensionsDetected={handleModuleDimensions}
+                        dimensionsPayload={chair.id}
                       />
                     </group>
                   </DraggableModule>

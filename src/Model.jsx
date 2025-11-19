@@ -20,6 +20,8 @@ export default function Model({
   pillowTexturePath,
   feetTexturePath,
   position = [0, 0, 0],
+  onDimensionsDetected,
+  dimensionsPayload,
 }) {
   const safePath = modelPath || "/models/Jump_Sofa_GLB/Jump_Sofa_CENTER.glb";
   const { scene } = useGLTF(safePath);
@@ -142,6 +144,22 @@ export default function Model({
       0.9
     );
   }, [clonedScene, chairTexture, pillowTexture, feetTexture]);
+
+  useEffect(() => {
+    if (!clonedScene || !onDimensionsDetected) return;
+    const box = new THREE.Box3();
+    const size = new THREE.Vector3();
+    clonedScene.updateMatrixWorld(true);
+    box.setFromObject(clonedScene);
+    box.getSize(size);
+    if (Number.isFinite(size.x)) {
+      onDimensionsDetected(dimensionsPayload, {
+        width: size.x,
+        height: size.y,
+        depth: size.z,
+      });
+    }
+  }, [clonedScene, onDimensionsDetected, dimensionsPayload]);
 
   return <primitive object={clonedScene} scale={1} position={position} />;
 }
