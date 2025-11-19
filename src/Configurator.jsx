@@ -16,7 +16,7 @@ import {
 
 export default function Configurator() {
   const [stage, setStage] = useState(STAGES.landing);
-  const [pendingSelection, setPendingSelection] = useState(null);
+  const [pendingVariantKeys, setPendingVariantKeys] = useState([]);
   const [selectedSofa, setSelectedSofa] = useState(null);
 
   const [selectedChairTexture, setSelectedChairTexture] = useState(null);
@@ -57,6 +57,37 @@ export default function Configurator() {
     });
     return variants;
   }, []);
+
+  const variantOrder = useMemo(
+    () => VARIANT_CONFIG.map((variant) => variant.key),
+    []
+  );
+
+  const getVariantKeyFromModelPath = (modelPath = "") => {
+    const upperPath = modelPath.toUpperCase();
+    if (upperPath.includes("CENTER")) return "center";
+    if (upperPath.includes("DX")) return "left";
+    if (upperPath.includes("SX")) return "right";
+    return null;
+  };
+
+  const sortVariantKeys = (keys) => {
+    return [...new Set(keys)].sort((a, b) => {
+      const idxA = variantOrder.indexOf(a);
+      const idxB = variantOrder.indexOf(b);
+      if (idxA === -1 && idxB === -1) return 0;
+      if (idxA === -1) return 1;
+      if (idxB === -1) return -1;
+      return idxA - idxB;
+    });
+  };
+
+  const deriveVariantKeysFromChairs = () =>
+    sortVariantKeys(
+      chairs
+        .map((chair) => getVariantKeyFromModelPath(chair?.sofa?.modelPath))
+        .filter(Boolean)
+    );
 
   const CHAIR_WIDTH = 1.14;
   const SNAP_DISTANCE = 0.9;
@@ -356,8 +387,13 @@ export default function Configurator() {
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
   const handleConfirmSelection = () => {
-    if (!pendingSelection) return;
-    setSelectedSofa(pendingSelection);
+    const selectedItems = pendingVariantKeys
+      .map((key) => sofaVariants[key])
+      .filter(Boolean);
+
+    if (selectedItems.length === 0) return;
+
+    setSelectedSofa(selectedItems[0]);
     setStage(STAGES.builder);
     setSelectedChairTexture(null);
     setSelectedPillowTexture(null);
@@ -365,35 +401,27 @@ export default function Configurator() {
     setSelectedChairOptionId(null);
     setSelectedPillowOptionId(null);
     setSelectedFeetOptionId(null);
-    // Initialize with the selected sofa as the first chair
-    setChairs([
-      {
-        id: Date.now(),
-        sofa: pendingSelection,
-        chairTexture: null,
-        pillowTexture: null,
-        feetTexture: null,
-        position: "center", // center, left, right
-        customPosition: null,
-        rotation: 0,
-      },
-    ]);
+
+    const timestamp = Date.now();
+    const seededChairs = selectedItems.map((sofa, index) => ({
+      id: timestamp + index,
+      sofa,
+      chairTexture: null,
+      pillowTexture: null,
+      feetTexture: null,
+      position: getVariantKeyFromModelPath(sofa?.modelPath) ?? "right",
+      customPosition: null,
+      rotation: 0,
+    }));
+
+    setChairs(seededChairs);
   };
 
   const handleAddChair = (sofa) => {
     if (!sofa) return;
 
     // Determine position based on model path
-    let position;
-    if (sofa.modelPath.includes("SX")) {
-      position = "right";
-    } else if (sofa.modelPath.includes("DX")) {
-      position = "left";
-    } else if (sofa.modelPath.includes("CENTER")) {
-      position = "center";
-    } else {
-      position = "right"; // Default to right
-    }
+    const position = getVariantKeyFromModelPath(sofa?.modelPath) ?? "right";
 
     const newChair = {
       id: Date.now(),
@@ -501,7 +529,7 @@ export default function Configurator() {
       <button
         onClick={() => {
           setStage(STAGES.landing);
-          setPendingSelection(null);
+          setPendingVariantKeys([]);
         }}
         style={{
           alignSelf: "flex-start",
@@ -532,11 +560,18 @@ export default function Configurator() {
           {VARIANT_CONFIG.map((variant) => {
             const item = sofaVariants[variant.key];
             if (!item) return null;
-            const isSelected = pendingSelection?.id === item.id;
+            const isSelected = pendingVariantKeys.includes(variant.key);
             return (
               <div
                 key={variant.key}
-                onClick={() => setPendingSelection(item)}
+                onClick={() =>
+                  setPendingVariantKeys((prev) => {
+                    if (prev.includes(variant.key)) {
+                      return prev.filter((key) => key !== variant.key);
+                    }
+                    return sortVariantKeys([...prev, variant.key]);
+                  })
+                }
                 style={{
                   width: "100%",
                   background: "#fff",
@@ -552,9 +587,12 @@ export default function Configurator() {
               >
                 <div
                   style={{
-                    height: "110px",
+                    height: "15rem",
                     borderRadius: "14px",
-                    background: "linear-gradient(135deg,#d9d8d6,#f0f0ef)",
+                    backgroundImage: `url(${variant.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundColor: "#f4f4f4",
                     marginBottom: "16px",
                   }}
                 />
@@ -596,14 +634,14 @@ export default function Configurator() {
       <div style={{ textAlign: "center", marginTop: "10px" }}>
         <button
           onClick={handleConfirmSelection}
-          disabled={!pendingSelection}
+          disabled={pendingVariantKeys.length === 0}
           style={{
             padding: "14px 32px",
             borderRadius: "999px",
             border: "1px solid #1b1b1b",
-            background: pendingSelection ? "#1b1b1b" : "#d2d2d2",
-            color: pendingSelection ? "#fff" : "#707070",
-            cursor: pendingSelection ? "pointer" : "not-allowed",
+            background: pendingVariantKeys.length > 0 ? "#1b1b1b" : "#d2d2d2",
+            color: pendingVariantKeys.length > 0 ? "#fff" : "#707070",
+            cursor: pendingVariantKeys.length > 0 ? "pointer" : "not-allowed",
             letterSpacing: "0.1em",
           }}
         >
@@ -650,8 +688,16 @@ export default function Configurator() {
         </div>
         <button
           onClick={() => {
+            const existingKeys =
+              chairs.length > 0
+                ? deriveVariantKeysFromChairs()
+                : sortVariantKeys(
+                    [
+                      getVariantKeyFromModelPath(selectedSofa?.modelPath),
+                    ].filter(Boolean)
+                  );
+            setPendingVariantKeys(existingKeys);
             setStage(STAGES.selection);
-            setPendingSelection(selectedSofa);
           }}
           style={{
             padding: "10px 18px",

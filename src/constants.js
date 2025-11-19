@@ -113,17 +113,20 @@ export const VARIANT_CONFIG = [
     title: "Modulo Centrale",
     description: "Elemento centrale per creare sezioni lineari.",
     badge: "CENTER",
+    image: "/frontimage/Icon_Jump_CENTER_element.png",
   },
   {
     key: "left",
     title: "Modulo Sinistro",
     description: "Terminale sinistro (modello DX).",
     badge: "DX",
+    image: "/frontimage/Icon_Jump_LEFT_element.png",
   },
   {
     key: "right",
     title: "Modulo Destro",
     description: "Terminale destro (modello SX).",
     badge: "SX",
+    image: "/frontimage/Icon_Jump_RIGHT_element.png",
   },
 ];
