@@ -1,10 +1,11 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, Line, Html } from "@react-three/drei";
+import { OrbitControls, Line, Html } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { detectPartsFromModel } from "./utils/detectParts";
 import DraggableModule from "./DraggableModule";
+import RotationRing from "./RotationRing";
 import {
   STAGES,
   upholsteryTextures,
@@ -46,11 +47,12 @@ export default function Configurator() {
     const variants = { center: null, left: null, right: null };
     sofaCatalog.forEach((section) => {
       section.items.forEach((item) => {
-        if (item.modelPath.includes("CENTER")) {
+        const upperPath = item.modelPath.toUpperCase();
+        if (upperPath.includes("CENTER")) {
           variants.center = item;
-        } else if (item.modelPath.includes("DX")) {
+        } else if (upperPath.includes("LEFT")) {
           variants.left = item;
-        } else if (item.modelPath.includes("SX")) {
+        } else if (upperPath.includes("RIGHT")) {
           variants.right = item;
         }
       });
@@ -66,8 +68,8 @@ export default function Configurator() {
   const getVariantKeyFromModelPath = (modelPath = "") => {
     const upperPath = modelPath.toUpperCase();
     if (upperPath.includes("CENTER")) return "center";
-    if (upperPath.includes("DX")) return "left";
-    if (upperPath.includes("SX")) return "right";
+    if (upperPath.includes("LEFT")) return "left";
+    if (upperPath.includes("RIGHT")) return "right";
     return null;
   };
 
@@ -580,7 +582,13 @@ export default function Configurator() {
         <h2 style={{ fontSize: "2rem", margin: "8px 0 24px 0" }}>
           {SOFA_FAMILY_NAME}
         </h2>
-        <div className="flex gap-3">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "20px",
+          }}
+        >
           {VARIANT_CONFIG.map((variant) => {
             const item = sofaVariants[variant.key];
             if (!item) return null;
@@ -597,7 +605,6 @@ export default function Configurator() {
                   })
                 }
                 style={{
-                  width: "100%",
                   background: "#fff",
                   borderRadius: "20px",
                   padding: "22px 24px",
@@ -913,7 +920,6 @@ export default function Configurator() {
                 maxZoom={3}
               />
             )}
-            <Environment preset="apartment" />
           </Canvas>
 
           {/* View Mode and Add Module Buttons */}

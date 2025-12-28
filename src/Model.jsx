@@ -23,7 +23,7 @@ export default function Model({
   onDimensionsDetected,
   dimensionsPayload,
 }) {
-  const safePath = modelPath || "/models/Jump_Sofa_GLB/Jump_Sofa_CENTER.glb";
+  const safePath = modelPath || "/models/JUMP_SOFA/3D_MODELS/Jump_Right.gltf";
   const { scene } = useGLTF(safePath);
   const clonedScene = useMemo(() => {
     // Clone to avoid mutating cached GLTF scene
