@@ -1,7 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 import CameraController from "./CameraController";
-import FloorPlane from "./FloorPlane";
 import SofaModule from "./SofaModule";
 import { upholsteryCategories } from "../constants";
 import { useTexture } from "@react-three/drei";
@@ -40,7 +39,7 @@ export default function Scene3D({
       shadows
       camera={{ position: [8, 6, 8], fov: 50 }}
       gl={{ preserveDrawingBuffer: true }} // Required for PDF screenshot export
-      style={{ background: "#f0f0f0" }}
+      style={{ background: "#EEEEEE" }}
     >
       <TexturePreloader />
 
@@ -68,9 +67,6 @@ export default function Scene3D({
 
       {/* Camera controls with floor constraint */}
       <CameraController viewMode={viewMode} isDragging={isDragging} />
-
-      {/* Fixed floor plane */}
-      <FloorPlane />
 
       {/* Render all sofa modules */}
       {modules.map((module) => (
