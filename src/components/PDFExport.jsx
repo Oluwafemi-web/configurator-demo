@@ -15,7 +15,15 @@ export default function PDFExport({ canvasRef, modules, selectedFabric }) {
 
     try {
       // Get canvas screenshot
-      const canvas = canvasRef.current;
+      let canvas = canvasRef.current;
+      if (canvas.tagName !== "CANVAS") {
+        canvas = canvas.querySelector("canvas");
+      }
+      
+      if (!canvas) {
+        throw new Error("Could not find canvas element");
+      }
+
       const imgData = canvas.toDataURL("image/png");
 
       // Create PDF
@@ -73,9 +81,7 @@ export default function PDFExport({ canvasRef, modules, selectedFabric }) {
     <button
       onClick={handleExportPDF}
       style={{
-        position: "absolute",
-        top: "20px",
-        left: "20px",
+      
         padding: "12px 24px",
         backgroundColor: "#000",
         color: "#fff",

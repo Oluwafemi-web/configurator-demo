@@ -543,46 +543,17 @@ export default function EnhancedConfigurator() {
       </div>
 
       {/* Bottom toolbar */}
-      <div className="absolute bottom-[30px] left-1/2 -translate-x-1/2 flex items-center gap-5 bg-white px-5 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-        {/* Left side - Brand */}
-        <div className="text-[0.7rem] text-[#999] tracking-[0.05em]">
-          showely
-        </div>
-
-        <div className="w-px h-5 bg-[#e0e0e0]" />
+      <div className="absolute bottom-[30px]  left-1/2 -translate-x-1/2 flex items-center gap-5 bg-white px-5 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
 
         {/* Center - Action buttons */}
         <div className="flex gap-[15px] items-center">
-          <button
-            onClick={() => setStage(STAGES.selection)}
-            className="border-none bg-transparent cursor-pointer text-[0.7rem] text-[#666]"
-            title="All"
-          >
-            ⊞
-          </button>
+
           <PDFExport
             canvasRef={canvasRef}
             modules={modules}
             selectedFabric={selectedFabric}
           />
-          <button
-            className="border-none bg-transparent cursor-pointer text-[0.7rem] text-[#666]"
-            title="3D"
-          >
-            ▣
-          </button>
-          <button
-            className="border-none bg-transparent cursor-pointer text-[0.7rem] text-[#666]"
-            title="Image"
-          >
-            ⬓
-          </button>
-          <button
-            className="border-none bg-transparent cursor-pointer text-[0.7rem] text-[#666]"
-            title="Share"
-          >
-            ⤤
-          </button>
+
         </div>
 
         <div className="w-px h-5 bg-[#e0e0e0]" />
