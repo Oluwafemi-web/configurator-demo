@@ -46,19 +46,25 @@ export default function SofaModule({
 
   // Apply fabric texture to all meshes in the model
   useEffect(() => {
-    if (texture && meshRef.current) {
-      // Set texture encoding/finetuning if needed
-      texture.flipY = false; // GLTF models usually expect flipY=false
-      texture.colorSpace = THREE.SRGBColorSpace; // Modern three.js color management
-
+    if (meshRef.current) {
       meshRef.current.traverse((child) => {
         if (child.isMesh && child.material) {
-          // Clone material to avoid affecting other instances
-          // We only need to clone once really, but doing it here ensures isolation
-          const material = child.material.clone();
-          material.map = texture;
-          material.needsUpdate = true;
-          child.material = material;
+          // Clone material only if not already cloned (check for custom flag)
+          if (!child.material.userData.isCloned) {
+            const material = child.material.clone();
+            material.userData.isCloned = true;
+            child.material = material;
+          }
+          
+          // Apply texture if provided
+          if (texture) {
+            // Set texture encoding/finetuning if needed
+            texture.flipY = false; // GLTF models usually expect flipY=false
+            texture.colorSpace = THREE.SRGBColorSpace; // Modern three.js color management
+            
+            child.material.map = texture;
+            child.material.needsUpdate = true;
+          }
         }
       });
     }
