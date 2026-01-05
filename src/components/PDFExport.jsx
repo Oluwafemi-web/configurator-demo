@@ -69,8 +69,8 @@ export default function PDFExport({ canvasRef, modules, selectedFabric }) {
         280
       );
 
-      // Download PDF
-      pdf.save(`jump-sofa-configuration-${Date.now()}.pdf`);
+      // Open PDF in new tab
+      window.open(pdf.output("bloburl"), "_blank");
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Failed to generate PDF. Please try again.");
