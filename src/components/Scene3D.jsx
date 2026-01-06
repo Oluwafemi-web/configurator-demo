@@ -35,7 +35,7 @@ function CameraManager({ viewMode, isDragging }) {
       camera.position.set(0, 50, 0);
       camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
-      camera.zoom = 40;
+      camera.zoom = 50;
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
@@ -45,20 +45,11 @@ function CameraManager({ viewMode, isDragging }) {
     }
   }, [viewMode, camera]);
 
-  // 2D: ZOOM ONLY
+  // In 2D mode, completely disable camera controls
   if (viewMode === "2D") {
-    return (
-      <CameraControls
-        ref={controlsRef}
-        enabled={!isDragging}
-        enablePan={false}
-        enableRotate={false}
-        enableZoom={true}
-        minZoom={5}
-        maxZoom={60}
-      />
-    );
+    return null; // No controls in 2D - locked top-down view
   }
+
   // 3D mode: full controls
   return (
     <CameraControls
