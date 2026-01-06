@@ -39,8 +39,9 @@ function CameraManager({ viewMode, isDragging }) {
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
-      camera.position.set(3, 0, 3);
+      camera.position.set(6, 4, 6);
       camera.lookAt(0, 0, 0);
+      camera.fov =35;
       camera.updateProjectionMatrix();
     }
   }, [viewMode, camera]);
