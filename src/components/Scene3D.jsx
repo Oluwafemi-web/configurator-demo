@@ -35,7 +35,7 @@ function CameraManager({ viewMode, isDragging }) {
       camera.position.set(0, 50, 0);
       camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
-      camera.zoom = 20;
+      camera.zoom = 40;
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
@@ -54,16 +54,6 @@ function CameraManager({ viewMode, isDragging }) {
         enablePan={false}
         enableRotate={false}
         enableZoom={true}
-        mouseButtons={{
-          left: 0,
-          middle: 0,
-          right: 0,
-          wheel: 8, // wheel → zoom
-        }}
-        touches={{
-          one: 0,
-          two: 512, // pinch → zoom
-        }}
         minZoom={5}
         maxZoom={60}
       />
