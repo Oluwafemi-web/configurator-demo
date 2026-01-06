@@ -1,14 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import Scene3D from "./components/Scene3D";
-import ViewModeToggle from "./components/ViewModeToggle";
-import FabricSelector from "./components/FabricSelector";
 import PDFExport from "./components/PDFExport";
 import {
   STAGES,
   upholsteryCategories,
-  SOFA_FAMILY_NAME,
   sofaCatalog,
-  VARIANT_CONFIG,
 } from "./constants";
 
 /**
@@ -24,7 +20,7 @@ export default function EnhancedConfigurator() {
   );
   const [viewMode, setViewMode] = useState("3D");
   const [selectedModuleId, setSelectedModuleId] = useState(null);
-  const [showModuleMenu, setShowModuleMenu] = useState(false);
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [showAddModule, setShowAddModule] = useState(false);
@@ -32,40 +28,10 @@ export default function EnhancedConfigurator() {
   const [showComposition, setShowComposition] = useState(false);
   const canvasRef = useRef(null);
 
-  // Get variant mapping
-  const sofaVariants = {
-    center: sofaCatalog
-      .flatMap((cat) => cat.items)
-      .find((item) => item.modelPath.toUpperCase().includes("CENTER")),
-    left: sofaCatalog
-      .flatMap((cat) => cat.items)
-      .find((item) => item.modelPath.toUpperCase().includes("LEFT")),
-    right: sofaCatalog
-      .flatMap((cat) => cat.items)
-      .find((item) => item.modelPath.toUpperCase().includes("RIGHT")),
-  };
 
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
-  const handleConfirmSelection = () => {
-    const selectedItems = pendingVariantKeys
-      .map((key) => sofaVariants[key])
-      .filter(Boolean);
 
-    if (selectedItems.length === 0) return;
-
-    const newModules = selectedItems.map((item, index) => ({
-      id: Date.now() + index,
-      name: item.name,
-      modelPath: item.modelPath,
-      connectors: item.connectors || [],
-      position: [index * 1.2, 0, 0], // Space them out initially
-      rotation: 0,
-    }));
-
-    setModules(newModules);
-    setStage(STAGES.builder);
-  };
 
   const findEmptyPosition = () => {
     // Grid-based placement to avoid overlaps
@@ -106,10 +72,15 @@ export default function EnhancedConfigurator() {
       rotation: 0,
     };
     setModules([...modules, newModule]);
+
   };
 
   const handleModuleClick = (module) => {
+
+
     setSelectedModuleId(module.id);
+   
+
   };
 
   const handleModuleDrag = (moduleId, newPosition) => {
@@ -149,9 +120,13 @@ export default function EnhancedConfigurator() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedModuleId]);
 
-  if (stage === STAGES.landing) {
-    return (
-      <div className="min-h-screen bg-[#e8e6e1] relative flex flex-col">
+  return (
+    <>
+      {/* Landing Screen */}
+      <div 
+        className="min-h-screen bg-[#e8e6e1] relative flex flex-col"
+        style={{ display: stage === STAGES.landing ? 'flex' : 'none' }}
+      >
         {/* Top-left "Configurator" text */}
         <div className="absolute top-[30px] left-10 text-[0.95rem] text-[#333] font-normal tracking-[0.02em]">
           Configurator
@@ -191,44 +166,16 @@ export default function EnhancedConfigurator() {
           </div>
         </div>
       </div>
-    );
-  }
 
-  // Selection Screen
-  if (stage === STAGES.selection) {
-    const handleItemToggle = (item) => {
-      setSelectedItems((prev) => {
-        const exists = prev.find((i) => i.id === item.id);
-        if (exists) {
-          return prev.filter((i) => i.id !== item.id);
-        }
-        return [...prev, item];
-      });
-    };
-
-    const handlePlaceInScene = () => {
-      if (selectedItems.length === 0) return;
-
-      const newModules = selectedItems.map((item, index) => ({
-        id: Date.now() + index,
-        name: item.name,
-        modelPath: item.modelPath,
-        connectors: item.connectors || [],
-        position: [index * 1.2, 0, 0],
-        rotation: 0,
-      }));
-
-      setModules(newModules);
-      setStage(STAGES.builder);
-    };
-
-    return (
-      <div className="min-h-screen bg-[#e8e6e1] relative flex">
+      {/* Selection Screen */}
+      <div 
+        className="min-h-screen bg-[#e8e6e1] relative flex"
+        style={{ display: stage === STAGES.selection ? 'flex' : 'none' }}
+      >
         {/* Close button */}
         <button
           onClick={() => {
             setStage(STAGES.landing);
-            setPendingVariantKeys([]);
           }}
           className="absolute top-5 right-5 w-8 h-8 border-none bg-transparent text-2xl cursor-pointer text-[#333] z-10"
         >
@@ -238,7 +185,6 @@ export default function EnhancedConfigurator() {
         {/* Left Panel - Module Categories */}
         <div className="flex-[0_0_55%] p-10 overflow-y-auto max-h-screen">
           <h3 className="text-[0.75rem] tracking-[0.2em] text-[#666] mb-[30px] font-normal">
-
             MODULE CATEGORIES
           </h3>
 
@@ -250,7 +196,15 @@ export default function EnhancedConfigurator() {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => handleItemToggle(item)}
+                    onClick={() => {
+                      setSelectedItems((prev) => {
+                        const exists = prev.find((i) => i.id === item.id);
+                        if (exists) {
+                          return prev.filter((i) => i.id !== item.id);
+                        }
+                        return [...prev, item];
+                      });
+                    }}
                     className={`bg-white ${isSelected ? 'border-2 border-black' : 'border border-[#d0d0d0]'} rounded-lg p-4 cursor-pointer relative transition-all duration-200`}
                   >
                     {/* Checkmark for selected items */}
@@ -279,7 +233,21 @@ export default function EnhancedConfigurator() {
           {/* Place in Scene Button */}
           <div className="mt-10 text-center">
             <button
-              onClick={handlePlaceInScene}
+              onClick={() => {
+                if (selectedItems.length === 0) return;
+
+                const newModules = selectedItems.map((item, index) => ({
+                  id: Date.now() + index,
+                  name: item.name,
+                  modelPath: item.modelPath,
+                  connectors: item.connectors || [],
+                  position: [index * 1.2, 0, 0],
+                  rotation: 0,
+                }));
+
+                setModules(newModules);
+                setStage(STAGES.builder);
+              }}
               disabled={selectedItems.length === 0}
               className={`px-10 py-3.5 text-[0.75rem] tracking-[0.15em] border-none ${selectedItems.length > 0 ? 'bg-black cursor-pointer' : 'bg-[#ccc] cursor-not-allowed'} text-white font-medium transition-all duration-300`}
             >
@@ -303,6 +271,7 @@ export default function EnhancedConfigurator() {
             <input
               type="text"
               placeholder=""
+              name="search"
               className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none"
             />
           </div>
@@ -314,6 +283,7 @@ export default function EnhancedConfigurator() {
             </label>
             <select
               value={selectedCategory || ""}
+              name="element_type"
               onChange={(e) => setSelectedCategory(e.target.value || null)}
               className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none cursor-pointer"
             >
@@ -331,7 +301,7 @@ export default function EnhancedConfigurator() {
             <label className="block text-[0.7rem] text-[#666] mb-2 tracking-[0.05em]">
               Filter by width
             </label>
-            <select className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none cursor-pointer">
+            <select name="width" className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none cursor-pointer">
               <option>Nothing Selected</option>
             </select>
           </div>
@@ -341,7 +311,7 @@ export default function EnhancedConfigurator() {
             <label className="block text-[0.7rem] text-[#666] mb-2 tracking-[0.05em]">
               Filter by depth
             </label>
-            <select className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none cursor-pointer">
+            <select name="depth" className="w-full py-3 px-4 border border-[#d0d0d0] bg-white text-[0.9rem] outline-none cursor-pointer">
               <option>Nothing Selected</option>
             </select>
           </div>
@@ -367,212 +337,209 @@ export default function EnhancedConfigurator() {
           )}
         </div>
       </div>
-    );
-  }
 
-  // Builder Screen with new 3D Scene
-  return (
-    <div className="min-h-screen bg-[#e8e6e1] relative flex flex-col">
-      {/* Top-right title */}
-      <div className="absolute top-[30px] right-10 text-[2rem] font-light tracking-[0.15em] text-[#1a1a1a] z-10">
-        JUMP SOFA
-      </div>
-
-      {/* Main container */}
-      <div className="flex-1 flex relative">
-        {/* Left side - View controls */}
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 flex flex-col gap-2.5 z-10">
-          {/* 3D View Button */}
-          <button
-            onClick={() => setViewMode("3D")}
-            className={`w-10 h-10 rounded-full ${viewMode === "3D" ? 'border-2 border-black bg-black text-white' : 'border border-[#999] bg-white text-black'} cursor-pointer text-[0.7rem] font-bold flex items-center justify-center`}
-            title="3D View"
-          >
-            3D
-          </button>
-
-          {/* 2D View Button */}
-          <button
-            onClick={() => setViewMode("2D")}
-            className={`w-10 h-10 rounded-full ${viewMode === "2D" ? 'border-2 border-black bg-black text-white' : 'border border-[#999] bg-white text-black'} cursor-pointer text-[0.7rem] font-bold flex items-center justify-center`}
-            title="2D View"
-          >
-            2D
-          </button>
-
+      {/* Builder Screen - ALWAYS MOUNTED, visibility controlled by CSS */}
+      <div 
+        className="min-h-screen bg-[#e8e6e1] relative flex flex-col"
+        style={{ display: stage === STAGES.builder ? 'flex' : 'none' }}
+      >
+        {/* Top-right title */}
+        <div className="absolute top-[30px] right-10 text-[2rem] font-light tracking-[0.15em] text-[#1a1a1a] z-10">
+          JUMP SOFA
         </div>
 
-        {/* Center - 3D Viewport */}
-        <div className="flex-1 flex items-center justify-center p-10">
-          <div
-            ref={canvasRef}
-            className="w-full max-w-[900px] h-[600px] bg-white rounded-lg overflow-hidden"
-          >
-            <Scene3D
-              modules={modules}
-              viewMode={viewMode}
-              selectedFabric={selectedFabric}
-              onModuleClick={handleModuleClick}
-              onModuleDrag={handleModuleDrag}
-              selectedModuleId={selectedModuleId}
-            />
-          </div>
-        </div>
-
-        {/* Right side - Collapsible panels */}
-        <div className="absolute right-10 top-[120px] w-[280px] flex flex-col gap-[15px] z-10">
-          {/* ADD MODULE Panel */}
-          <div className="bg-white rounded overflow-hidden">
+        {/* Main container */}
+        <div className="flex-1 flex relative">
+          {/* Left side - View controls */}
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 flex flex-col gap-2.5 z-10">
+            {/* 3D View Button */}
             <button
-              onClick={() => setShowAddModule(!showAddModule)}
-              className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
+              onClick={() => setViewMode("3D")}
+              className={`w-10 h-10 rounded-full ${viewMode === "3D" ? 'border-2 border-black bg-black text-white' : 'border border-[#999] bg-white text-black'} cursor-pointer text-[0.7rem] font-bold flex items-center justify-center`}
+              title="3D View"
             >
-              <span>+</span>
-              <span>ADD MODULE</span>
+              3D
             </button>
-            {showAddModule && (
-              <div className="py-[15px] px-5 border-t border-[#e0e0e0] max-h-[300px] overflow-y-auto">
-                {sofaCatalog.map((category) => (
-                  <div key={category.category} className="mb-5">
-                    <div className="text-[0.7rem] font-semibold mb-2.5 text-[#666]">
-                      {category.category}
-                    </div>
-                    {category.items.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => {
-                          handleAddModule(item);
-                          setShowAddModule(false);
-                        }}
-                        className="py-2 cursor-pointer text-[0.75rem] border-b border-[#f0f0f0] hover:bg-[#f8f8f8] transition-colors"
-                      >
-                        {item.name}
+
+            {/* 2D View Button */}
+            <button
+              onClick={() => setViewMode("2D")}
+              className={`w-10 h-10 rounded-full ${viewMode === "2D" ? 'border-2 border-black bg-black text-white' : 'border border-[#999] bg-white text-black'} cursor-pointer text-[0.7rem] font-bold flex items-center justify-center`}
+              title="2D View"
+            >
+              2D
+            </button>
+          </div>
+
+          {/* Center - 3D Viewport - ALWAYS RENDERED */}
+          <div className="flex-1 flex items-center justify-center p-10">
+            <div
+              ref={canvasRef}
+              className="w-full max-w-[900px] h-[600px] bg-white rounded-lg overflow-hidden"
+            >
+              <Scene3D
+                modules={modules}
+                viewMode={viewMode}
+                selectedFabric={selectedFabric}
+                onModuleClick={handleModuleClick}
+                onModuleDrag={handleModuleDrag}
+                selectedModuleId={selectedModuleId}
+              />
+            </div>
+          </div>
+
+          {/* Right side - Collapsible panels */}
+          <div className="absolute right-10 top-[120px] w-[280px] flex flex-col gap-[15px] z-10">
+            {/* ADD MODULE Panel */}
+            <div className="bg-white rounded overflow-hidden">
+              <button
+                onClick={() => setShowAddModule(!showAddModule)}
+                className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
+              >
+                <span>+</span>
+                <span>ADD MODULE</span>
+              </button>
+              {showAddModule && (
+                <div className="py-[15px] px-5 border-t border-[#e0e0e0] max-h-[300px] overflow-y-auto">
+                  {sofaCatalog.map((category) => (
+                    <div key={category.category} className="mb-5">
+                      <div className="text-[0.7rem] font-semibold mb-2.5 text-[#666]">
+                        {category.category}
                       </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* MATERIALS Panel */}
-          <div className="bg-white rounded overflow-hidden">
-            <button
-              onClick={() => setShowMaterials(!showMaterials)}
-              className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
-            >
-              <span>+</span>
-              <span>MATERIALS</span>
-            </button>
-            {showMaterials && (
-              <div className="py-[15px] px-5 border-t border-[#e0e0e0] max-h-[400px] overflow-y-auto">
-                {upholsteryCategories.map((category) => (
-                  <div key={category.name} className="mb-6 last:mb-0">
-                    <div className="text-[0.7rem] font-semibold mb-3 text-[#666] tracking-wider sticky top-0 bg-white py-1 z-10">
-                      {category.name}
-                    </div>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {category.items.map((texture) => (
+                      {category.items.map((item) => (
                         <div
-                          key={texture.id}
-                          onClick={() => setSelectedFabric(texture.path)}
-                          className={`w-full h-[60px] bg-cover bg-center rounded cursor-pointer ${selectedFabric === texture.path ? 'border-2 border-black' : 'border border-[#e0e0e0]'}`}
-                          style={{ backgroundImage: `url("${texture.path}")` }}
-                          title={texture.label}
-                        />
+                          key={item.id}
+                          onClick={() => {
+                            handleAddModule(item);
+                            setShowAddModule(false);
+                          }}
+                          className="py-2 cursor-pointer text-[0.75rem] border-b border-[#f0f0f0] hover:bg-[#f8f8f8] transition-colors"
+                        >
+                          {item.name}
+                        </div>
                       ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* COMPOSITION LIST Panel */}
-          <div className="bg-white rounded overflow-hidden">
-            <button
-              onClick={() => setShowComposition(!showComposition)}
-              className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
-            >
-              <span>+</span>
-              <span>COMPOSITION LIST</span>
-            </button>
-            {showComposition && (
-              <div className="py-[15px] px-5 border-t border-[#e0e0e0]">
-                {modules.length === 0 ? (
-                  <div className="text-[0.75rem] text-[#999]">
-                    No modules in scene
-                  </div>
-                ) : (
-                  modules.map((module, index) => (
-                    <div
-                      key={module.id}
-                      onClick={() => setSelectedModuleId(module.id)}
-                      className={`py-2 text-[0.75rem] ${index < modules.length - 1 ? 'border-b border-[#f0f0f0]' : ''} cursor-pointer ${selectedModuleId === module.id ? 'bg-[#f8f8f8]' : ''} flex justify-between items-center`}
-                    >
-                      <span>{module.name}</span>
-                      {selectedModuleId === module.id && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRotateModule();
-                            }}
-                            className="py-1 px-2 text-[0.65rem] border border-[#ccc] bg-white cursor-pointer rounded-sm"
-                          >
-                            ↻
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveModule();
-                            }}
-                            className="py-1 px-2 text-[0.65rem] border border-[#d32f2f] bg-white text-[#d32f2f] cursor-pointer rounded-sm"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )}
+            {/* MATERIALS Panel */}
+            <div className="bg-white rounded overflow-hidden">
+              <button
+                onClick={() => setShowMaterials(!showMaterials)}
+                className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
+              >
+                <span>+</span>
+                <span>MATERIALS</span>
+              </button>
+              {showMaterials && (
+                <div className="py-[15px] px-5 border-t border-[#e0e0e0] max-h-[400px] overflow-y-auto">
+                  {upholsteryCategories.map((category) => (
+                    <div key={category.name} className="mb-6 last:mb-0">
+                      <div className="text-[0.7rem] font-semibold mb-3 text-[#666] tracking-wider sticky top-0 bg-white py-1 z-10">
+                        {category.name}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {category.items.map((texture) => (
+                          <div
+                            key={texture.id}
+                            onClick={() => setSelectedFabric(texture.path)}
+                            className={`w-full h-[60px] bg-cover bg-center rounded cursor-pointer ${selectedFabric === texture.path ? 'border-2 border-black' : 'border border-[#e0e0e0]'}`}
+                            style={{ backgroundImage: `url("${texture.path}")` }}
+                            title={texture.label}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* COMPOSITION LIST Panel */}
+            <div className="bg-white rounded overflow-hidden">
+              <button
+                onClick={() => setShowComposition(!showComposition)}
+                className="w-full py-[15px] px-5 border-none bg-transparent text-left cursor-pointer text-[0.75rem] tracking-[0.1em] font-normal flex items-center gap-2.5"
+              >
+                <span>+</span>
+                <span>COMPOSITION LIST</span>
+              </button>
+              {showComposition && (
+                <div className="py-[15px] px-5 border-t border-[#e0e0e0]">
+                  {modules.length === 0 ? (
+                    <div className="text-[0.75rem] text-[#999]">
+                      No modules in scene
+                    </div>
+                  ) : (
+                    modules.map((module, index) => (
+                      <div
+                        key={module.id}
+                        onClick={() => setSelectedModuleId(module.id)}
+                        className={`py-2 text-[0.75rem] ${index < modules.length - 1 ? 'border-b border-[#f0f0f0]' : ''} cursor-pointer ${selectedModuleId === module.id ? 'bg-[#f8f8f8]' : ''} flex justify-between items-center`}
+                      >
+                        <span>{module.name}</span>
+                        {selectedModuleId === module.id && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRotateModule();
+                              }}
+                              className="py-1 px-2 text-[0.65rem] border border-[#ccc] bg-white cursor-pointer rounded-sm"
+                            >
+                              ↻
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveModule();
+                              }}
+                              className="py-1 px-2 text-[0.65rem] border border-[#d32f2f] bg-white text-[#d32f2f] cursor-pointer rounded-sm"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom toolbar */}
+        <div className="absolute bottom-[30px]  left-1/2 -translate-x-1/2 flex items-center gap-5 bg-white px-5 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
+          {/* Center - Action buttons */}
+          <div className="flex gap-[15px] items-center">
+            <PDFExport
+              canvasRef={canvasRef}
+              modules={modules}
+              selectedFabric={selectedFabric}
+            />
+          </div>
+
+          <div className="w-px h-5 bg-[#e0e0e0]" />
+
+          {/* Right side - Request Info button */}
+          <div className="flex items-center gap-[15px]">
+            {selectedModuleId && (
+              <button
+                onClick={handleRemoveModule}
+                className="py-2 px-5 border-none bg-[#d32f2f] text-white cursor-pointer text-[0.7rem] tracking-[0.1em] font-medium transition-colors hover:bg-[#b71c1c]"
+              >
+                DELETE
+              </button>
             )}
+            <button className="py-2 px-5 border-none bg-black text-white cursor-pointer text-[0.7rem] tracking-[0.1em] font-medium">
+              REQUEST INFO
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Bottom toolbar */}
-      <div className="absolute bottom-[30px]  left-1/2 -translate-x-1/2 flex items-center gap-5 bg-white px-5 py-3 rounded shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-
-        {/* Center - Action buttons */}
-        <div className="flex gap-[15px] items-center">
-
-          <PDFExport
-            canvasRef={canvasRef}
-            modules={modules}
-            selectedFabric={selectedFabric}
-          />
-
-        </div>
-
-        <div className="w-px h-5 bg-[#e0e0e0]" />
-
-        {/* Right side - Request Info button */}
-        <div className="flex items-center gap-[15px]">
-          {selectedModuleId && (
-            <button
-              onClick={handleRemoveModule}
-              className="py-2 px-5 border-none bg-[#d32f2f] text-white cursor-pointer text-[0.7rem] tracking-[0.1em] font-medium transition-colors hover:bg-[#b71c1c]"
-            >
-              DELETE
-            </button>
-          )}
-          <button className="py-2 px-5 border-none bg-black text-white cursor-pointer text-[0.7rem] tracking-[0.1em] font-medium">
-            REQUEST INFO
-          </button>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
