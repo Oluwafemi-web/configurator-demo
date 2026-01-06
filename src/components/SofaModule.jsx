@@ -6,6 +6,7 @@ import * as THREE from "three";
 export default function SofaModule({
   module,
   allModules = [],
+  fabricTexture,
   isSelected = false,
   viewMode = "3D",
   onClick = () => {},
@@ -20,6 +21,47 @@ export default function SofaModule({
 
   const groupRef = useRef(null);
   const { camera, gl } = useThree();
+
+  // Apply Texture and Shadows
+  useEffect(() => {
+    if (!model) return;
+
+    // Enable shadows for all meshes
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    let isMounted = true;
+
+    // Apply Texture if available
+    if (fabricTexture) {
+      new THREE.TextureLoader().load(fabricTexture, (tex) => {
+        if (!isMounted) return; // Race condition check
+        
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        
+        model.traverse((child) => {
+          if (child.isMesh && child.material) {
+            // Clone material to ensure unique instance for this module
+            if (!child.material.userData.isUnique) {
+              child.material = child.material.clone();
+              child.material.userData.isUnique = true;
+            }
+            child.material.map = tex;
+            child.material.needsUpdate = true;
+          }
+        });
+      });
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [model, fabricTexture]);
 
   /** ------------------ DRAG STATE ------------------ */
   const draggingRef = useRef(false);

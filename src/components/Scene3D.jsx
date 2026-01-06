@@ -35,11 +35,11 @@ function CameraManager({ viewMode, isDragging }) {
       camera.position.set(0, 50, 0);
       camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
-      camera.zoom = 2;
+      camera.zoom = 5;
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
-      camera.position.set(7, 5, 7);
+      camera.position.set(3, 0, 3);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
     }
