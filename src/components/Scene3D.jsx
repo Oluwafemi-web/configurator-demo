@@ -10,17 +10,16 @@ import { useThree } from "@react-three/fiber";
 import SofaModule from "./SofaModule";
 import { upholsteryCategories } from "../constants";
 
-// Preload all textures to avoid suspense/blink during selection
-// DISABLED to save memory and prevent WebGL context loss
+
 const TexturePreloader = () => {
-  /* 
+  
   upholsteryCategories.forEach((category) => {
     category.items.forEach((item) => {
       useTexture.preload(item.path);
     });
   });
-  */
-  return null;
+
+
 };
 
 /**
@@ -36,6 +35,7 @@ function CameraManager({ viewMode, isDragging }) {
       camera.position.set(0, 50, 0);
       camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
+      camera.zoom = 20;
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
@@ -45,11 +45,30 @@ function CameraManager({ viewMode, isDragging }) {
     }
   }, [viewMode, camera]);
 
-  // In 2D mode, completely disable camera controls
+  // 2D: ZOOM ONLY
   if (viewMode === "2D") {
-    return null; // No controls in 2D - locked top-down view
+    return (
+      <CameraControls
+        ref={controlsRef}
+        enabled={!isDragging}
+        enablePan={false}
+        enableRotate={false}
+        enableZoom={true}
+        mouseButtons={{
+          left: 0,
+          middle: 0,
+          right: 0,
+          wheel: 8, // wheel → zoom
+        }}
+        touches={{
+          one: 0,
+          two: 512, // pinch → zoom
+        }}
+        minZoom={5}
+        maxZoom={60}
+      />
+    );
   }
-
   // 3D mode: full controls
   return (
     <CameraControls
