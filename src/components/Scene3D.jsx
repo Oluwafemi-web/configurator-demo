@@ -155,13 +155,31 @@ export default function Scene3D({
       <Suspense fallback={<Loader />}>
         <Canvas
           shadows
+       
+  onCreated={({ gl }) => {
+    gl.shadowMap.enabled = true
+    gl.shadowMap.type = THREE.PCFSoftShadowMap
+  }}
           camera={{ position: [5, 0, 5], fov: 35 }}
           orthographic={viewMode === "2D"}
-          // gl={{ preserveDrawingBuffer: true }} // DISABLED for performance/memory optimization 
+          gl={{ preserveDrawingBuffer: true }} 
           style={{ background: "#c5c5c5ff" }}
         >
           <TexturePreloader />
-\
+          <directionalLight
+  position={[5, 10, 5]}
+  intensity={1}
+  castShadow
+  shadow-mapSize-width={2048}
+  shadow-mapSize-height={2048}
+  shadow-camera-near={1}
+  shadow-camera-far={50}
+  shadow-camera-left={-10}
+  shadow-camera-right={10}
+  shadow-camera-top={10}
+  shadow-camera-bottom={-10}
+/>
+
           <ambientLight intensity={Math.PI} />
 
 

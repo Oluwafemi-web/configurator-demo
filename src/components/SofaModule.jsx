@@ -35,6 +35,7 @@ export default function SofaModule({
     });
 
     let isMounted = true;
+            console.log(child, child.material)
 
     // Apply Texture if available
     if (fabricTexture) {
@@ -46,7 +47,6 @@ export default function SofaModule({
         
         model.traverse((child) => {
           if (child.isMesh && child.material) {
-            console.log(child, child.material)
             // Clone material to ensure unique instance for this module
             if (!child.material.userData.isUnique) {
               child.material = child.material.clone();
