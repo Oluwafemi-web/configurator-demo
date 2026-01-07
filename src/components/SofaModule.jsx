@@ -52,6 +52,7 @@ export default function SofaModule({
               child.material.userData.isUnique = true;
             }
             child.material.map = tex;
+            child.material.color.setHex(0xffffff); // Reset color to white to avoid tinting
             child.material.needsUpdate = true;
           }
         });
