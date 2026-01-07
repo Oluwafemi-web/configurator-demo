@@ -115,7 +115,6 @@ export default function Scene3D({
   onModuleClick = () => { },
   onModuleDrag = () => { },
   selectedModuleId = null,
-  getResolvedPosition = (m) => m.position || [0, 0, 0],
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -160,7 +159,7 @@ export default function Scene3D({
           {modules.map((module) => (
             <SofaModule
               key={module.id}
-              module={{ ...module, position: getResolvedPosition(module) }}
+              module={module}
               allModules={modules}
               fabricTexture={selectedFabric}
               isSelected={module.id === selectedModuleId}

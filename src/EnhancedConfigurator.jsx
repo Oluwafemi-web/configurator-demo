@@ -31,34 +31,38 @@ export default function EnhancedConfigurator() {
 
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
-  // Auto-layout positioning system (from commit 18de11c)
+  // Constants
   const CHAIR_WIDTH = 1.14;
 
+  // Helper: Get module width from dimensions or use default
   const getModuleWidth = (module) => {
     if (module?.meshWidth && Number.isFinite(module.meshWidth)) {
       return module.meshWidth;
     }
-    const metric = module?.dimensionsMetric ?? "";
+    const metric = module?.sofa?.dimensionsMetric ?? module?.dimensionsMetric ?? "";
     const firstValue = parseFloat(metric.split("x")[0]);
     if (!Number.isFinite(firstValue)) return CHAIR_WIDTH;
-    return firstValue / 100;
+    return firstValue / 100; // Convert cm to meters
   };
 
-  // Determine position type from model path (left/center/right)
-  const getPositionType = (modelPath) => {
-    if (!modelPath) return "center";
-    const upperPath = modelPath.toUpperCase();
-    if (upperPath.includes("LEFT") || upperPath.includes("SX")) return "right";
-    if (upperPath.includes("RIGHT") || upperPath.includes("DX")) return "left";
+  // Helper: Determine module position type from model path
+  const getVariantKeyFromModelPath = (path) => {
+    if (!path) return "center";
+    const upperPath = path.toUpperCase();
+    if (upperPath.includes("CENTER") || upperPath.includes("CENTRE")) return "center";
+    if (upperPath.includes("DX") || upperPath.includes("LEFT")) return "left";
+    if (upperPath.includes("SX") || upperPath.includes("RIGHT")) return "right";
     return "center";
   };
 
+  // Auto-layout positioning system - calculates positions based on module type
   const autoPositions = useMemo(() => {
     const positionsMap = new Map();
-    const leftModules = modules.filter((m) => m.positionType === "left");
-    const centerModules = modules.filter((m) => m.positionType === "center");
-    const rightModules = modules.filter((m) => m.positionType === "right");
+    const leftModules = modules.filter((m) => m.position === "left");
+    const centerModules = modules.filter((m) => m.position === "center");
+    const rightModules = modules.filter((m) => m.position === "right");
 
+    // Position left modules (going left from origin)
     let leftOffset = 0;
     for (let i = leftModules.length - 1; i >= 0; i -= 1) {
       const module = leftModules[i];
@@ -68,6 +72,7 @@ export default function EnhancedConfigurator() {
       leftOffset += width;
     }
 
+    // Position center modules (going right from origin)
     let centerOffset = 0;
     centerModules.forEach((module) => {
       const width = getModuleWidth(module);
@@ -76,6 +81,7 @@ export default function EnhancedConfigurator() {
       centerOffset += width;
     });
 
+    // Position right modules (continuing right from center)
     let rightCursor = centerOffset > 0 ? centerOffset : 0;
     rightModules.forEach((module) => {
       const width = getModuleWidth(module);
@@ -87,31 +93,29 @@ export default function EnhancedConfigurator() {
     return positionsMap;
   }, [modules]);
 
+  // Get resolved position (customPosition if dragged, otherwise auto-positioned)
   const getResolvedPosition = (module) =>
     module.customPosition ?? autoPositions.get(module.id) ?? [0, 0, 0];
 
 
 
   const handleAddModule = (item) => {
-    setModules((prev) => {
-      const positionType = getPositionType(item.modelPath);
+    const positionType = getVariantKeyFromModelPath(item.modelPath);
 
-      return [
-        ...prev,
-        {
-          id: Date.now(),
-          name: item.name,
-          modelPath: item.modelPath,
-          connectors: item.connectors || [],
-          radius: item.radius ?? 1.4,
-          positionType, // left/center/right
-          customPosition: null, // For drag overrides
-          dimensionsMetric: item.dimensionsMetric || "",
-          meshWidth: null, // Detected later
-          rotation: 0,
-        },
-      ];
-    });
+    const newModule = {
+      id: Date.now(),
+      sofa: item, // Store full item object
+      name: item.name,
+      modelPath: item.modelPath,
+      dimensionsMetric: item.dimensionsMetric,
+      connectors: item.connectors || [],
+      position: positionType, // "left", "center", or "right"
+      customPosition: null, // Will be set when dragged
+      rotation: 0,
+      meshWidth: null, // Will be detected from 3D model
+    };
+
+    setModules((prev) => [...prev, newModule]);
   };
 
 
@@ -276,27 +280,24 @@ export default function EnhancedConfigurator() {
               onClick={() => {
                 if (selectedItems.length === 0) return;
 
-                const newModules = [];
-                let tempModules = [];
+                const newModules = selectedItems.map((item, index) => {
+                  const positionType = getVariantKeyFromModelPath(item.modelPath);
 
-                for (const item of selectedItems) {
-                  const positionType = getPositionType(item.modelPath);
-
-                  tempModules.push({
-                    id: Date.now() + Math.random(),
+                  return {
+                    id: Date.now() + index,
+                    sofa: item,
                     name: item.name,
                     modelPath: item.modelPath,
+                    dimensionsMetric: item.dimensionsMetric,
                     connectors: item.connectors || [],
-                    radius: item.radius ?? 1.4,
-                    positionType,
+                    position: positionType,
                     customPosition: null,
-                    dimensionsMetric: item.dimensionsMetric || "",
-                    meshWidth: null,
                     rotation: 0,
-                  });
-                }
+                    meshWidth: null,
+                  };
+                });
 
-                setModules(tempModules);
+                setModules(newModules);
                 setStage(STAGES.builder);
               }}
               disabled={selectedItems.length === 0}
@@ -435,7 +436,6 @@ export default function EnhancedConfigurator() {
                 onModuleClick={handleModuleClick}
                 onModuleDrag={handleModuleDrag}
                 selectedModuleId={selectedModuleId}
-                getResolvedPosition={getResolvedPosition}
               />
             </div>
           </div>
