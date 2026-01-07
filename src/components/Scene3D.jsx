@@ -137,9 +137,9 @@ export default function Scene3D({
           <TexturePreloader />
           <directionalLight
             position={[3, 8, 3]}
-            intensity={0.5}
+            intensity={0.3}
             castShadow
-            shadow-radius={10}
+            shadow-radius={15}
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
             shadow-camera-near={1}
@@ -149,11 +149,7 @@ export default function Scene3D({
             shadow-camera-top={10}
             shadow-camera-bottom={-10}
           />
-          <hemisphereLight
-            skyColor="#ffffff"
-            groundColor="#888888"
-            intensity={0.5}
-          />
+
           <ambientLight intensity={0.2} />
 
 
