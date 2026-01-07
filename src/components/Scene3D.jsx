@@ -1,4 +1,4 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, ContactShadows } from "@react-three/fiber";
 import { useState, useEffect, Suspense, useRef } from "react";
 import {
 
