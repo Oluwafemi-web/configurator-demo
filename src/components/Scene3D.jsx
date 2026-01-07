@@ -170,7 +170,7 @@ export default function Scene3D({
               onDragStop={() => setIsDragging(false)}
             />
           ))}
-          <mesh receiveShadow rotation={-[Math.PI / 2, 0, 0]}
+          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}
             position={[0, -0.01, 0]}
           >
             <planeGeometry args={[100, 100]} />
