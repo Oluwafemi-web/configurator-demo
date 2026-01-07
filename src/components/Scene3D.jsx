@@ -139,7 +139,7 @@ export default function Scene3D({
             position={[3, 8, 3]}
             intensity={0.5}
             castShadow
-            shadow-radius={9}
+            shadow-radius={10}
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
             shadow-camera-near={1}
@@ -154,7 +154,7 @@ export default function Scene3D({
             groundColor="#888888"
             intensity={0.5}
           />
-          <ambientLight intensity={0.3} />
+          <ambientLight intensity={0.2} />
 
 
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
