@@ -375,7 +375,7 @@ export default function EnhancedConfigurator() {
           <div className="flex-1 flex items-center justify-center p-10">
             <div
               ref={canvasRef}
-              className="w-full max-w-7xl h-[1000px] bg-white rounded-lg overflow-hidden"
+              className="w-full max-w-7xl h-[900px] bg-white rounded-lg overflow-hidden"
             >
               <Scene3D
                 modules={modules}
