@@ -97,33 +97,7 @@ function Loader() {
   );
 }
 
-/**
- * Error fallback component
- */
-function ErrorFallback({ error }) {
-  console.error("[Scene3D] Error rendering scene:", error);
-  return (
-    <div style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      textAlign: 'center',
-      color: '#d32f2f',
-      padding: '20px'
-    }}>
-      <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px' }}>
-        Failed to load 3D models
-      </div>
-      <div style={{ fontSize: '12px', color: '#666' }}>
-        {error?.message || 'Unknown error'}
-      </div>
-      <div style={{ fontSize: '11px', color: '#999', marginTop: '10px' }}>
-        Check browser console for details
-      </div>
-    </div>
-  );
-}
+
 
 /**
  * Scene3D - Main 3D scene component with realistic lighting and shadows
@@ -165,6 +139,7 @@ export default function Scene3D({
             position={[3, 8, 3]}
             intensity={0.5}
             castShadow
+            shadow-radius={9}
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
             shadow-camera-near={1}
@@ -174,8 +149,12 @@ export default function Scene3D({
             shadow-camera-top={10}
             shadow-camera-bottom={-10}
           />
-
-          <ambientLight intensity={0.4} />
+          <hemisphereLight
+            skyColor="#ffffff"
+            groundColor="#888888"
+            intensity={0.5}
+          />
+          <ambientLight intensity={0.3} />
 
 
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
@@ -197,7 +176,7 @@ export default function Scene3D({
           ))}
           <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[100, 100]} />
-            <shadowMaterial opacity={0.3} />
+            <shadowMaterial opacity={0.2} />
           </mesh>
 
           <Environment preset="city" />
