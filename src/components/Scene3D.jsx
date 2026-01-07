@@ -139,7 +139,7 @@ export default function Scene3D({
             position={[3, 8, 3]}
             intensity={0.3}
             castShadow
-            shadow-radius={10}
+            shadow-radius={8}
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
             shadow-camera-near={0.1}

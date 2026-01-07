@@ -35,7 +35,7 @@ export default function EnhancedConfigurator() {
 
   const findEmptyPosition = () => {
     // Grid-based placement to avoid overlaps
-    const GRID_SIZE = 1.5; // Spacing between modules
+    const GRID_SIZE = 4.0; // Spacing between modules
     const MAX_SEARCH = 20; // Maximum positions to check
 
     // Start from origin and spiral outward
