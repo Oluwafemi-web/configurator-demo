@@ -33,8 +33,9 @@ export default function EnhancedConfigurator() {
 
 
 
-  const findEmptyPosition = (existingModules) => {
+  const findEmptyPosition = (existingModules, newItem) => {
     const GRID = 3.2;
+    const newRadius = newItem.radius ?? 1.4;
 
     for (let ring = 0; ring < 20; ring++) {
       for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
@@ -46,12 +47,9 @@ export default function EnhancedConfigurator() {
           const dz = m.position[2] - z;
           const dist = Math.hypot(dx, dz);
 
-          const r1 = m.radius ?? 1.4;
-          const r2 = item.radius ?? 1.4;
-
-          return dist < r1 + r2;
+          const existingRadius = m.radius ?? 1.4;
+          return dist < existingRadius + newRadius;
         });
-
 
         if (!hasOverlap) return [x, 0, z];
       }
@@ -61,9 +59,10 @@ export default function EnhancedConfigurator() {
   };
 
 
+
   const handleAddModule = (item) => {
     setModules((prev) => {
-      const position = findEmptyPosition(prev);
+      const position = findEmptyPosition(prev, item);
 
       return [
         ...prev,
@@ -72,12 +71,14 @@ export default function EnhancedConfigurator() {
           name: item.name,
           modelPath: item.modelPath,
           connectors: item.connectors || [],
+          radius: item.radius ?? 1.4,
           position,
           rotation: 0,
         },
       ];
     });
   };
+
 
   const handleModuleClick = (module) => {
 
