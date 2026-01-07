@@ -436,6 +436,7 @@ export default function EnhancedConfigurator() {
                 onModuleClick={handleModuleClick}
                 onModuleDrag={handleModuleDrag}
                 selectedModuleId={selectedModuleId}
+                getResolvedPosition={getResolvedPosition}
               />
             </div>
           </div>

@@ -115,6 +115,7 @@ export default function Scene3D({
   onModuleClick = () => { },
   onModuleDrag = () => { },
   selectedModuleId = null,
+  getResolvedPosition = (m) => m.position || [0, 0, 0], // Default fallback
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -156,20 +157,24 @@ export default function Scene3D({
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
 
 
-          {modules.map((module) => (
-            <SofaModule
-              key={module.id}
-              module={module}
-              allModules={modules}
-              fabricTexture={selectedFabric}
-              isSelected={module.id === selectedModuleId}
-              viewMode={viewMode}
-              onClick={() => onModuleClick(module)}
-              onDragEnd={(position) => onModuleDrag(module.id, position)}
-              onDragStart={() => setIsDragging(true)}
-              onDragStop={() => setIsDragging(false)}
-            />
-          ))}
+          {modules.map((module) => {
+            const resolvedPosition = getResolvedPosition(module);
+            return (
+              <SofaModule
+                key={module.id}
+                module={module}
+                position={resolvedPosition}
+                allModules={modules}
+                fabricTexture={selectedFabric}
+                isSelected={module.id === selectedModuleId}
+                viewMode={viewMode}
+                onClick={() => onModuleClick(module)}
+                onDragEnd={(position) => onModuleDrag(module.id, position)}
+                onDragStart={() => setIsDragging(true)}
+                onDragStop={() => setIsDragging(false)}
+              />
+            );
+          })}
           <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}
             position={[0, -0.6, 0]}
           >

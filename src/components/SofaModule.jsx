@@ -5,6 +5,7 @@ import * as THREE from "three";
 
 export default function SofaModule({
   module,
+  position = [0, 0, 0], // Position prop from parent
   allModules = [],
   fabricTexture,
   isSelected = false,
@@ -248,7 +249,7 @@ export default function SofaModule({
   return (
     <group
       ref={groupRef}
-      position={module.position || [0, 0, 0]}
+      position={position}
       rotation={[0, module.rotation || 0, 0]}
       scale={isSelected ? 1.04 : 1.0}
     >
