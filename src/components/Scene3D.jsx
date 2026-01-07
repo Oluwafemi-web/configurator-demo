@@ -162,7 +162,7 @@ export default function Scene3D({
         >
           <TexturePreloader />
           <directionalLight
-            position={[0, 10, 0]}
+            position={[3, 8, 3]}
             intensity={1}
             castShadow
             shadow-mapSize-width={2048}
