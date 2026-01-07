@@ -55,9 +55,6 @@ export default function EnhancedConfigurator() {
   return [existingModules.length * GRID_SIZE, 0, 0];
 };
 
-    // Fallback: place far away if no empty spot found
-    return [modules.length * 2, 0, 0];
-  };
 
   const handleAddModule = (item) => {
   setModules((prevModules) => {
