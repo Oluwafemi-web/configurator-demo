@@ -245,13 +245,14 @@ export default function EnhancedConfigurator() {
                 let tempModules = [];
 
                 for (const item of selectedItems) {
-                  const position = findEmptyPosition([...modules, ...tempModules]);
+                  const position = findEmptyPosition([...modules, ...tempModules], item);
 
                   tempModules.push({
                     id: Date.now() + Math.random(),
                     name: item.name,
                     modelPath: item.modelPath,
                     connectors: item.connectors || [],
+                    radius: item.radius ?? 1.4,
                     position,
                     rotation: 0,
                   });
