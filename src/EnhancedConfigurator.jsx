@@ -375,7 +375,7 @@ export default function EnhancedConfigurator() {
           <div className="flex-1 flex items-center justify-center p-10">
             <div
               ref={canvasRef}
-              className="w-full max-w-7xl h-[900px] bg-white rounded-lg overflow-hidden"
+              className="w-full max-w-7xl h-[800px] bg-white rounded-lg overflow-hidden"
             >
               <Scene3D
                 modules={modules}
@@ -389,7 +389,7 @@ export default function EnhancedConfigurator() {
           </div>
 
           {/* Right side - Collapsible panels */}
-          <div className="absolute right-10 top-1/2 -translate-y-1/2 w-[280px] flex flex-col gap-[15px] z-10">
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 w-[280px] flex flex-col gap-[15px] z-10">
             {/* ADD MODULE Panel */}
             <div className="bg-white rounded overflow-hidden">
               <button

@@ -142,12 +142,12 @@ export default function Scene3D({
             shadow-radius={15}
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
-            shadow-camera-near={1}
-            shadow-camera-far={50}
-            shadow-camera-left={-10}
-            shadow-camera-right={10}
-            shadow-camera-top={10}
-            shadow-camera-bottom={-5}
+            shadow-camera-near={0.1}
+            shadow-camera-far={100}
+            shadow-camera-left={-20}
+            shadow-camera-right={20}
+            shadow-camera-top={20}
+            shadow-camera-bottom={-20}
           />
 
           <ambientLight intensity={0.2} />
@@ -170,7 +170,9 @@ export default function Scene3D({
               onDragStop={() => setIsDragging(false)}
             />
           ))}
-          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh receiveShadow rotation={-[Math.PI / 2, 0, 0]}
+            position={[0, -0.01, 0]}
+          >
             <planeGeometry args={[100, 100]} />
             <shadowMaterial opacity={0.2} />
           </mesh>

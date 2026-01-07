@@ -48,7 +48,7 @@ export default function SofaModule({
         tex.colorSpace = THREE.SRGBColorSpace;
 
         model.traverse((child) => {
-          console.log(child)
+          console.log(child, tex)
           if (child.isMesh && child.material) {
             // Clone material to ensure unique instance for this module
             if (!child.material.userData.isUnique) {
