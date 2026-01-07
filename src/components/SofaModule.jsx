@@ -9,11 +9,11 @@ export default function SofaModule({
   fabricTexture,
   isSelected = false,
   viewMode = "3D",
-  onClick = () => {},
-  onDragStart = () => {},
-  onDragMove = () => {},
-  onDragEnd = () => {},
-  onDragStop = () => {},
+  onClick = () => { },
+  onDragStart = () => { },
+  onDragMove = () => { },
+  onDragEnd = () => { },
+  onDragStop = () => { },
 }) {
   /** ------------------ THREE SETUP ------------------ */
   const { scene } = useGLTF(module.modelPath);
@@ -35,16 +35,16 @@ export default function SofaModule({
     });
 
     let isMounted = true;
-            console.log(child, child.material)
+    console.log(child, child.material)
 
     // Apply Texture if available
     if (fabricTexture) {
       new THREE.TextureLoader().load(fabricTexture, (tex) => {
         if (!isMounted) return; // Race condition check
-        
+
         tex.flipY = false;
         tex.colorSpace = THREE.SRGBColorSpace;
-        
+
         model.traverse((child) => {
           if (child.isMesh && child.material) {
             // Clone material to ensure unique instance for this module
@@ -59,7 +59,7 @@ export default function SofaModule({
         });
       });
     }
-    
+
     return () => {
       isMounted = false;
     };
@@ -233,9 +233,10 @@ export default function SofaModule({
       <primitive object={model} />
 
       {/* Interaction proxy */}
-      <mesh visible={false} onPointerDown={onPointerDown}>
+      <mesh visible={false} onPointerDown={onPointerDown} receiveShadow>
         <boxGeometry args={[1.5, 1, 1.5]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <shadowMaterial opacity={0.3} />
+        {/* <meshBasicMaterial transparent opacity={0.3} /> */}
       </mesh>
     </group>
   );

@@ -1,10 +1,10 @@
 import { Canvas } from "@react-three/fiber";
 import { useState, useEffect, Suspense, useRef } from "react";
-import { 
+import {
 
-  Environment, 
+  Environment,
   CameraControls,
-  useTexture 
+  useTexture
 } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import SofaModule from "./SofaModule";
@@ -12,7 +12,7 @@ import { upholsteryCategories } from "../constants";
 
 
 const TexturePreloader = () => {
-  
+
   upholsteryCategories.forEach((category) => {
     category.items.forEach((item) => {
       useTexture.preload(item.path);
@@ -41,7 +41,7 @@ function CameraManager({ viewMode, isDragging }) {
       // 3D perspective view
       camera.position.set(6, 4, 6);
       camera.lookAt(0, 0, 0);
-      camera.fov =35;
+      camera.fov = 35;
       camera.updateProjectionMatrix();
     }
   }, [viewMode, camera]);
@@ -138,8 +138,8 @@ export default function Scene3D({
   modules = [],
   viewMode = "3D",
   selectedFabric = null,
-  onModuleClick = () => {},
-  onModuleDrag = () => {},
+  onModuleClick = () => { },
+  onModuleDrag = () => { },
   selectedModuleId = null,
 }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -155,30 +155,29 @@ export default function Scene3D({
       <Suspense fallback={<Loader />}>
         <Canvas
           shadows
-       
-  onCreated={({ gl }) => {
-    gl.shadowMap.enabled = true
-    gl.shadowMap.type = THREE.PCFSoftShadowMap
-  }}
+          // onCreated={({ gl }) => {
+          //   gl.shadowMap.enabled = true
+          //   gl.shadowMap.type = THREE.PCFSoftShadowMap
+          // }}
           camera={{ position: [5, 0, 5], fov: 35 }}
           orthographic={viewMode === "2D"}
-          gl={{ preserveDrawingBuffer: true }} 
+          gl={{ preserveDrawingBuffer: true, antialias: true }}
           style={{ background: "#c5c5c5ff" }}
         >
           <TexturePreloader />
           <directionalLight
-  position={[5, 10, 5]}
-  intensity={1}
-  castShadow
-  shadow-mapSize-width={2048}
-  shadow-mapSize-height={2048}
-  shadow-camera-near={1}
-  shadow-camera-far={50}
-  shadow-camera-left={-10}
-  shadow-camera-right={10}
-  shadow-camera-top={10}
-  shadow-camera-bottom={-10}
-/>
+            position={[5, 10, 5]}
+            intensity={1}
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-near={1}
+            shadow-camera-far={50}
+            shadow-camera-left={-10}
+            shadow-camera-right={10}
+            shadow-camera-top={10}
+            shadow-camera-bottom={-10}
+          />
 
           <ambientLight intensity={Math.PI} />
 
