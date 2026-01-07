@@ -44,20 +44,27 @@ export default function SofaModule({
       new THREE.TextureLoader().load(fabricTexture, (tex) => {
         if (!isMounted) return; // Race condition check
 
-        tex.flipY = false;
-        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.flipY = false
+        tex.colorSpace = THREE.SRGBColorSpace
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+        tex.repeat.set(1, 1)
+
+        tex.generateMipmaps = true
+        tex.minFilter = THREE.LinearMipmapLinearFilter
+        tex.magFilter = THREE.LinearFilter
+        tex.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy())
+
 
         model.traverse((child) => {
-          console.log(child, tex)
           if (child.isMesh && child.material) {
-            // Clone material to ensure unique instance for this module
-            if (!child.material.userData.isUnique) {
-              child.material = child.material.clone();
-              child.material.userData.isUnique = true;
-            }
-            child.material.map = tex;
-            child.material.color.setHex(0xffffff); // Reset color to white to avoid tinting
-            child.material.needsUpdate = true;
+            const original = child.material
+            child.material = original.clone()
+            child.material.map = tex
+            child.material.normalMap = original.normalMap
+            child.material.roughnessMap = original.roughnessMap
+            child.material.metalnessMap = original.metalnessMap
+            child.material.color.set(0xffffff)
+            child.material.needsUpdate = true
           }
         });
       });
