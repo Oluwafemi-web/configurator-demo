@@ -8,9 +8,17 @@ export default function Palette({
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Check if options are grouped (for upholstery) or flat (for feet)
+    const isGrouped = options.length > 0 && options[0]?.category;
+
+    // Get all fabrics for preview and selection
+    const allFabrics = isGrouped
+        ? options.flatMap((group) => group.fabrics || [])
+        : options;
+
     // Get the preview texture - use selected one if available, otherwise first option
     const previewTexture =
-        options.find((opt) => opt.id === selectedOptionId) || options[0];
+        allFabrics.find((opt) => opt.id === selectedOptionId) || allFabrics[0];
     const previewPath = previewTexture?.path || null;
 
     return (
@@ -31,7 +39,7 @@ export default function Palette({
                         <span className="relative z-10">{isExpanded ? "−" : "+"}</span>
                     )}
                     {previewPath && (
-                        <span className="relative  rounded-full flex items-center justify-center text-xl text-white">
+                        <span className="relative rounded-full flex items-center justify-center text-xl text-black">
                             {isExpanded ? "−" : "+"}
                         </span>
                     )}
@@ -41,41 +49,82 @@ export default function Palette({
                 </span>
             </div>
             {isExpanded && (
-                <div className="w-full">
-                    <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-3 text-center">
-                        SCELTE TROVATE {options.length}
-                    </p>
-                    <div className="grid grid-cols-1 gap-4">
-                        {options.map((option) => (
-                            <div
-                                key={option.id}
-                                className="flex flex-col items-center gap-2 cursor-pointer"
-                                onClick={() => {
-                                    onSelect(option);
-                                    setIsExpanded(false);
-                                }}
-                            >
+                <div className="w-full max-h-[500px] overflow-y-auto pr-2">
+                    {isGrouped ? (
+                        // Grouped display for upholstery fabrics
+                        <div className="flex flex-col gap-6">
+                            {options.map((group) => {
+                                console.log(group);
+                                return (
+                                    <div key={group.category}>
+                                        <h3 className="text-xs uppercase tracking-wide text-gray-600 mb-3 font-medium">
+                                            {group.category}
+                                        </h3>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {group.fabrics.map((fabric) => (
+                                                <div
+                                                    key={fabric.id}
+                                                    className="flex flex-col items-center gap-1 cursor-pointer"
+                                                    onClick={() => {
+                                                        onSelect(fabric);
+                                                        setIsExpanded(false);
+                                                    }}
+                                                >
+                                                    <div
+                                                        className="color-selector-circle"
+                                                        style={{
+                                                            width: "60px",
+                                                            height: "60px",
+                                                            backgroundImage: `url(${encodeURI(fabric.path)})`,
+                                                            backgroundSize: "cover",
+                                                            backgroundPosition: "center",
+                                                            border:
+                                                                selectedOptionId === fabric.id
+                                                                    ? "3px solid #000"
+                                                                    : "2px solid #ccc",
+                                                            borderRadius: "4px",
+                                                        }}
+                                                        title={fabric.label}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        // Flat display for feet textures
+                        <div className="grid grid-cols-3 gap-2">
+                            {options.map((option) => (
                                 <div
-                                    className="color-selector-circle"
-                                    style={{
-                                        width: "50px",
-                                        height: "50px",
-                                        backgroundImage: `url(${option.path})`,
-                                        backgroundSize: "cover",
-                                        backgroundPosition: "center",
-                                        border:
-                                            selectedOptionId === option.id
-                                                ? "3px solid #000"
-                                                : "2px solid #ccc",
+                                    key={option.id}
+                                    className="flex flex-col items-center gap-1 cursor-pointer"
+                                    onClick={() => {
+                                        onSelect(option);
+                                        setIsExpanded(false);
                                     }}
-                                    title={option.label}
-                                />
-                                <span className="text-[11px] uppercase tracking-[0.2em] text-gray-600 text-center">
-                                    {option.label}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                                >
+                                    <div
+                                        className="color-selector-circle"
+                                        style={{
+                                            width: "60px",
+                                            height: "60px",
+                                            backgroundImage: `url(${option.path})`,
+                                            backgroundSize: "cover",
+                                            backgroundPosition: "center",
+                                            border:
+                                                selectedOptionId === option.id
+                                                    ? "3px solid #000"
+                                                    : "2px solid #ccc",
+                                            borderRadius: "4px",
+                                        }}
+                                        title={option.label}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
