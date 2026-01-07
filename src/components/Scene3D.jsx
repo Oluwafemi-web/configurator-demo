@@ -137,7 +137,7 @@ export default function Scene3D({
           <TexturePreloader />
           <directionalLight
             position={[3, 8, 3]}
-            intensity={0.3}
+            intensity={0.1}
             castShadow
             shadow-radius={8}
             shadow-mapSize-width={2048}
@@ -150,7 +150,7 @@ export default function Scene3D({
             shadow-camera-bottom={-20}
           />
 
-          <ambientLight intensity={0.2} />
+          <ambientLight intensity={0.1} />
 
 
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
@@ -171,7 +171,7 @@ export default function Scene3D({
             />
           ))}
           <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}
-            position={[-0.9, -0.6, 0]}
+            position={[0, -0.6, 0]}
           >
             <planeGeometry args={[100, 100]} />
             <shadowMaterial opacity={0.2} />
