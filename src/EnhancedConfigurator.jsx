@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Scene3D from "./components/Scene3D";
 import PDFExport from "./components/PDFExport";
 import {
@@ -31,38 +31,70 @@ export default function EnhancedConfigurator() {
 
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
+  // Auto-layout positioning system (from commit 18de11c)
+  const CHAIR_WIDTH = 1.14;
 
+  const getModuleWidth = (module) => {
+    if (module?.meshWidth && Number.isFinite(module.meshWidth)) {
+      return module.meshWidth;
+    }
+    const metric = module?.dimensionsMetric ?? "";
+    const firstValue = parseFloat(metric.split("x")[0]);
+    if (!Number.isFinite(firstValue)) return CHAIR_WIDTH;
+    return firstValue / 100;
+  };
 
-  const findEmptyPosition = (existingModules, newItem) => {
-    const GRID = 3.2;
-    const newRadius = newItem.radius ?? 1.4;
+  // Determine position type from model path (left/center/right)
+  const getPositionType = (modelPath) => {
+    if (!modelPath) return "center";
+    const upperPath = modelPath.toUpperCase();
+    if (upperPath.includes("LEFT") || upperPath.includes("SX")) return "right";
+    if (upperPath.includes("RIGHT") || upperPath.includes("DX")) return "left";
+    return "center";
+  };
 
-    for (let ring = 0; ring < 20; ring++) {
-      for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
-        const x = Math.cos(a) * ring * GRID;
-        const z = Math.sin(a) * ring * GRID;
+  const autoPositions = useMemo(() => {
+    const positionsMap = new Map();
+    const leftModules = modules.filter((m) => m.positionType === "left");
+    const centerModules = modules.filter((m) => m.positionType === "center");
+    const rightModules = modules.filter((m) => m.positionType === "right");
 
-        const hasOverlap = existingModules.some((m) => {
-          const dx = m.position[0] - x;
-          const dz = m.position[2] - z;
-          const dist = Math.hypot(dx, dz);
-
-          const existingRadius = m.radius ?? 1.4;
-          return dist < existingRadius + newRadius;
-        });
-
-        if (!hasOverlap) return [x, 0, z];
-      }
+    let leftOffset = 0;
+    for (let i = leftModules.length - 1; i >= 0; i -= 1) {
+      const module = leftModules[i];
+      const width = getModuleWidth(module);
+      const half = width / 2;
+      positionsMap.set(module.id, [-(leftOffset + half), 0, 0]);
+      leftOffset += width;
     }
 
-    return [existingModules.length * GRID, 0, 0];
-  };
+    let centerOffset = 0;
+    centerModules.forEach((module) => {
+      const width = getModuleWidth(module);
+      const half = width / 2;
+      positionsMap.set(module.id, [centerOffset + half, 0, 0]);
+      centerOffset += width;
+    });
+
+    let rightCursor = centerOffset > 0 ? centerOffset : 0;
+    rightModules.forEach((module) => {
+      const width = getModuleWidth(module);
+      const half = width / 2;
+      positionsMap.set(module.id, [rightCursor + half, 0, 0]);
+      rightCursor += width;
+    });
+
+    return positionsMap;
+  }, [modules]);
+
+  const getResolvedPosition = (module) =>
+    module.customPosition ?? autoPositions.get(module.id) ?? [0, 0, 0];
 
 
 
   const handleAddModule = (item) => {
     setModules((prev) => {
-      const position = findEmptyPosition(prev, item);
+      const positionType = getPositionType(item.modelPath);
 
       return [
         ...prev,
@@ -72,7 +104,10 @@ export default function EnhancedConfigurator() {
           modelPath: item.modelPath,
           connectors: item.connectors || [],
           radius: item.radius ?? 1.4,
-          position,
+          positionType, // left/center/right
+          customPosition: null, // For drag overrides
+          dimensionsMetric: item.dimensionsMetric || "",
+          meshWidth: null, // Detected later
           rotation: 0,
         },
       ];
@@ -91,7 +126,7 @@ export default function EnhancedConfigurator() {
   const handleModuleDrag = (moduleId, newPosition) => {
     setModules((prev) =>
       prev.map((m) =>
-        m.id === moduleId ? { ...m, position: newPosition } : m
+        m.id === moduleId ? { ...m, customPosition: newPosition } : m
       )
     );
   };
@@ -245,7 +280,7 @@ export default function EnhancedConfigurator() {
                 let tempModules = [];
 
                 for (const item of selectedItems) {
-                  const position = findEmptyPosition([...modules, ...tempModules], item);
+                  const positionType = getPositionType(item.modelPath);
 
                   tempModules.push({
                     id: Date.now() + Math.random(),
@@ -253,7 +288,10 @@ export default function EnhancedConfigurator() {
                     modelPath: item.modelPath,
                     connectors: item.connectors || [],
                     radius: item.radius ?? 1.4,
-                    position,
+                    positionType,
+                    customPosition: null,
+                    dimensionsMetric: item.dimensionsMetric || "",
+                    meshWidth: null,
                     rotation: 0,
                   });
                 }
@@ -397,6 +435,7 @@ export default function EnhancedConfigurator() {
                 onModuleClick={handleModuleClick}
                 onModuleDrag={handleModuleDrag}
                 selectedModuleId={selectedModuleId}
+                getResolvedPosition={getResolvedPosition}
               />
             </div>
           </div>
