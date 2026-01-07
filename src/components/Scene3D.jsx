@@ -132,7 +132,7 @@ export default function Scene3D({
           camera={{ position: [5, 0, 5], fov: 35 }}
           orthographic={viewMode === "2D"}
           gl={{ preserveDrawingBuffer: true, antialias: true }}
-          style={{ background: "#c5c5c5ff" }}
+          style={{ background: "#e4e4e4ff" }}
         >
           <TexturePreloader />
           <directionalLight

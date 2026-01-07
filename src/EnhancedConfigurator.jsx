@@ -79,7 +79,7 @@ export default function EnhancedConfigurator() {
 
 
     setSelectedModuleId(module.id);
-   
+
 
   };
 
@@ -123,7 +123,7 @@ export default function EnhancedConfigurator() {
   return (
     <>
       {/* Landing Screen */}
-      <div 
+      <div
         className="min-h-screen bg-[#e8e6e1] relative flex flex-col"
         style={{ display: stage === STAGES.landing ? 'flex' : 'none' }}
       >
@@ -168,7 +168,7 @@ export default function EnhancedConfigurator() {
       </div>
 
       {/* Selection Screen */}
-      <div 
+      <div
         className="min-h-screen bg-[#e8e6e1] relative flex"
         style={{ display: stage === STAGES.selection ? 'flex' : 'none' }}
       >
@@ -339,7 +339,7 @@ export default function EnhancedConfigurator() {
       </div>
 
       {/* Builder Screen - ALWAYS MOUNTED, visibility controlled by CSS */}
-      <div 
+      <div
         className="min-h-screen bg-[#e8e6e1] relative flex flex-col"
         style={{ display: stage === STAGES.builder ? 'flex' : 'none' }}
       >
@@ -375,7 +375,7 @@ export default function EnhancedConfigurator() {
           <div className="flex-1 flex items-center justify-center p-10">
             <div
               ref={canvasRef}
-              className="w-full max-w-[900px] h-[600px] bg-white rounded-lg overflow-hidden"
+              className="w-full max-w-7xl h-[1000px] bg-white rounded-lg overflow-hidden"
             >
               <Scene3D
                 modules={modules}
@@ -389,7 +389,7 @@ export default function EnhancedConfigurator() {
           </div>
 
           {/* Right side - Collapsible panels */}
-          <div className="absolute right-10 top-[120px] w-[280px] flex flex-col gap-[15px] z-10">
+          <div className="absolute right-10 top-1/2 -translate-y-1/2 w-[280px] flex flex-col gap-[15px] z-10">
             {/* ADD MODULE Panel */}
             <div className="bg-white rounded overflow-hidden">
               <button
