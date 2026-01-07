@@ -34,45 +34,51 @@ export default function EnhancedConfigurator() {
 
 
   const findEmptyPosition = (existingModules) => {
-  const GRID_SIZE = 4;
-  const MAX_SEARCH = 20;
+    const GRID = 3.2;
 
-  for (let distance = 0; distance < MAX_SEARCH; distance++) {
-    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-      const x = Math.cos(angle) * distance * GRID_SIZE;
-      const z = Math.sin(angle) * distance * GRID_SIZE;
+    for (let ring = 0; ring < 20; ring++) {
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+        const x = Math.cos(a) * ring * GRID;
+        const z = Math.sin(a) * ring * GRID;
 
-      const hasOverlap = existingModules.some((m) => {
-        const dx = m.position[0] - x;
-        const dz = m.position[2] - z;
-        return Math.sqrt(dx * dx + dz * dz) < GRID_SIZE * 0.9;
-      });
+        const hasOverlap = existingModules.some((m) => {
+          const dx = m.position[0] - x;
+          const dz = m.position[2] - z;
+          const dist = Math.hypot(dx, dz);
 
-      if (!hasOverlap) return [x, 0, z];
+          const r1 = m.radius ?? 1.4;
+          const r2 = item.radius ?? 1.4;
+
+          return dist < r1 + r2;
+        });
+
+
+        if (!hasOverlap) return [x, 0, z];
+      }
     }
-  }
 
-  return [existingModules.length * GRID_SIZE, 0, 0];
-};
+    return [existingModules.length * GRID, 0, 0];
+  };
 
 
   const handleAddModule = (item) => {
-  setModules((prevModules) => {
-    const position = findEmptyPosition(prevModules);
+    setModules((prev) => {
+      const position = findEmptyPosition(prev);
 
-    return [
-      ...prevModules,
-      {
-        id: Date.now(),
-        name: item.name,
-        modelPath: item.modelPath,
-        connectors: item.connectors || [],
-        position,
-        rotation: 0,
-      },
-    ];
-  });
-};
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          name: item.name,
+          modelPath: item.modelPath,
+          connectors: item.connectors || [],
+          position,
+          rotation: 0,
+        },
+      ];
+    });
+  };
+
   const handleModuleClick = (module) => {
 
 
@@ -234,16 +240,23 @@ export default function EnhancedConfigurator() {
               onClick={() => {
                 if (selectedItems.length === 0) return;
 
-                const newModules = selectedItems.map((item, index) => ({
-                  id: Date.now() + index,
-                  name: item.name,
-                  modelPath: item.modelPath,
-                  connectors: item.connectors || [],
-                  position: [index * 1.2, 0, 0],
-                  rotation: 0,
-                }));
+                const newModules = [];
+                let tempModules = [];
 
-                setModules(newModules);
+                for (const item of selectedItems) {
+                  const position = findEmptyPosition([...modules, ...tempModules]);
+
+                  tempModules.push({
+                    id: Date.now() + Math.random(),
+                    name: item.name,
+                    modelPath: item.modelPath,
+                    connectors: item.connectors || [],
+                    position,
+                    rotation: 0,
+                  });
+                }
+
+                setModules(tempModules);
                 setStage(STAGES.builder);
               }}
               disabled={selectedItems.length === 0}
