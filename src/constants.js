@@ -74,7 +74,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_Center.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_Center.png",
         fabricGroup: "Seats",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.57, z: 0 },   // Right
           { x: -0.57, z: 0 },  // Left
@@ -91,7 +91,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_BigSeat.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_BigSeat.png",
         fabricGroup: "Seats",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.70, z: 0 },   // Right
           { x: -0.70, z: 0 },  // Left
@@ -113,7 +113,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_Left.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_Left.png",
         fabricGroup: "Arms",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.46, z: 0 }    // Right (connects to seat)
         ]
@@ -127,7 +127,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_Right.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_Right.png",
         fabricGroup: "Arms",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: -0.46, z: 0 }   // Left (connects to seat)
         ]
@@ -146,7 +146,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_Angle.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_Angle.png",
         fabricGroup: "Corners",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.57, z: 0 },   // Right
           { x: -0.57, z: 0 },  // Left
@@ -163,7 +163,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_BigAngle.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_BigAngle.png",
         fabricGroup: "Corners",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.70, z: 0 },   // Right
           { x: -0.70, z: 0 },  // Left
@@ -185,7 +185,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_Pouf.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_Pouf.png",
         fabricGroup: "Poufs",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.46, z: 0 },
           { x: -0.46, z: 0 },
@@ -202,7 +202,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_SeatPouf.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_SeatPouf.png",
         fabricGroup: "Poufs",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.57, z: 0 },   // Right
           { x: -0.57, z: 0 },  // Left
@@ -219,7 +219,7 @@ export const sofaCatalog = [
         modelPath: "/models/JUMP_SOFA/3D_MODELS/Jump_ChaisePouf.gltf",
         thumbnail: "/models/JUMP_SOFA/SCREENSHOR_Dimensions/Jump_ChaisePouf.png",
         fabricGroup: "Poufs",
-        radius: 3.5,
+        radius: 1.4,
         connectors: [
           { x: 0.57, z: 0 },   // Right
           { x: -0.57, z: 0 }   // Left

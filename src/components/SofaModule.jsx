@@ -250,7 +250,7 @@ export default function SofaModule({
       ref={groupRef}
       position={module.position || [0, 0, 0]}
       rotation={[0, module.rotation || 0, 0]}
-      scale={isSelected ? 2.6 : 2.5}
+      scale={isSelected ? 1.04 : 1.0}
     >
       <primitive object={model} />
 

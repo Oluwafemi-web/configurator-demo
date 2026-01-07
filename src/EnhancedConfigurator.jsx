@@ -35,7 +35,7 @@ export default function EnhancedConfigurator() {
 
   const findEmptyPosition = (existingModules, newItem) => {
     const GRID = 3.2;
-    const newRadius = newItem.radius ?? 3.5;
+    const newRadius = newItem.radius ?? 1.4;
 
     for (let ring = 0; ring < 20; ring++) {
       for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
@@ -47,7 +47,7 @@ export default function EnhancedConfigurator() {
           const dz = m.position[2] - z;
           const dist = Math.hypot(dx, dz);
 
-          const existingRadius = m.radius ?? 3.5;
+          const existingRadius = m.radius ?? 1.4;
           return dist < existingRadius + newRadius;
         });
 
@@ -71,7 +71,7 @@ export default function EnhancedConfigurator() {
           name: item.name,
           modelPath: item.modelPath,
           connectors: item.connectors || [],
-          radius: item.radius ?? 3.5,
+          radius: item.radius ?? 1.4,
           position,
           rotation: 0,
         },
@@ -252,7 +252,7 @@ export default function EnhancedConfigurator() {
                     name: item.name,
                     modelPath: item.modelPath,
                     connectors: item.connectors || [],
-                    radius: item.radius ?? 3.5,
+                    radius: item.radius ?? 1.4,
                     position,
                     rotation: 0,
                   });
