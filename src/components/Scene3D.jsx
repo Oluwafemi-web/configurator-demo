@@ -1,6 +1,4 @@
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows } from "@react-three/drei";
-
 import { useState, useEffect, Suspense, useRef } from "react";
 import {
 
@@ -163,21 +161,21 @@ export default function Scene3D({
           style={{ background: "#c5c5c5ff" }}
         >
           <TexturePreloader />
-          <ambientLight intensity={0.4} />
-
           <directionalLight
             position={[0, 10, 0]}
             intensity={1}
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
-            shadow-camera-left={-6}
-            shadow-camera-right={6}
-            shadow-camera-top={6}
-            shadow-camera-bottom={-6}
             shadow-camera-near={1}
-            shadow-camera-far={20}
+            shadow-camera-far={50}
+            shadow-camera-left={-10}
+            shadow-camera-right={10}
+            shadow-camera-top={10}
+            shadow-camera-bottom={-10}
           />
+
+          <ambientLight intensity={0.4} />
 
 
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
@@ -197,18 +195,10 @@ export default function Scene3D({
               onDragStop={() => setIsDragging(false)}
             />
           ))}
-          <ContactShadows
-            position={[0, 0.01, 0]}
-            opacity={0.35}
-            scale={20}
-            blur={2.5}
-            far={2}
-          />
-
-          {/* <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[100, 100]} />
-            <shadowMaterial opacity={0.25} />
-          </mesh> */}
+            <shadowMaterial opacity={0.3} />
+          </mesh>
 
           <Environment preset="city" />
         </Canvas>
