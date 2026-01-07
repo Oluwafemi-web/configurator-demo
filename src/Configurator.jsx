@@ -4,7 +4,7 @@ import Model from "./Model";
 import Palette from "./Palette";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { detectPartsFromModel } from "./utils/detectParts";
-import DraggableModule from "./DraggableModule";
+import DraggableModule from "./components/DraggableModule"
 import {
   STAGES,
   upholsteryTextures,
@@ -692,10 +692,10 @@ export default function Configurator() {
               chairs.length > 0
                 ? deriveVariantKeysFromChairs()
                 : sortVariantKeys(
-                    [
-                      getVariantKeyFromModelPath(selectedSofa?.modelPath),
-                    ].filter(Boolean)
-                  );
+                  [
+                    getVariantKeyFromModelPath(selectedSofa?.modelPath),
+                  ].filter(Boolean)
+                );
             setPendingVariantKeys(existingKeys);
             setStage(STAGES.selection);
           }}
@@ -763,9 +763,9 @@ export default function Configurator() {
             camera={
               viewMode === "2d"
                 ? {
-                    position: [0, 1.5, 5],
-                    zoom: 50,
-                  }
+                  position: [0, 1.5, 5],
+                  zoom: 50,
+                }
                 : { position: [2, 2, 2], fov: 45 }
             }
             orthographic={viewMode === "2d"}
