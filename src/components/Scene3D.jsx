@@ -161,6 +161,8 @@ export default function Scene3D({
           style={{ background: "#c5c5c5ff" }}
         >
           <TexturePreloader />
+          <ambientLight intensity={0.4} />
+
           <directionalLight
             position={[0, 10, 0]}
             intensity={1}
@@ -174,8 +176,6 @@ export default function Scene3D({
             shadow-camera-near={1}
             shadow-camera-far={20}
           />
-
-          <ambientLight intensity={0.4} />
 
 
           <CameraManager viewMode={viewMode} isDragging={isDragging} />
@@ -195,10 +195,18 @@ export default function Scene3D({
               onDragStop={() => setIsDragging(false)}
             />
           ))}
-          <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <ContactShadows
+            position={[0, 0.01, 0]}
+            opacity={0.35}
+            scale={20}
+            blur={2.5}
+            far={2}
+          />
+
+          {/* <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[100, 100]} />
             <shadowMaterial opacity={0.25} />
-          </mesh>
+          </mesh> */}
 
           <Environment preset="city" />
         </Canvas>
