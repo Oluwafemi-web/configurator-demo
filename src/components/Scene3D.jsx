@@ -147,7 +147,7 @@ export default function Scene3D({
             shadow-camera-left={-10}
             shadow-camera-right={10}
             shadow-camera-top={10}
-            shadow-camera-bottom={-10}
+            shadow-camera-bottom={-5}
           />
 
           <ambientLight intensity={0.2} />

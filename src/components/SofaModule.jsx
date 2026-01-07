@@ -26,9 +26,9 @@ export default function SofaModule({
   useEffect(() => {
     if (!model) return;
 
+
     // Enable shadows for all meshes
     model.traverse((child) => {
-      console.log(child, child.material)
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
@@ -40,6 +40,7 @@ export default function SofaModule({
 
     // Apply Texture if available
     if (fabricTexture) {
+      console.log(fabricTexture)
       new THREE.TextureLoader().load(fabricTexture, (tex) => {
         if (!isMounted) return; // Race condition check
 
@@ -47,6 +48,7 @@ export default function SofaModule({
         tex.colorSpace = THREE.SRGBColorSpace;
 
         model.traverse((child) => {
+          console.log(child)
           if (child.isMesh && child.material) {
             // Clone material to ensure unique instance for this module
             if (!child.material.userData.isUnique) {
