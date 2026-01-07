@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import { useRef, useState, useEffect, useMemo, useCallback, useLayoutEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -65,6 +65,18 @@ export default function SofaModule({
       isMounted = false;
     };
   }, [model, fabricTexture]);
+
+
+  useLayoutEffect(() => {
+    if (!groupRef.current) return
+
+    const box = new THREE.Box3().setFromObject(groupRef.current)
+    const center = box.getCenter(new THREE.Vector3())
+
+    // Move model so its center is at world origin
+    groupRef.current.position.sub(center)
+
+  }, [])
 
   /** ------------------ DRAG STATE ------------------ */
   const draggingRef = useRef(false);
