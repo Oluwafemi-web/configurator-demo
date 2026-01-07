@@ -33,48 +33,49 @@ export default function EnhancedConfigurator() {
 
 
 
-  const findEmptyPosition = () => {
-    // Grid-based placement to avoid overlaps
-    const GRID_SIZE = 4.0; // Spacing between modules
-    const MAX_SEARCH = 20; // Maximum positions to check
+  const findEmptyPosition = (existingModules) => {
+  const GRID_SIZE = 4;
+  const MAX_SEARCH = 20;
 
-    // Start from origin and spiral outward
-    for (let distance = 0; distance < MAX_SEARCH; distance++) {
-      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-        const x = Math.cos(angle) * distance * GRID_SIZE;
-        const z = Math.sin(angle) * distance * GRID_SIZE;
+  for (let distance = 0; distance < MAX_SEARCH; distance++) {
+    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+      const x = Math.cos(angle) * distance * GRID_SIZE;
+      const z = Math.sin(angle) * distance * GRID_SIZE;
 
-        // Check if this position overlaps with any existing module
-        const hasOverlap = modules.some((m) => {
-          const dx = m.position[0] - x;
-          const dz = m.position[2] - z;
-          const distanceToModule = Math.sqrt(dx * dx + dz * dz);
-          return distanceToModule < GRID_SIZE * 0.8; // 80% of grid size for safety
-        });
+      const hasOverlap = existingModules.some((m) => {
+        const dx = m.position[0] - x;
+        const dz = m.position[2] - z;
+        return Math.sqrt(dx * dx + dz * dz) < GRID_SIZE * 0.9;
+      });
 
-        if (!hasOverlap) {
-          return [x, 0, z];
-        }
-      }
+      if (!hasOverlap) return [x, 0, z];
     }
+  }
+
+  return [existingModules.length * GRID_SIZE, 0, 0];
+};
 
     // Fallback: place far away if no empty spot found
     return [modules.length * 2, 0, 0];
   };
 
   const handleAddModule = (item) => {
-    const newModule = {
-      id: Date.now(),
-      name: item.name,
-      modelPath: item.modelPath,
-      connectors: item.connectors || [],
-      position: findEmptyPosition(),
-      rotation: 0,
-    };
-    setModules([...modules, newModule]);
+  setModules((prevModules) => {
+    const position = findEmptyPosition(prevModules);
 
-  };
-
+    return [
+      ...prevModules,
+      {
+        id: Date.now(),
+        name: item.name,
+        modelPath: item.modelPath,
+        connectors: item.connectors || [],
+        position,
+        rotation: 0,
+      },
+    ];
+  });
+};
   const handleModuleClick = (module) => {
 
 
