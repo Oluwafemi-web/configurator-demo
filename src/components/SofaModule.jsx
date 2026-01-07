@@ -234,9 +234,8 @@ export default function SofaModule({
       <primitive object={model} />
 
       {/* Interaction proxy */}
-      <mesh visible={false} onPointerDown={onPointerDown} receiveShadow>
+      <mesh visible={false} onPointerDown={onPointerDown}>
         <boxGeometry args={[1.5, 1, 1.5]} />
-        <shadowMaterial opacity={0.3} />
         {/* <meshBasicMaterial transparent opacity={0.3} /> */}
       </mesh>
     </group>
