@@ -28,6 +28,7 @@ export default function SofaModule({
 
     // Enable shadows for all meshes
     model.traverse((child) => {
+      console.log(child, child.material)
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
@@ -35,7 +36,7 @@ export default function SofaModule({
     });
 
     let isMounted = true;
-    console.log(child, child.material)
+
 
     // Apply Texture if available
     if (fabricTexture) {
