@@ -1,5 +1,5 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Line, Html } from "@react-three/drei";
+import { OrbitControls, Environment, Line, Html, CameraControls } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -14,6 +14,7 @@ import {
   sofaCatalog,
   VARIANT_CONFIG,
 } from "./constants";
+import PDFExport from "./components/PDFExport";
 
 // Camera Manager Component for refined camera control
 function CameraManager({ viewMode, isDragging }) {
@@ -26,7 +27,7 @@ function CameraManager({ viewMode, isDragging }) {
       camera.position.set(0, 50, 0);
       camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
-      camera.zoom = 5;
+      camera.zoom = 8;
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
@@ -45,6 +46,7 @@ function CameraManager({ viewMode, isDragging }) {
 
   // In 2D mode, completely disable camera controls
   if (viewMode === "2d") {
+    <CameraControls ref={controlsRef} zoom={true} />
     return null; // No controls in 2D - locked top-down view
   }
 
@@ -965,6 +967,7 @@ export default function Configurator() {
                   : { position: [2, 2, 2], fov: 45 }
               }
               orthographic={viewMode === "2d"}
+              gl={{ preserveDrawingBuffer: true }}
             >
               <ambientLight intensity={0.7} />
               <directionalLight position={[3, 3, 3]} intensity={0.5} />
@@ -1414,19 +1417,7 @@ export default function Configurator() {
               >
                 📐
               </button>
-              <button
-                style={{
-                  padding: "6px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                  background: "#fff",
-                  cursor: "pointer",
-                  fontSize: "11px",
-                }}
-                title="Copy/Export"
-              >
-                📋
-              </button>
+              <PDFExport canvasRef={canvasContainerRef} modules={chairs} selectedFabric={selectedChairTexture} />
             </div>
           </div>
 
