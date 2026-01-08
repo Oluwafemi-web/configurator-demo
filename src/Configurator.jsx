@@ -30,10 +30,16 @@ function CameraManager({ viewMode, isDragging }) {
       camera.updateProjectionMatrix();
     } else {
       // 3D perspective view
-      camera.position.set(6, 4, 6);
+      camera.position.set(12, 6, 12);
       camera.lookAt(0, 0, 0);
-      camera.fov = 35;
+      camera.fov = 50;
       camera.updateProjectionMatrix();
+
+      // Reset controls target to center when switching to 3D
+      if (controlsRef.current) {
+        controlsRef.current.target.set(0, 0, 0);
+        controlsRef.current.update();
+      }
     }
   }, [viewMode, camera]);
 
@@ -50,6 +56,7 @@ function CameraManager({ viewMode, isDragging }) {
       minDistance={3}
       maxDistance={50}
       maxPolarAngle={Math.PI / 2 - 0.1}
+      target={[0, 0, 0]}
     />
   );
 }

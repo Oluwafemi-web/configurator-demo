@@ -53,45 +53,39 @@ export default function Palette({
                     {isGrouped ? (
                         // Grouped display for upholstery fabrics
                         <div className="flex flex-col gap-6">
-                            {options.map((group) => {
-                                console.log(group);
-                                return (
-                                    <div key={group.category}>
-                                        <h3 className="text-xs uppercase tracking-wide text-gray-600 mb-3 font-medium">
-                                            {group.category}
-                                        </h3>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {group.fabrics.map((fabric) => (
+                            {options.map((group) => (
+                                <div key={group.category}>
+                                    <h3 className="text-xs uppercase tracking-wide text-gray-600 mb-3 font-medium">
+                                        {group.category}
+                                    </h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {group.fabrics.map((fabric) => (
+                                            <div
+                                                key={fabric.id}
+                                                className="flex flex-col items-center gap-1 cursor-pointer"
+                                                onClick={() => onSelect(fabric)}
+                                            >
                                                 <div
-                                                    key={fabric.id}
-                                                    className="flex flex-col items-center gap-1 cursor-pointer"
-                                                    onClick={() => {
-                                                        onSelect(fabric);
-                                                        setIsExpanded(false);
+                                                    className="color-selector-circle"
+                                                    style={{
+                                                        width: "60px",
+                                                        height: "60px",
+                                                        backgroundImage: `url(${encodeURI(fabric.path)})`,
+                                                        backgroundSize: "cover",
+                                                        backgroundPosition: "center",
+                                                        border:
+                                                            selectedOptionId === fabric.id
+                                                                ? "3px solid #000"
+                                                                : "2px solid #ccc",
+                                                        borderRadius: "4px",
                                                     }}
-                                                >
-                                                    <div
-                                                        className="color-selector-circle"
-                                                        style={{
-                                                            width: "60px",
-                                                            height: "60px",
-                                                            backgroundImage: `url(${encodeURI(fabric.path)})`,
-                                                            backgroundSize: "cover",
-                                                            backgroundPosition: "center",
-                                                            border:
-                                                                selectedOptionId === fabric.id
-                                                                    ? "3px solid #000"
-                                                                    : "2px solid #ccc",
-                                                            borderRadius: "4px",
-                                                        }}
-                                                        title={fabric.label}
-                                                    />
-                                                </div>
-                                            ))}
-                                        </div>
+                                                    title={fabric.label}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
-                                )
-                            })}
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         // Flat display for feet textures
@@ -100,10 +94,7 @@ export default function Palette({
                                 <div
                                     key={option.id}
                                     className="flex flex-col items-center gap-1 cursor-pointer"
-                                    onClick={() => {
-                                        onSelect(option);
-                                        setIsExpanded(false);
-                                    }}
+                                    onClick={() => onSelect(option)}
                                 >
                                     <div
                                         className="color-selector-circle"
