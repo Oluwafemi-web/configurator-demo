@@ -989,6 +989,7 @@ export default function Configurator() {
                     <DraggableModule
                       key={chair.id}
                       position={resolvedPosition}
+                      viewMode={viewMode}
                       disabled={
                         viewMode !== "2d" || rotationTargetId === chair.id
                       }
