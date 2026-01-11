@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { useRef, useState } from "react";
+import { DragControls } from "@react-three/drei";
 
 export default function DraggableModule({
     children,
@@ -9,79 +9,89 @@ export default function DraggableModule({
     onDragEnd,
     onSelect,
     disabled = false,
+    viewMode = "2d", // Add viewMode prop to determine rendering strategy
 }) {
-    const ref = useRef(null);
-    const plane = useMemo(
-        () => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
-        []
-    );
-    const offsetRef = useRef(new THREE.Vector3());
-    const intersection = useRef(new THREE.Vector3());
+    const groupRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [moved, setMoved] = useState(false);
 
-    useEffect(() => {
-        if (!ref.current) return;
-        ref.current.position.set(position[0], position[1], position[2]);
-    }, [position]);
-
-    const handlePointerDown = (event) => {
+    const handleDragStart = () => {
         if (disabled) return;
-        event.stopPropagation();
         setIsDragging(true);
-        event.target.setPointerCapture(event.pointerId);
-        setMoved(false);
-        onDragStart?.({
-            x: ref.current.position.x,
-            y: ref.current.position.y,
-            z: ref.current.position.z,
-        });
-
-        if (event.ray.intersectPlane(plane, intersection.current)) {
-            offsetRef.current.copy(intersection.current).sub(ref.current.position);
-        }
-    };
-
-    const handlePointerMove = (event) => {
-        if (!isDragging || disabled) return;
-        event.stopPropagation();
-        if (event.ray.intersectPlane(plane, intersection.current)) {
-            const nextPos = intersection.current.sub(offsetRef.current);
-            ref.current.position.copy(nextPos);
-            setMoved(true);
-            onDrag?.({
-                x: nextPos.x,
-                y: nextPos.y,
-                z: nextPos.z,
+        if (onDragStart) {
+            onDragStart({
+                x: groupRef.current.position.x,
+                y: groupRef.current.position.y,
+                z: groupRef.current.position.z,
             });
         }
     };
 
-    const handlePointerUp = (event) => {
-        if (!isDragging) return;
-        event.stopPropagation();
+    const handleDrag = (localMatrix, deltaLocalMatrix, worldMatrix, deltaWorldMatrix) => {
+        if (disabled) return;
+
+        // Get the current position from the group
+        const pos = groupRef.current.position;
+
+        // Lock Y position to 0 (only allow XZ movement)
+        groupRef.current.position.set(pos.x, 0, pos.z);
+
+        if (onDrag) {
+            onDrag({
+                x: pos.x,
+                y: 0,
+                z: pos.z,
+            });
+        }
+    };
+
+    const handleDragEnd = () => {
+        if (disabled) return;
         setIsDragging(false);
-        event.target.releasePointerCapture(event.pointerId);
-        onDragEnd?.({
-            x: ref.current.position.x,
-            y: ref.current.position.y,
-            z: ref.current.position.z,
-        });
+        if (onDragEnd) {
+            onDragEnd({
+                x: groupRef.current.position.x,
+                y: groupRef.current.position.y,
+                z: groupRef.current.position.z,
+            });
+        }
     };
 
     const handleClick = (event) => {
-        if (disabled || moved) return;
-        onSelect?.(event);
+        if (disabled || isDragging) return;
+        event.stopPropagation();
+        if (onSelect) {
+            onSelect(event);
+        }
     };
 
+    // In 2D mode, always use DragControls (just enable/disable it)
+    // In 3D mode, don't use DragControls at all
+    if (viewMode === "2d") {
+        return (
+            <>
+                <DragControls
+                    enabled={!disabled}
+                    onDragStart={handleDragStart}
+                    onDrag={handleDrag}
+                    onDragEnd={handleDragEnd}
+                >
+                    <group
+                        ref={groupRef}
+                        position={position}
+                        onClick={handleClick}
+                    >
+                        {children}
+                    </group>
+                </DragControls>
+            </>
+        );
+    }
+
+    // 3D mode: no drag controls
     return (
         <group
-            ref={ref}
+            ref={groupRef}
             position={position}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerOut={handlePointerUp}
             onClick={handleClick}
         >
             {children}

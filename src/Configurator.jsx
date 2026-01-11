@@ -1,5 +1,5 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Line, Html, CameraControls } from "@react-three/drei";
+import { OrbitControls, Environment, Line, Html, CameraControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -15,50 +15,31 @@ import {
   VARIANT_CONFIG,
 } from "./constants";
 import PDFExport from "./components/PDFExport";
+import ModuleActionModal from "./components/ModuleActionModal";
 
 // Camera Manager Component for refined camera control
-function CameraManager({ viewMode, isDragging }) {
-  const { camera } = useThree();
+function CameraManager({ viewMode, isDragging, sceneCenter = [0, 0, 0] }) {
   const controlsRef = useRef(null);
 
   useEffect(() => {
-    if (viewMode === "2d") {
-      // Lock to perfect top-down orthographic view
-      camera.position.set(0, 50, 0);
-      camera.rotation.set(-Math.PI / 1.5, 0, 0); // Point straight down
-      camera.lookAt(0, 0, 0);
-      camera.zoom = 8;
-      camera.updateProjectionMatrix();
-    } else {
-      // 3D perspective view
-      camera.position.set(12, 6, 12);
-      camera.lookAt(0, 0, 0);
-      camera.fov = 50;
-      camera.updateProjectionMatrix();
-
-      // Reset controls target to center when switching to 3D
-      if (controlsRef.current) {
-        controlsRef.current.target.set(0, 0, 0);
-        controlsRef.current.update();
-      }
+    if (controlsRef.current && viewMode === "3d") {
+      controlsRef.current.setTarget(...sceneCenter, true);
     }
-  }, [viewMode, camera]);
+  }, [sceneCenter, viewMode]);
 
-  // In 2D mode, completely disable camera controls
   if (viewMode === "2d") {
-    <CameraControls ref={controlsRef} zoom={true} />
-    return null; // No controls in 2D - locked top-down view
+    return null;
   }
 
   // 3D mode: full controls
   return (
-    <OrbitControls
+    <CameraControls
       ref={controlsRef}
       enabled={!isDragging}
       minDistance={3}
       maxDistance={50}
       maxPolarAngle={Math.PI / 2 - 0.1}
-      target={[0, 0, 0]}
+      makeDefault
     />
   );
 }
@@ -143,7 +124,7 @@ export default function Configurator() {
     );
 
   const CHAIR_WIDTH = 1.14;
-  const SNAP_DISTANCE = 0.9;
+  const SNAP_DISTANCE = 0.4;
   const MIN_ZOOM = 0.5;
   const MAX_ZOOM = 2.5;
   const ZOOM_STEP = 0.25;
@@ -191,6 +172,29 @@ export default function Configurator() {
 
   const getResolvedPosition = (chair) =>
     chair.customPosition ?? autoPositions.get(chair.id) ?? [0, 0, 0];
+
+  const sceneCenter = useMemo(() => {
+    if (chairs.length === 0) return [0, 0, 0];
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+
+    chairs.forEach((c) => {
+      const [x, , z] = getResolvedPosition(c);
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (z < minZ) minZ = z;
+      if (z > maxZ) maxZ = z;
+    });
+
+    if (minX === Infinity) return [0, 0, 0];
+
+    const centerX = (minX + maxX) / 2;
+    const centerZ = (minZ + maxZ) / 2;
+    return [centerX, 0, centerZ];
+  }, [chairs, autoPositions]);
 
   const findSnapTarget = (draggedChair, pos) => {
     let nearest = null;
@@ -958,19 +962,26 @@ export default function Configurator() {
             }}
           >
             <Canvas
-              camera={
-                viewMode === "2d"
-                  ? {
-                    position: [0, 1.5, 5],
-                    zoom: 50,
-                  }
-                  : { position: [2, 2, 2], fov: 45 }
-              }
-              orthographic={viewMode === "2d"}
               gl={{ preserveDrawingBuffer: true }}
             >
-              <ambientLight intensity={0.3} />
-              <directionalLight position={[3, 3, 3]} intensity={0.3} />
+              {viewMode === "2d" ? (
+                <OrthographicCamera
+                  makeDefault
+                  position={[1, 1, 1]}
+                  zoom={100}
+                  rotation={[-Math.PI / 2, 0, 0]}
+                  near={0}
+                // far={200}
+                />
+              ) : (
+                <PerspectiveCamera
+                  makeDefault
+                  position={[12, 6, 12]}
+                  fov={50}
+                />
+              )}
+              <ambientLight intensity={0.1} />
+              <directionalLight position={[3, 3, 3]} intensity={0.1} />
               {chairs.length > 0 ? (
                 chairs.map((chair) => {
                   const resolvedPosition = getResolvedPosition(chair);
@@ -986,27 +997,28 @@ export default function Configurator() {
                       onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                       onSelect={(event) => handleSelectChair(chair, event)}
                     >
-                      {/* <group
+                      <group
                         rotation={[
                           0,
-                          viewMode === "3d" ? chair.rotation || 0 : 0,
+                          chair.rotation || 0,
                           0,
                         ]}
-                      > */}
-                      <Model
-                        modelPath={chair.sofa.modelPath}
-                        chairTexturePath={
-                          chair.chairTexture || selectedChairTexture
-                        }
-                        pillowTexturePath={
-                          chair.pillowTexture || selectedPillowTexture
-                        }
-                        feetTexturePath={
-                          chair.feetTexture || selectedFeetTexture
-                        }
-                        position={[0, 0, 0]}
-                      />
-                      {/* </group> */}
+                      >
+                        <Model
+                          modelPath={chair.sofa.modelPath}
+                          chairTexturePath={
+                            chair.chairTexture || selectedChairTexture
+                          }
+                          pillowTexturePath={
+                            chair.pillowTexture || selectedPillowTexture
+                          }
+                          feetTexturePath={
+                            chair.feetTexture || selectedFeetTexture
+                          }
+                          position={[0, 0, 0]}
+
+                        />
+                      </group>
                     </DraggableModule>
                   );
                 })
@@ -1016,6 +1028,9 @@ export default function Configurator() {
                   chairTexturePath={selectedChairTexture}
                   pillowTexturePath={selectedPillowTexture}
                   feetTexturePath={selectedFeetTexture}
+                  position={[0, 0, 0]}
+
+
                 />
               ) : null}
               {snapPreview && viewMode === "2d" && (
@@ -1069,61 +1084,47 @@ export default function Configurator() {
                   onClose={() => setRotationTargetId(null)}
                 />
               )}
-              <CameraManager viewMode={viewMode} isDragging={isDragging2D} />
+              <CameraManager viewMode={viewMode} isDragging={isDragging2D} sceneCenter={sceneCenter} />
               <Environment preset="apartment" />
             </Canvas>
 
-            {/* Action Panel for selected module in 2D mode */}
+            {/* Action Modal for selected module in 2D mode */}
             {showActionPanel && selectedChair && viewMode === "2d" && (
-              <div
-                data-selection-menu
-                style={{
-                  position: "absolute",
-                  ...getActionPanelStyle(),
-                  background: "#fff",
-                  border: "2px solid #1b1b1b",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  zIndex: 100,
+              <ModuleActionModal
+                selectedChair={selectedChair}
+                onClose={() => {
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
                 }}
-              >
-                <div style={{ marginBottom: "12px", fontWeight: "600" }}>
-                  {selectedChair.sofa.name}
-                </div>
-                <button
-                  onClick={handleRotateRequest}
-                  style={{
-                    width: "100%",
-                    padding: "8px 16px",
-                    marginBottom: "8px",
-                    borderRadius: "6px",
-                    border: "1px solid #e0e0e0",
-                    background: "#fff",
-                    cursor: "pointer",
-                  }}
-                >
-                  Rotate Module
-                </button>
-                <button
-                  onClick={() => {
-                    handleRemoveChair(selectedChair.id);
-                    setShowActionPanel(false);
-                    setSelectedChairId(null);
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    border: "1px solid #e0e0e0",
-                    background: "#fff",
-                    cursor: "pointer",
-                    color: "#c00",
-                  }}
-                >
-                  Remove Module
-                </button>
-              </div>
+                onRotate={() => {
+                  handleRotateRequest();
+                }}
+                onDuplicate={() => {
+                  handleAddChair(selectedChair.sofa);
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
+                }}
+                onDelete={() => {
+                  handleRemoveChair(selectedChair.id);
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
+                }}
+                onAddModules={() => {
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
+                  setExpandedPanel("addModule");
+                }}
+                onChangeMaterialModule={() => {
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
+                  setExpandedPanel("materials");
+                }}
+                onChangeMaterialComposition={() => {
+                  setShowActionPanel(false);
+                  setSelectedChairId(null);
+                  setExpandedPanel("materials");
+                }}
+              />
             )}
           </div>
 

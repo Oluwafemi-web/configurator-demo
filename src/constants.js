@@ -143,26 +143,7 @@ export const upholsteryTextures = [
 ];
 
 export const feetTextures = [
-  {
-    id: "wood-texture",
-    label: "WOOD",
-    path: "/textures/Feet/Wood_texture_FEET.jpg",
-  },
-  {
-    id: "metal-texture",
-    label: "METAL",
-    path: "/textures/Feet/metal_texture_FEET.jpg",
-  },
-  {
-    id: "texture01",
-    label: "TEXTURE 01",
-    path: "/textures/Feet/texture01.jpg",
-  },
-  {
-    id: "texture02",
-    label: "TEXTURE 02",
-    path: "/textures/Feet/texture02.jpg",
-  },
+
   {
     id: "metalfeet",
     label: "METAL ALT",
