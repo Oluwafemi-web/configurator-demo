@@ -25,7 +25,7 @@ function CameraManager({ viewMode, isDragging }) {
     if (viewMode === "2d") {
       // Lock to perfect top-down orthographic view
       camera.position.set(0, 50, 0);
-      camera.rotation.set(-Math.PI / 2, 0, 0); // Point straight down
+      camera.rotation.set(-Math.PI / 1.5, 0, 0); // Point straight down
       camera.lookAt(0, 0, 0);
       camera.zoom = 8;
       camera.updateProjectionMatrix();
@@ -969,8 +969,8 @@ export default function Configurator() {
               orthographic={viewMode === "2d"}
               gl={{ preserveDrawingBuffer: true }}
             >
-              <ambientLight intensity={0.7} />
-              <directionalLight position={[3, 3, 3]} intensity={0.5} />
+              <ambientLight intensity={0.3} />
+              <directionalLight position={[3, 3, 3]} intensity={0.3} />
               {chairs.length > 0 ? (
                 chairs.map((chair) => {
                   const resolvedPosition = getResolvedPosition(chair);
@@ -986,27 +986,27 @@ export default function Configurator() {
                       onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                       onSelect={(event) => handleSelectChair(chair, event)}
                     >
-                      <group
+                      {/* <group
                         rotation={[
                           0,
                           viewMode === "3d" ? chair.rotation || 0 : 0,
                           0,
                         ]}
-                      >
-                        <Model
-                          modelPath={chair.sofa.modelPath}
-                          chairTexturePath={
-                            chair.chairTexture || selectedChairTexture
-                          }
-                          pillowTexturePath={
-                            chair.pillowTexture || selectedPillowTexture
-                          }
-                          feetTexturePath={
-                            chair.feetTexture || selectedFeetTexture
-                          }
-                          position={[0, 0, 0]}
-                        />
-                      </group>
+                      > */}
+                      <Model
+                        modelPath={chair.sofa.modelPath}
+                        chairTexturePath={
+                          chair.chairTexture || selectedChairTexture
+                        }
+                        pillowTexturePath={
+                          chair.pillowTexture || selectedPillowTexture
+                        }
+                        feetTexturePath={
+                          chair.feetTexture || selectedFeetTexture
+                        }
+                        position={[0, 0, 0]}
+                      />
+                      {/* </group> */}
                     </DraggableModule>
                   );
                 })
