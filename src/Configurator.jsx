@@ -1,5 +1,13 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Line, Html, CameraControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
+import {
+  OrbitControls,
+  Environment,
+  Line,
+  Html,
+  CameraControls,
+  OrthographicCamera,
+  PerspectiveCamera,
+} from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -15,6 +23,8 @@ import {
   VARIANT_CONFIG,
 } from "./constants";
 import PDFExport from "./components/PDFExport";
+import ExportImage from "./components/ExportImage";
+import Export3D from "./components/Export3D";
 import ModuleActionModal from "./components/ModuleActionModal";
 
 // Camera Manager Component for refined camera control
@@ -381,12 +391,12 @@ export default function Configurator() {
           setSelectedChairOptionId(option.id);
           setSelectedChairTexture(option.path);
           // Apply texture to all chairs
-          setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              chairTexture: option.path,
-            }))
-          );
+          // setChairs((prev) =>
+          //   prev.map((chair) => ({
+          //     ...chair,
+          //     chairTexture: option.path,
+          //   }))
+          // );
         },
       });
     }
@@ -399,12 +409,12 @@ export default function Configurator() {
           setSelectedPillowOptionId(option.id);
           setSelectedPillowTexture(option.path);
           // Apply texture to all chairs
-          setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              pillowTexture: option.path,
-            }))
-          );
+          // setChairs((prev) =>
+          //   prev.map((chair) => ({
+          //     ...chair,
+          //     pillowTexture: option.path,
+          //   }))
+          // );
         },
       });
     }
@@ -417,12 +427,12 @@ export default function Configurator() {
           setSelectedFeetOptionId(option.id);
           setSelectedFeetTexture(option.path);
           // Apply texture to all chairs
-          setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              feetTexture: option.path,
-            }))
-          );
+          // setChairs((prev) =>
+          //   prev.map((chair) => ({
+          //     ...chair,
+          //     feetTexture: option.path,
+          //   }))
+          // );
         },
       });
     }
@@ -527,21 +537,20 @@ export default function Configurator() {
   // Helper function to map item IDs to front image paths
   const getItemImagePath = (itemId) => {
     const imageMap = {
-      'jump-center': '/frontimage/Jump_Center.png',
-      'jump-left': '/frontimage/Jump_Left.png',
-      'jump-right': '/frontimage/Jump_Right.png',
-      'jump-angle': '/frontimage/Jump_Angle.png',
-      'jump-bigangle': '/frontimage/Jump_BigAngle.png',
-      'jump-bigseat': '/frontimage/Jump_BigSeat.png',
-      'jump-pouf': '/frontimage/Jump_Pouf.png',
-      'jump-chaisepouf-left': '/frontimage/Jump_ChaisePouf.png',
-      'jump-chaisepouf-right': '/frontimage/Jump_ChaisePouf_opposite.png',
-      'jump-seatpouf-left': '/frontimage/Jump_SeatPouf.png',
-      'jump-seatpouf-right': '/frontimage/Jump_SeatPouf_opposite.png',
+      "jump-center": "/frontimage/Jump_Center.png",
+      "jump-left": "/frontimage/Jump_Left.png",
+      "jump-right": "/frontimage/Jump_Right.png",
+      "jump-angle": "/frontimage/Jump_Angle.png",
+      "jump-bigangle": "/frontimage/Jump_BigAngle.png",
+      "jump-bigseat": "/frontimage/Jump_BigSeat.png",
+      "jump-pouf": "/frontimage/Jump_Pouf.png",
+      "jump-chaisepouf-left": "/frontimage/Jump_ChaisePouf.png",
+      "jump-chaisepouf-right": "/frontimage/Jump_ChaisePouf_opposite.png",
+      "jump-seatpouf-left": "/frontimage/Jump_SeatPouf.png",
+      "jump-seatpouf-right": "/frontimage/Jump_SeatPouf_opposite.png",
     };
-    return imageMap[itemId] || '/frontimage/placeholder.png';
+    return imageMap[itemId] || "/frontimage/placeholder.png";
   };
-
 
   const renderLandingScreen = () => (
     <div
@@ -557,50 +566,60 @@ export default function Configurator() {
       }}
     >
       <div style={{ flex: "1 1 400px" }}>
-        <p style={{
-          letterSpacing: "0.15em",
-          fontSize: "0.75rem",
-          fontWeight: "400",
-          marginBottom: "30px",
-          color: "#3a3a3a"
-        }}>
+        <p
+          style={{
+            letterSpacing: "0.15em",
+            fontSize: "0.75rem",
+            fontWeight: "400",
+            marginBottom: "30px",
+            color: "#3a3a3a",
+          }}
+        >
           Configurator
         </p>
-        <h1 style={{
-          fontSize: "3.5rem",
-          margin: "0 0 20px 0",
-          fontWeight: "300",
-          letterSpacing: "0.2em",
-          lineHeight: "1.1"
-        }}>
+        <h1
+          style={{
+            fontSize: "3.5rem",
+            margin: "0 0 20px 0",
+            fontWeight: "300",
+            letterSpacing: "0.2em",
+            lineHeight: "1.1",
+          }}
+        >
           JUMP SOFA
         </h1>
-        <p style={{
-          maxWidth: "420px",
-          color: "#6a6a6a",
-          lineHeight: 1.6,
-          fontSize: "0.95rem",
-          marginBottom: "8px"
-        }}>
+        <p
+          style={{
+            maxWidth: "420px",
+            color: "#6a6a6a",
+            lineHeight: 1.6,
+            fontSize: "0.95rem",
+            marginBottom: "8px",
+          }}
+        >
           Scopri tutte le configurazioni, cambia forme
         </p>
-        <p style={{
-          maxWidth: "420px",
-          color: "#6a6a6a",
-          lineHeight: 1.6,
-          fontSize: "0.95rem",
-          marginBottom: "0"
-        }}>
+        <p
+          style={{
+            maxWidth: "420px",
+            color: "#6a6a6a",
+            lineHeight: 1.6,
+            fontSize: "0.95rem",
+            marginBottom: "0",
+          }}
+        >
           e materiali.
         </p>
-        <p style={{
-          maxWidth: "420px",
-          color: "#9a9a9a",
-          lineHeight: 1.6,
-          fontSize: "0.85rem",
-          fontStyle: "italic",
-          marginTop: "15px"
-        }}>
+        <p
+          style={{
+            maxWidth: "420px",
+            color: "#9a9a9a",
+            lineHeight: 1.6,
+            fontSize: "0.85rem",
+            fontStyle: "italic",
+            marginTop: "15px",
+          }}
+        >
           Clicca e produci in ogni settore.
         </p>
         <button
@@ -672,7 +691,13 @@ export default function Configurator() {
       </button>
 
       <div>
-        <p style={{ letterSpacing: "0.35em", fontSize: "0.75rem", marginBottom: "8px" }}>
+        <p
+          style={{
+            letterSpacing: "0.35em",
+            fontSize: "0.75rem",
+            marginBottom: "8px",
+          }}
+        >
           COLLEZIONE
         </p>
         <h2 style={{ fontSize: "2rem", margin: "8px 0 24px 0" }}>
@@ -719,7 +744,9 @@ export default function Configurator() {
                       background: "#fff",
                       borderRadius: "20px",
                       padding: "22px 24px",
-                      border: isSelected ? "2px solid #000" : "1px solid #e0e0e0",
+                      border: isSelected
+                        ? "2px solid #000"
+                        : "1px solid #e0e0e0",
                       cursor: "pointer",
                       boxShadow: isSelected
                         ? "0 14px 28px rgba(0,0,0,0.12)"
@@ -798,7 +825,7 @@ export default function Configurator() {
 
   const renderBuilderScreen = () => {
     const togglePanel = (panelName) => {
-      setExpandedPanel(prev => prev === panelName ? null : panelName);
+      setExpandedPanel((prev) => (prev === panelName ? null : panelName));
     };
 
     return (
@@ -827,10 +854,10 @@ export default function Configurator() {
                 chairs.length > 0
                   ? deriveVariantKeysFromChairs()
                   : sortVariantKeys(
-                    [
-                      getVariantKeyFromModelPath(selectedSofa?.modelPath),
-                    ].filter(Boolean)
-                  );
+                      [
+                        getVariantKeyFromModelPath(selectedSofa?.modelPath),
+                      ].filter(Boolean)
+                    );
               setPendingVariantKeys(existingKeys);
               setStage(STAGES.selection);
             }}
@@ -948,7 +975,6 @@ export default function Configurator() {
             >
               ↻
             </button>
-
           </div>
 
           {/* Center - 3D Canvas */}
@@ -963,6 +989,14 @@ export default function Configurator() {
           >
             <Canvas
               gl={{ preserveDrawingBuffer: true }}
+              camera={
+                viewMode === "2d"
+                  ? {
+                      position: [0, 1.5, 5],
+                      zoom: 50,
+                    }
+                  : { position: [2, 2, 2], fov: 45 }
+              }
             >
               {viewMode === "2d" ? (
                 <OrthographicCamera
@@ -971,12 +1005,12 @@ export default function Configurator() {
                   zoom={100}
                   rotation={[-Math.PI / 2, 0, 0]}
                   near={0}
-                // far={200}
+                  // far={200}
                 />
               ) : (
                 <PerspectiveCamera
                   makeDefault
-                  position={[12, 6, 12]}
+                  position={[10, 5, 10]}
                   fov={50}
                 />
               )}
@@ -998,13 +1032,7 @@ export default function Configurator() {
                       onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                       onSelect={(event) => handleSelectChair(chair, event)}
                     >
-                      <group
-                        rotation={[
-                          0,
-                          chair.rotation || 0,
-                          0,
-                        ]}
-                      >
+                      <group rotation={[0, chair.rotation || 0, 0]}>
                         <Model
                           modelPath={chair.sofa.modelPath}
                           chairTexturePath={
@@ -1017,7 +1045,6 @@ export default function Configurator() {
                             chair.feetTexture || selectedFeetTexture
                           }
                           position={[0, 0, 0]}
-
                         />
                       </group>
                     </DraggableModule>
@@ -1030,8 +1057,6 @@ export default function Configurator() {
                   pillowTexturePath={selectedPillowTexture}
                   feetTexturePath={selectedFeetTexture}
                   position={[0, 0, 0]}
-
-
                 />
               ) : null}
               {snapPreview && viewMode === "2d" && (
@@ -1085,7 +1110,11 @@ export default function Configurator() {
                   onClose={() => setRotationTargetId(null)}
                 />
               )}
-              <CameraManager viewMode={viewMode} isDragging={isDragging2D} sceneCenter={sceneCenter} />
+              <CameraManager
+                viewMode={viewMode}
+                isDragging={isDragging2D}
+                sceneCenter={sceneCenter}
+              />
               <Environment preset="apartment" />
             </Canvas>
 
@@ -1269,15 +1298,33 @@ export default function Configurator() {
                   }}
                 >
                   {isDetectingParts ? (
-                    <div style={{ fontSize: "12px", color: "#666", padding: "10px" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#666",
+                        padding: "10px",
+                      }}
+                    >
                       Caricamento...
                     </div>
                   ) : colorSelectors.length === 0 ? (
-                    <div style={{ fontSize: "12px", color: "#666", padding: "10px" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#666",
+                        padding: "10px",
+                      }}
+                    >
                       Nessuna parte disponibile
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "24px",
+                      }}
+                    >
                       {colorSelectors.map((selector) => (
                         <Palette
                           key={selector.label}
@@ -1333,11 +1380,23 @@ export default function Configurator() {
                   }}
                 >
                   {chairs.length === 0 ? (
-                    <div style={{ fontSize: "12px", color: "#666", padding: "10px" }}>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#666",
+                        padding: "10px",
+                      }}
+                    >
                       No modules added yet
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
                       {chairs.map((chair, index) => (
                         <div
                           key={chair.id}
@@ -1352,7 +1411,9 @@ export default function Configurator() {
                           }}
                         >
                           <div>
-                            <div style={{ fontSize: "13px", fontWeight: "500" }}>
+                            <div
+                              style={{ fontSize: "13px", fontWeight: "500" }}
+                            >
                               {chair.sofa.name}
                             </div>
                             <div style={{ fontSize: "11px", color: "#666" }}>
@@ -1404,8 +1465,6 @@ export default function Configurator() {
           >
             <span style={{ fontSize: "12px", color: "#999" }}>spagnol</span>
             <div style={{ display: "flex", gap: "10px" }}>
-
-
               <button
                 style={{
                   padding: "6px",
@@ -1419,7 +1478,13 @@ export default function Configurator() {
               >
                 📐
               </button>
-              <PDFExport canvasRef={canvasContainerRef} modules={chairs} selectedFabric={selectedChairTexture} />
+              <PDFExport
+                canvasRef={canvasContainerRef}
+                modules={chairs}
+                selectedFabric={selectedChairTexture}
+              />
+              <ExportImage canvasRef={canvasContainerRef} />
+              <Export3D modules={chairs} />
             </div>
           </div>
 

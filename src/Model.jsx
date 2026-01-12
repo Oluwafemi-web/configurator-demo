@@ -1,15 +1,34 @@
 import { useGLTF } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+
+// Custom hook for optional texture loading with proper caching
+// Uses useLoader which handles caching automatically
 const useOptionalTexture = (path) => {
+  // useLoader from drei/r3f handles caching automatically
+  // We need to handle the optional case - use a memoized loader
+  const textureCache = useRef(new Map());
+
   return useMemo(() => {
     if (!path) return null;
+
+    // Check cache first
+    if (textureCache.current.has(path)) {
+      return textureCache.current.get(path);
+    }
+
+    // Load texture using TextureLoader
     const loader = new THREE.TextureLoader();
     const texture = loader.load(path);
     texture.flipY = false;
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(1, 1);
+
+    // Cache it
+    textureCache.current.set(path, texture);
+
     return texture;
   }, [path]);
 };
@@ -20,29 +39,42 @@ export default function Model({
   pillowTexturePath,
   feetTexturePath,
   position = [0, 0, 0],
-
+  autoRotate = false,
+  rotationSpeed = 0.01,
 }) {
   const safePath = modelPath || "/models/Jump_Sofa_GLB/jump_Center.glb";
   const { scene } = useGLTF(safePath);
-  const clonedScene = useMemo(() => {
-    // Clone to avoid mutating cached GLTF scene
-    return scene.clone(true);
-  }, [scene]);
 
+  // Create a stable cloned scene that persists across renders
+  // Only recreate if the model path actually changes
+  const clonedSceneRef = useRef(null);
+  const scenePathRef = useRef(null);
+
+  if (scenePathRef.current !== safePath || !clonedSceneRef.current) {
+    clonedSceneRef.current = scene.clone(true);
+    scenePathRef.current = safePath;
+  }
+
+  const clonedScene = clonedSceneRef.current;
+
+  // Use drei's useTexture for proper texture management and caching
+  // This ensures textures are reused and properly updated
   const chairTexture = useOptionalTexture(chairTexturePath);
   const pillowTexture = useOptionalTexture(pillowTexturePath);
   const feetTexture = useOptionalTexture(feetTexturePath);
 
+  // Store material references to update them without recreating meshes
+  const materialRefsRef = useRef({
+    chair: [],
+    pillow: [],
+    feet: [],
+  });
+
+  // Initialize material references once when scene is created
   useEffect(() => {
     if (!clonedScene) return;
 
-    // Apply textures to meshes based on their parent node names
-    // Node naming convention: seat_centro01, back_centro01, pillow_centro01, feet_centro01, base
-    // Only apply textures if they are set
-
     // Find nodes by pattern matching
-    // Handles: seat_centro01, seatDX_01, seatSX_02, backSX_01, backDX_01,
-    //          feet_SX01, feet_DX01, armrestSX_01, armrestDX_01, base
     const findNodesByPattern = (patterns) => {
       const found = [];
       clonedScene.traverse((child) => {
@@ -51,45 +83,28 @@ export default function Model({
           for (const pattern of patterns) {
             const patternLower = pattern.toLowerCase();
 
-            // Check for exact match (e.g., "base")
             if (nameLower === patternLower) {
               found.push(child);
               break;
             }
 
-            // Check if starts with pattern
             if (nameLower.startsWith(patternLower)) {
               const remaining = nameLower.slice(patternLower.length);
-
-              // Empty remaining = exact match (already handled above)
-              if (remaining === "") {
-                continue;
-              }
-
-              // Pattern followed by underscore (e.g., seat_centro01, feet_SX01, feet_DX01)
+              if (remaining === "") continue;
               if (remaining.startsWith("_")) {
                 found.push(child);
                 break;
               }
-
-              // Pattern followed by letters then underscore (e.g., seatDX_01, seatSX_02, backSX_01, armrestDX_01)
-              // This matches: pattern + [dx|sx|centro|etc] + _ + numbers
-              // Matches 1-10 lowercase letters followed by underscore
               if (remaining.match(/^[a-z]{1,10}_/)) {
                 found.push(child);
                 break;
               }
-
-              // Pattern followed by letters (e.g., seatdx, backsx, armrestdx)
-              // This handles cases where there might be numbers after without underscore
-              // Matches 1-10 lowercase letters (optionally followed by numbers)
               if (remaining.match(/^[a-z]{1,10}/)) {
                 found.push(child);
                 break;
               }
             }
 
-            // Check if contains pattern with underscores around it
             if (
               nameLower.includes("_" + patternLower + "_") ||
               nameLower.endsWith("_" + patternLower)
@@ -103,51 +118,121 @@ export default function Model({
       return found;
     };
 
-    // Apply texture to all meshes under matching nodes (only if provided)
-    const applyTextureToNodes = (patterns, texture, metalness, roughness) => {
-      if (!texture) return; // Don't apply if null
-
+    // Collect material references for each category
+    const collectMaterials = (patterns, category) => {
       const nodes = findNodesByPattern(patterns);
+      const materials = [];
       nodes.forEach((node) => {
         node.traverse((child) => {
           if (child.isMesh) {
-            const materials = Array.isArray(child.material)
+            const mats = Array.isArray(child.material)
               ? child.material
               : [child.material];
-            materials.forEach((mat) => {
-              if (mat) {
-                mat.map = texture;
-                mat.color.set("#ffffff");
-                mat.metalness = metalness;
-                mat.roughness = roughness;
-                mat.needsUpdate = true;
+            mats.forEach((mat) => {
+              if (mat && !materials.includes(mat)) {
+                materials.push(mat);
               }
             });
           }
         });
       });
+      materialRefsRef.current[category] = materials;
     };
 
-    // Apply textures using pattern matching
-    // Pillow: pillow_centro01, pillow_dx, pillow_sx, cushion_centro01, etc.
-    applyTextureToNodes(["pillow", "cushion"], pillowTexture, 0, 0.9);
+    collectMaterials(["pillow", "cushion"], "pillow");
+    collectMaterials(["feet", "leg"], "feet");
+    collectMaterials(["seat", "back", "base", "armrest"], "chair");
+  }, [clonedScene]);
 
-    // Feet: feet_centro01, feet_dx, feet_sx, leg, legs
-    applyTextureToNodes(["feet", "leg"], feetTexture, 0.8, 0.2);
+  // Update textures by mutating existing materials (no recreation)
+  useEffect(() => {
+    const { chair, pillow, feet } = materialRefsRef.current;
 
-    // Chair parts: seat_centro01, seatDX_01, back_centro01, backDX_01, armrestDX_01, base
-    applyTextureToNodes(
-      ["seat", "back", "base", "armrest"],
-      chairTexture,
-      0,
-      0.9
-    );
-  }, [clonedScene, chairTexture, pillowTexture, feetTexture]);
+    // Update chair materials
+    chair.forEach((mat) => {
+      if (mat) {
+        if (chairTexture) {
+          // Dispose old texture if it exists
+          if (mat.map && mat.map !== chairTexture) {
+            mat.map.dispose();
+          }
+          mat.map = chairTexture;
+          mat.map.flipY = false;
+          mat.map.colorSpace = THREE.SRGBColorSpace;
+          mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+          mat.map.repeat.set(1, 1);
+        }
+        mat.color.set("#ffffff");
+        mat.metalness = 0;
+        mat.roughness = 0.9;
+        mat.needsUpdate = true;
+      }
+    });
 
-  return <primitive object={clonedScene} scale={1} position={position} />;
+    // Update pillow materials
+    pillow.forEach((mat) => {
+      if (mat) {
+        if (pillowTexture) {
+          if (mat.map && mat.map !== pillowTexture) {
+            mat.map.dispose();
+          }
+          mat.map = pillowTexture;
+          mat.map.flipY = false;
+          mat.map.colorSpace = THREE.SRGBColorSpace;
+          mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+          mat.map.repeat.set(1, 1);
+        }
+        mat.color.set("#ffffff");
+        mat.metalness = 0;
+        mat.roughness = 0.9;
+        mat.needsUpdate = true;
+      }
+    });
+
+    // Update feet materials
+    feet.forEach((mat) => {
+      if (mat) {
+        if (feetTexture) {
+          if (mat.map && mat.map !== feetTexture) {
+            mat.map.dispose();
+          }
+          mat.map = feetTexture;
+          mat.map.flipY = false;
+          mat.map.colorSpace = THREE.SRGBColorSpace;
+          mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+          mat.map.repeat.set(1, 1);
+        }
+        mat.color.set("#ffffff");
+        mat.metalness = 0.8;
+        mat.roughness = 0.2;
+        mat.needsUpdate = true;
+      }
+    });
+  }, [chairTexture, pillowTexture, feetTexture]);
+
+  // Stable rotation ref for continuous rotation
+  // This ref persists across texture changes, ensuring rotation never resets
+  const rotationRef = useRef(0);
+  const groupRef = useRef(null);
+
+  // Continuous rotation using useFrame (runs every frame, independent of texture changes)
+  // This ensures rotation continues smoothly even when textures change
+  useFrame(() => {
+    if (autoRotate && groupRef.current) {
+      rotationRef.current += rotationSpeed;
+      groupRef.current.rotation.y = rotationRef.current;
+    }
+  });
+
+  // Return a stable group that never unmounts
+  // The primitive inside uses the cloned scene which persists across texture changes
+  return (
+    <group ref={groupRef} position={position}>
+      <primitive object={clonedScene} scale={1} />
+    </group>
+  );
 }
 
 useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_CENTER.glb");
 useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_DX.glb");
 useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_SX.glb");
-
