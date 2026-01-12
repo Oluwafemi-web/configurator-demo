@@ -855,10 +855,10 @@ export default function Configurator() {
                 chairs.length > 0
                   ? deriveVariantKeysFromChairs()
                   : sortVariantKeys(
-                    [
-                      getVariantKeyFromModelPath(selectedSofa?.modelPath),
-                    ].filter(Boolean)
-                  );
+                      [
+                        getVariantKeyFromModelPath(selectedSofa?.modelPath),
+                      ].filter(Boolean)
+                    );
               setPendingVariantKeys(existingKeys);
               setStage(STAGES.selection);
             }}
@@ -993,9 +993,9 @@ export default function Configurator() {
               camera={
                 viewMode === "2d"
                   ? {
-                    position: [0, 1.5, 5],
-                    zoom: 50,
-                  }
+                      position: [0, 1.5, 5],
+                      zoom: 50,
+                    }
                   : { position: [2, 2, 2], fov: 45 }
               }
             >
@@ -1006,7 +1006,7 @@ export default function Configurator() {
                   zoom={100}
                   rotation={[-Math.PI / 2, 0, 0]}
                   near={0}
-                // far={200}
+                  // far={200}
                 />
               ) : (
                 <PerspectiveCamera
@@ -1015,8 +1015,8 @@ export default function Configurator() {
                   fov={50}
                 />
               )}
-              <ambientLight intensity={0.1} />
-              <directionalLight position={[3, 3, 3]} intensity={0.1} />
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[3, 3, 3]} intensity={0.5} />
               {chairs.length > 0 ? (
                 chairs.map((chair) => {
                   const resolvedPosition = getResolvedPosition(chair);
@@ -1116,7 +1116,7 @@ export default function Configurator() {
                 isDragging={isDragging2D}
                 sceneCenter={sceneCenter}
               />
-              <Environment preset="apartment" />
+              <Environment preset="night" />
             </Canvas>
 
             {/* Action Modal for selected module in 2D mode */}
