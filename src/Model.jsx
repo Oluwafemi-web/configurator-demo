@@ -2,6 +2,8 @@ import { useGLTF } from "@react-three/drei";
 import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { Stage } from "@react-three/drei";
+import { PresentationControls } from "@react-three/drei";
 
 // Custom hook for optional texture loading with proper caching
 // Uses useLoader which handles caching automatically

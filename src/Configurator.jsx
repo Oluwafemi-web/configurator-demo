@@ -28,7 +28,7 @@ import Export3D from "./components/Export3D";
 import ModuleActionModal from "./components/ModuleActionModal";
 
 // Camera Manager Component for refined camera control
-function CameraManager({ viewMode, isDragging, sceneCenter = [0, 0, 0] }) {
+function CameraManager({ viewMode, isDragging }) {
   const controlsRef = useRef(null);
 
   useEffect(() => {
@@ -1033,7 +1033,7 @@ export default function Configurator() {
                       onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                       onSelect={(event) => handleSelectChair(chair, event)}
                     >
-                      <group rotation={[0, chair.rotation || 0, 0]}>
+                      <group>
                         <Model
                           modelPath={chair.sofa.modelPath}
                           chairTexturePath={
@@ -1111,11 +1111,7 @@ export default function Configurator() {
                   onClose={() => setRotationTargetId(null)}
                 />
               )}
-              <CameraManager
-                viewMode={viewMode}
-                isDragging={isDragging2D}
-                sceneCenter={sceneCenter}
-              />
+              <CameraManager viewMode={viewMode} isDragging={isDragging2D} />
               <Environment preset="night" />
             </Canvas>
 
