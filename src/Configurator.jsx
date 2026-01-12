@@ -33,9 +33,10 @@ function CameraManager({ viewMode, isDragging, sceneCenter = [0, 0, 0] }) {
 
   useEffect(() => {
     if (controlsRef.current && viewMode === "3d") {
-      controlsRef.current.setTarget(...sceneCenter, true);
+      // Set target to [0, 0, 0] to make objects rotate in place around their own center
+      controlsRef.current.setTarget(0, 0, 0, true);
     }
-  }, [sceneCenter, viewMode]);
+  }, [viewMode]);
 
   if (viewMode === "2d") {
     return null;
@@ -391,12 +392,12 @@ export default function Configurator() {
           setSelectedChairOptionId(option.id);
           setSelectedChairTexture(option.path);
           // Apply texture to all chairs
-          // setChairs((prev) =>
-          //   prev.map((chair) => ({
-          //     ...chair,
-          //     chairTexture: option.path,
-          //   }))
-          // );
+          setChairs((prev) =>
+            prev.map((chair) => ({
+              ...chair,
+              chairTexture: option.path,
+            }))
+          );
         },
       });
     }
@@ -409,12 +410,12 @@ export default function Configurator() {
           setSelectedPillowOptionId(option.id);
           setSelectedPillowTexture(option.path);
           // Apply texture to all chairs
-          // setChairs((prev) =>
-          //   prev.map((chair) => ({
-          //     ...chair,
-          //     pillowTexture: option.path,
-          //   }))
-          // );
+          setChairs((prev) =>
+            prev.map((chair) => ({
+              ...chair,
+              pillowTexture: option.path,
+            }))
+          );
         },
       });
     }
@@ -427,12 +428,12 @@ export default function Configurator() {
           setSelectedFeetOptionId(option.id);
           setSelectedFeetTexture(option.path);
           // Apply texture to all chairs
-          // setChairs((prev) =>
-          //   prev.map((chair) => ({
-          //     ...chair,
-          //     feetTexture: option.path,
-          //   }))
-          // );
+          setChairs((prev) =>
+            prev.map((chair) => ({
+              ...chair,
+              feetTexture: option.path,
+            }))
+          );
         },
       });
     }
@@ -854,10 +855,10 @@ export default function Configurator() {
                 chairs.length > 0
                   ? deriveVariantKeysFromChairs()
                   : sortVariantKeys(
-                      [
-                        getVariantKeyFromModelPath(selectedSofa?.modelPath),
-                      ].filter(Boolean)
-                    );
+                    [
+                      getVariantKeyFromModelPath(selectedSofa?.modelPath),
+                    ].filter(Boolean)
+                  );
               setPendingVariantKeys(existingKeys);
               setStage(STAGES.selection);
             }}
@@ -992,9 +993,9 @@ export default function Configurator() {
               camera={
                 viewMode === "2d"
                   ? {
-                      position: [0, 1.5, 5],
-                      zoom: 50,
-                    }
+                    position: [0, 1.5, 5],
+                    zoom: 50,
+                  }
                   : { position: [2, 2, 2], fov: 45 }
               }
             >
@@ -1005,7 +1006,7 @@ export default function Configurator() {
                   zoom={100}
                   rotation={[-Math.PI / 2, 0, 0]}
                   near={0}
-                  // far={200}
+                // far={200}
                 />
               ) : (
                 <PerspectiveCamera

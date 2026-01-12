@@ -56,6 +56,17 @@ export default function Model({
   }
 
   const clonedScene = clonedSceneRef.current;
+  // Center the model so it rotates around its own center
+  useEffect(() => {
+    if (!clonedScene) return;
+
+    const box = new THREE.Box3().setFromObject(clonedScene);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+
+    // Move model so its center is at the origin
+    clonedScene.position.sub(center);
+  }, [clonedScene]);
 
   // Use drei's useTexture for proper texture management and caching
   // This ensures textures are reused and properly updated
