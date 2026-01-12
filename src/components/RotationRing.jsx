@@ -22,8 +22,14 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         const currentMouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        const delta = currentMouseAngle - startAngleRef.current;
-        const newAngle = (currentAngleRef.current + delta + 360) % 360;
+        let delta = currentMouseAngle - startAngleRef.current;
+        
+        // Normalize delta to handle wrapping around 360/0 boundary
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        
+        // Negate delta to fix rotation direction (clockwise ring = clockwise model)
+        const newAngle = (currentAngleRef.current - delta + 360) % 360;
         onRotate(newAngle);
     };
 

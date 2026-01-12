@@ -7,6 +7,7 @@ import {
   CameraControls,
   OrthographicCamera,
   PerspectiveCamera,
+  ContactShadows,
 } from "@react-three/drei";
 import Model from "./Model";
 import Palette from "./Palette";
@@ -49,7 +50,8 @@ function CameraManager({ viewMode, isDragging }) {
       enabled={!isDragging}
       minDistance={3}
       maxDistance={50}
-      maxPolarAngle={Math.PI / 2 - 0.1}
+      minPolarAngle={Math.PI / 2}
+      maxPolarAngle={Math.PI / 2}
       makeDefault
     />
   );
@@ -1012,7 +1014,7 @@ export default function Configurator() {
                 <PerspectiveCamera
                   makeDefault
                   position={[10, 5, 10]}
-                  fov={50}
+                  fov={35}
                 />
               )}
               <ambientLight intensity={0.5} />
@@ -1026,14 +1028,14 @@ export default function Configurator() {
                       position={resolvedPosition}
                       viewMode={viewMode}
                       disabled={
-                        viewMode !== "2d" || rotationTargetId === chair.id
+                        viewMode === "3d" || rotationTargetId === chair.id
                       }
                       onDragStart={() => handleDragStart(chair)}
                       onDrag={(pos) => handleDragMove(chair, pos)}
                       onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                       onSelect={(event) => handleSelectChair(chair, event)}
                     >
-                      <group>
+                      <group rotation={[0, chair.rotation || 0, 0]}>
                         <Model
                           modelPath={chair.sofa.modelPath}
                           chairTexturePath={
@@ -1111,6 +1113,18 @@ export default function Configurator() {
                   onClose={() => setRotationTargetId(null)}
                 />
               )}
+
+              {/* Contact Shadows for soft, diffused shadows beneath models */}
+              <ContactShadows
+                position={[0, -0.01, 0]}
+                opacity={0.35}
+                scale={15}
+                blur={2.5}
+                far={4}
+                resolution={512}
+                color="#1a1a1a"
+              />
+
               <CameraManager viewMode={viewMode} isDragging={isDragging2D} />
               <Environment preset="night" />
             </Canvas>
