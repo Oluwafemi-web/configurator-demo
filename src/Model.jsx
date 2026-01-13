@@ -1,12 +1,8 @@
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Center, useTexture } from "@react-three/drei";
 import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Stage } from "@react-three/drei";
-import { PresentationControls } from "@react-three/drei";
 
-// Custom hook for optional texture loading with proper caching
-// Uses useLoader which handles caching automatically
 const useOptionalTexture = (path) => {
   // useLoader from drei/r3f handles caching automatically
   // We need to handle the optional case - use a memoized loader
@@ -40,7 +36,6 @@ export default function Model({
   chairTexturePath,
   pillowTexturePath,
   feetTexturePath,
-  position = [0, 0, 0],
   autoRotate = false,
   rotationSpeed = 0.01,
 }) {
@@ -58,17 +53,6 @@ export default function Model({
   }
 
   const clonedScene = clonedSceneRef.current;
-  // Center the model so it rotates around its own center
-  useEffect(() => {
-    if (!clonedScene) return;
-
-    const box = new THREE.Box3().setFromObject(clonedScene);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-
-    // Move model so its center is at the origin
-    clonedScene.position.sub(center);
-  }, [clonedScene]);
 
   // Use drei's useTexture for proper texture management and caching
   // This ensures textures are reused and properly updated
@@ -223,8 +207,6 @@ export default function Model({
     });
   }, [chairTexture, pillowTexture, feetTexture]);
 
-  // Stable rotation ref for continuous rotation
-  // This ref persists across texture changes, ensuring rotation never resets
   const rotationRef = useRef(0);
   const groupRef = useRef(null);
 
@@ -237,12 +219,12 @@ export default function Model({
     }
   });
 
-  // Return a stable group that never unmounts
-  // The primitive inside uses the cloned scene which persists across texture changes
   return (
-    <group ref={groupRef} position={position}>
-      <primitive object={clonedScene} scale={1} />
+    // <Center>
+    <group ref={groupRef}>
+      <primitive object={clonedScene} />
     </group>
+    // </Center>
   );
 }
 

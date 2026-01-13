@@ -1,4 +1,3 @@
-import { CameraControls } from "@react-three/drei";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { detectPartsFromModel } from "./utils/detectParts";
 import {
@@ -19,35 +18,6 @@ import {
 import LandingScreen from "./components/screens/LandingScreen";
 import SelectionScreen from "./components/screens/SelectionScreen";
 import BuilderScreen from "./components/screens/BuilderScreen";
-
-// Camera Manager Component for refined camera control
-function CameraManager({ viewMode, isDragging }) {
-  const controlsRef = useRef(null);
-
-  useEffect(() => {
-    if (controlsRef.current && viewMode === "3d") {
-      // Set target to [0, 0, 0] to make objects rotate in place around their own center
-      controlsRef.current.setTarget(0, 0, 0, true);
-    }
-  }, [viewMode]);
-
-  if (viewMode === "2d") {
-    return null;
-  }
-
-  // 3D mode: full controls
-  return (
-    <CameraControls
-      ref={controlsRef}
-      enabled={!isDragging}
-      minDistance={3}
-      maxDistance={50}
-      minPolarAngle={Math.PI / 2}
-      maxPolarAngle={Math.PI / 2}
-      makeDefault
-    />
-  );
-}
 
 export default function Configurator() {
   const [stage, setStage] = useState(STAGES.landing);
@@ -481,8 +451,6 @@ export default function Configurator() {
       handleAddChair={handleAddChair}
       handleRemoveChair={handleRemoveChair}
       getResolvedPosition={(chair) => getResolvedPosition(chair, autoPositions)}
-      // Camera component
-      CameraManager={CameraManager}
     />
   );
 }

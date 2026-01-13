@@ -1,19 +1,11 @@
-import { Canvas } from "@react-three/fiber";
-import {
-    OrthographicCamera,
-    PerspectiveCamera,
-    ContactShadows,
-    Environment,
-    Line,
-} from "@react-three/drei";
-import Model from "../../Model";
+import React from "react";
 import Palette from "../../Palette";
-import DraggableModule from "../DraggableModule";
-import RotationRing from "../RotationRing";
 import PDFExport from "../PDFExport";
 import ExportImage from "../ExportImage";
 import Export3D from "../Export3D";
 import ModuleActionModal from "../ModuleActionModal";
+import Canvas2DView from "../canvas/Canvas2DView";
+import Canvas3DView from "../canvas/Canvas3DView";
 
 const CHAIR_WIDTH = 1.14;
 
@@ -58,10 +50,9 @@ export default function BuilderScreen({
     handleAddChair,
     handleRemoveChair,
     getResolvedPosition,
-
-    // Camera component
-    CameraManager,
 }) {
+    const [showDimensions, setShowDimensions] = React.useState(false);
+
     const togglePanel = (panelName) => {
         setExpandedPanel((prev) => (prev === panelName ? null : panelName));
     };
@@ -214,143 +205,36 @@ export default function BuilderScreen({
                         margin: "0 20px",
                     }}
                 >
-                    <Canvas
-                        gl={{ preserveDrawingBuffer: true }}
-                        camera={
-                            viewMode === "2d"
-                                ? {
-                                    position: [0, 1.5, 5],
-                                    zoom: 50,
-                                }
-                                : { position: [2, 2, 2], fov: 45 }
-                        }
-                    >
-                        {viewMode === "2d" ? (
-                            <OrthographicCamera
-                                makeDefault
-                                position={[1, 1, 1]}
-                                zoom={100}
-                                rotation={[-Math.PI / 2, 0, 0]}
-                                near={0}
-                            />
-                        ) : (
-                            <PerspectiveCamera
-                                makeDefault
-                                position={[10, 5, 10]}
-                                fov={35}
-                            />
-                        )}
-                        <ambientLight intensity={0.5} />
-                        <directionalLight position={[3, 3, 3]} intensity={0.5} />
-                        {chairs.length > 0 ? (
-                            chairs.map((chair) => {
-                                const resolvedPosition = getResolvedPosition(chair);
-                                return (
-                                    <DraggableModule
-                                        key={chair.id}
-                                        position={resolvedPosition}
-                                        viewMode={viewMode}
-                                        disabled={
-                                            viewMode === "3d" || rotationTargetId === chair.id
-                                        }
-                                        onDragStart={() => handleDragStart(chair)}
-                                        onDrag={(pos) => handleDragMove(chair, pos)}
-                                        onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
-                                        onSelect={(event) => handleSelectChair(chair, event)}
-                                    >
-                                        <group rotation={[0, chair.rotation || 0, 0]}>
-                                            <Model
-                                                modelPath={chair.sofa.modelPath}
-                                                chairTexturePath={
-                                                    chair.chairTexture || selectedChairTexture
-                                                }
-                                                pillowTexturePath={
-                                                    chair.pillowTexture || selectedPillowTexture
-                                                }
-                                                feetTexturePath={
-                                                    chair.feetTexture || selectedFeetTexture
-                                                }
-                                                position={[0, 0, 0]}
-                                            />
-                                        </group>
-                                    </DraggableModule>
-                                );
-                            })
-                        ) : selectedSofa ? (
-                            <Model
-                                modelPath={selectedSofa.modelPath}
-                                chairTexturePath={selectedChairTexture}
-                                pillowTexturePath={selectedPillowTexture}
-                                feetTexturePath={selectedFeetTexture}
-                                position={[0, 0, 0]}
-                            />
-                        ) : null}
-                        {snapPreview && viewMode === "2d" && (
-                            <group>
-                                <Line
-                                    points={[
-                                        [
-                                            snapPreview.neighborPosition[0],
-                                            0.05,
-                                            snapPreview.neighborPosition[2],
-                                        ],
-                                        [
-                                            snapPreview.snappedPosition[0],
-                                            0.05,
-                                            snapPreview.snappedPosition[2],
-                                        ],
-                                    ]}
-                                    color="#222222"
-                                    lineWidth={1}
-                                    dashed
-                                    dashSize={0.2}
-                                    gapSize={0.12}
-                                />
-                                <mesh
-                                    position={[
-                                        snapPreview.snappedPosition[0],
-                                        0.01,
-                                        snapPreview.snappedPosition[2],
-                                    ]}
-                                >
-                                    <boxGeometry
-                                        args={[
-                                            (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.9,
-                                            0.005,
-                                            (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.6,
-                                        ]}
-                                    />
-                                    <meshStandardMaterial
-                                        color="#111111"
-                                        transparent
-                                        opacity={0.15}
-                                    />
-                                </mesh>
-                            </group>
-                        )}
-                        {rotationTarget && viewMode === "2d" && (
-                            <RotationRing
-                                position={getResolvedPosition(rotationTarget)}
-                                angle={((rotationTarget.rotation || 0) * 180) / Math.PI}
-                                onRotate={(deg) => handleRotateChange(rotationTarget.id, deg)}
-                                onClose={() => handleRotateChange(null)}
-                            />
-                        )}
-
-                        {/* Contact Shadows for soft, diffused shadows beneath models */}
-                        <ContactShadows
-                            position={[0, -0.01, 0]}
-                            opacity={0.35}
-                            scale={15}
-                            blur={2.5}
-                            far={4}
-                            resolution={512}
-                            color="#1a1a1a"
+                    {viewMode === "2d" ? (
+                        <Canvas2DView
+                            chairs={chairs}
+                            selectedChairTexture={selectedChairTexture}
+                            selectedPillowTexture={selectedPillowTexture}
+                            selectedFeetTexture={selectedFeetTexture}
+                            snapPreview={snapPreview}
+                            rotationTarget={rotationTarget}
+                            isDragging2D={isDragging2D}
+                            canvasContainerRef={canvasContainerRef}
+                            handleDragStart={handleDragStart}
+                            handleDragMove={handleDragMove}
+                            handleDragEnd={handleDragEnd}
+                            handleSelectChair={handleSelectChair}
+                            handleRotateChange={handleRotateChange}
+                            getResolvedPosition={getResolvedPosition}
+                            rotationTargetId={rotationTargetId}
+                            showDimensions={showDimensions}
                         />
-
-                        <CameraManager viewMode={viewMode} isDragging={isDragging2D} />
-                        <Environment preset="night" />
-                    </Canvas>
+                    ) : (
+                        <Canvas3DView
+                            chairs={chairs}
+                            selectedChairTexture={selectedChairTexture}
+                            selectedPillowTexture={selectedPillowTexture}
+                            selectedFeetTexture={selectedFeetTexture}
+                            canvasContainerRef={canvasContainerRef}
+                            getResolvedPosition={getResolvedPosition}
+                            showDimensions={showDimensions}
+                        />
+                    )}
 
                     {/* Action Modal for selected module in 2D mode */}
                     {showActionPanel && selectedChair && viewMode === "2d" && (
@@ -700,13 +584,16 @@ export default function BuilderScreen({
                     <span style={{ fontSize: "12px", color: "#999" }}>spagnol</span>
                     <div style={{ display: "flex", gap: "10px" }}>
                         <button
+                            onClick={() => setShowDimensions(!showDimensions)}
                             style={{
                                 padding: "6px",
                                 borderRadius: "4px",
                                 border: "1px solid #ccc",
-                                background: "#fff",
+                                background: showDimensions ? "#333" : "#fff",
+                                color: showDimensions ? "#fff" : "#000",
                                 cursor: "pointer",
                                 fontSize: "11px",
+                                transition: "all 0.2s",
                             }}
                             title="Dimensions"
                         >
