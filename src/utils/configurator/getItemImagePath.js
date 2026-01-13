@@ -12,10 +12,10 @@ export const getItemImagePath = (itemId) => {
     "jump-bigangle": "/frontimage/Jump_BigAngle.png",
     "jump-bigseat": "/frontimage/Jump_BigSeat.png",
     "jump-pouf": "/frontimage/Jump_Pouf.png",
-    "jump-chaisepouf-left": "/frontimage/Jump_ChaisePouf.png",
-    "jump-chaisepouf-right": "/frontimage/Jump_ChaisePouf_opposite.png",
-    "jump-seatpouf-left": "/frontimage/Jump_SeatPouf.png",
-    "jump-seatpouf-right": "/frontimage/Jump_SeatPouf_opposite.png",
+    "jump-chaisepouf-left": "/frontimage/Jump_Chaise_Pouf_Left.png",
+    "jump-chaisepouf-right": "/frontimage/Jump_Chaise_Pouf_Right.png",
+    "jump-seatpouf-left": "/frontimage/Jump_SeatPouf_Left.png",
+    "jump-seatpouf-right": "/frontimage/Jump_SeatPouf_Right.png",
   };
   return imageMap[itemId] || "/frontimage/placeholder.png";
 };

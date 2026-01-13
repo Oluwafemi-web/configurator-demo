@@ -140,10 +140,44 @@ export const upholsteryTextures = [
       },
     ],
   },
+  {
+    category: "CAT F_ULPHOSTERY",
+    fabrics: [
+      {
+        id: "cat-f-01a",
+        label: "CAT.F 01A",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_01A.jpg",
+      },
+      {
+        id: "cat-f-01b",
+        label: "CAT.F 01B",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_01B.jpg",
+      },
+      {
+        id: "cat-f-01c",
+        label: "CAT.F 01C",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_01C.jpg",
+      },
+      {
+        id: "cat-f-02a",
+        label: "CAT.F 02A",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_02A.jpg",
+      },
+      {
+        id: "cat-f-02b",
+        label: "CAT.F 02b",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_02B.jpg",
+      },
+      {
+        id: "cat-f-02c",
+        label: "CAT.F 02C",
+        path: "/textures/Ulphostery/Cat.F_ulphostery/Cat.F_02C.jpg",
+      },
+    ],
+  },
 ];
 
 export const feetTextures = [
-
   {
     id: "metalfeet",
     label: "METAL ALT",
@@ -298,4 +332,3 @@ export const VARIANT_CONFIG = [
     image: "/frontimage/Jump_Right.png",
   },
 ];
-
