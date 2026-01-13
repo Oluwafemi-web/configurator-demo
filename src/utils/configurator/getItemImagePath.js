@@ -5,17 +5,17 @@
  */
 export const getItemImagePath = (itemId) => {
   const imageMap = {
-    "jump-center": "/frontimage/Jump_Center.png",
-    "jump-left": "/frontimage/Jump_Left.png",
-    "jump-right": "/frontimage/Jump_Right.png",
-    "jump-angle": "/frontimage/Jump_Angle.png",
-    "jump-bigangle": "/frontimage/Jump_BigAngle.png",
-    "jump-bigseat": "/frontimage/Jump_BigSeat.png",
-    "jump-pouf": "/frontimage/Jump_Pouf.png",
-    "jump-chaisepouf-left": "/frontimage/Jump_Chaise_Pouf_Left.png",
-    "jump-chaisepouf-right": "/frontimage/Jump_Chaise_Pouf_Right.png",
-    "jump-seatpouf-left": "/frontimage/Jump_SeatPouf_Left.png",
-    "jump-seatpouf-right": "/frontimage/Jump_SeatPouf_Right.png",
+    "jump-center": "/frontimage/JUMPCenter.jpg",
+    "jump-left": "/frontimage/JUMP_Left.jpg",
+    "jump-right": "/frontimage/JUMP_Right.jpg",
+    "jump-angle": "/frontimage/JUMP_Angle.jpg",
+    "jump-bigangle": "/frontimage/JUMP_Big_Angle.jpg",
+    "jump-bigseat": "/frontimage/JUMP_Big_Seat.jpg",
+    "jump-pouf": "/frontimage/JUMP_Pouf.jpg",
+    "jump-chaisepouf-left": "/frontimage/JUMP_Chaise_Pouf_Left.jpg",
+    "jump-chaisepouf-right": "/frontimage/JUMP_Chaise_Pouf_Right.jpg",
+    "jump-seatpouf-left": "/frontimage/JUMP_Seat_Pouf_Left.jpg",
+    "jump-seatpouf-right": "/frontimage/JUMP_Seat_Pouf_Right.jpg",
   };
-  return imageMap[itemId] || "/frontimage/placeholder.png";
+  return imageMap[itemId] || "/frontimage/placeholder.jpg";
 };
