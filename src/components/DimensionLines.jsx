@@ -168,7 +168,12 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
                 />
                 {/* Label */}
                 <Html
-                    position={[bbox.min.x - offset, bbox.min.y, (bbox.min.z + bbox.max.z) / 2]}
+                    position={[
+                        bbox.min.x - offset - 0.2,
+                        bbox.min.y + 0.001, // tiny lift to avoid z-fighting
+                        (bbox.min.z + bbox.max.z) / 2,
+                    ]}
+                    rotation={[Math.PI / 2, Math.PI / 1, 1.5]}
                     center
                     transform
                     occlude={false}
@@ -179,9 +184,8 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
                         whiteSpace: "nowrap",
                         userSelect: "none",
                         pointerEvents: "none",
-                        marginLeft: "-20px",
-                        transform: "rotateZ(20deg)",
-                        transform: "rotateY(45deg)"
+                        marginTop: "5px",
+                        marginLeft: "5px",
                     }}
                 >
                     {formatDimension(depth)}
