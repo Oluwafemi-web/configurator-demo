@@ -56,7 +56,7 @@ export default function Canvas3DView({
         ref={controlsRef}
         minDistance={3}
         maxDistance={50}
-        minPolarAngle={Math.PI / 2}
+        minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         makeDefault
       />
