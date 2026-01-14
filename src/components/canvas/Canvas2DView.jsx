@@ -161,6 +161,7 @@ export default function Canvas2DView({
                 <DimensionLines
                     chairs={chairs}
                     getResolvedPosition={getResolvedPosition}
+                    viewMode="2d"
                 />
             )}
 

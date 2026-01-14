@@ -38,6 +38,8 @@ export default function BuilderScreen({
     setExpandedPanel,
     setShowActionPanel,
     setSelectedChairId,
+    setMaterialTargetMode,
+    setMaterialTargetChairId,
 
     // Handlers
     onBackToSelection,
@@ -56,6 +58,13 @@ export default function BuilderScreen({
     const togglePanel = (panelName) => {
         setExpandedPanel((prev) => (prev === panelName ? null : panelName));
     };
+
+    // Auto-hide dimensions when switching from 3D to 2D view
+    React.useEffect(() => {
+        if (viewMode === "2d" && showDimensions) {
+            setShowDimensions(false);
+        }
+    }, [viewMode]);
 
     return (
         <div
@@ -175,7 +184,7 @@ export default function BuilderScreen({
                     </button>
 
                     {/* Placeholder for rotation icon */}
-                    <button
+                    {/* <button
                         style={{
                             width: "40px",
                             height: "40px",
@@ -192,7 +201,7 @@ export default function BuilderScreen({
                         title="Orbit control"
                     >
                         ↻
-                    </button>
+                    </button> */}
                 </div>
 
                 {/* Center - 3D Canvas */}
@@ -263,11 +272,17 @@ export default function BuilderScreen({
                                 setExpandedPanel("addModule");
                             }}
                             onChangeMaterialModule={() => {
+                                // Set mode to single module and store the selected chair ID
+                                setMaterialTargetMode("single");
+                                setMaterialTargetChairId(selectedChair.id);
                                 setShowActionPanel(false);
                                 setSelectedChairId(null);
                                 setExpandedPanel("materials");
                             }}
                             onChangeMaterialComposition={() => {
+                                // Set mode to all modules
+                                setMaterialTargetMode("all");
+                                setMaterialTargetChairId(null);
                                 setShowActionPanel(false);
                                 setSelectedChairId(null);
                                 setExpandedPanel("materials");

@@ -115,7 +115,7 @@ export default function ModuleActionModal({
                             </>
                         }
                         onClick={onAddModules}
-                    />
+                    /> */}
 
                     <ActionButton
                         icon="🎨"
@@ -139,7 +139,7 @@ export default function ModuleActionModal({
                             </>
                         }
                         onClick={onChangeMaterialComposition}
-                    /> */}
+                    />
                 </div>
             </div>
         </>

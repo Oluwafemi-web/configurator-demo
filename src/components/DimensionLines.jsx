@@ -8,8 +8,9 @@ import { rotate } from "three/tsl";
  * DimensionLines Component
  * Renders dimension lines and labels around the furniture composition
  * Shows width, depth, and height measurements in cm and inches using actual module dimensions
+ * Different styling for 2D (minimal, clean) vs 3D (detailed with ticks)
  */
-export default function DimensionLines({ chairs, getResolvedPosition }) {
+export default function DimensionLines({ chairs, getResolvedPosition, viewMode = "3d" }) {
     // Calculate bounding box and dimensions using actual module sizes
     const dimensions = useMemo(() => {
         if (!chairs || chairs.length === 0) return null;
@@ -86,7 +87,115 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
     if (!dimensions) return null;
 
     const { bbox, width, depth, height } = dimensions;
-    const offset = 0.3; // Offset from model for dimension lines
+
+    // Render 2D style dimensions (minimal, clean)
+    if (viewMode === "2d") {
+        const offset = 0.5; // Larger offset for cleaner look
+
+        return (
+            <group>
+                {/* Width dimension (X-axis) - bottom */}
+                <group>
+                    {/* Connecting lines from model to dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x, 0, bbox.max.z],
+                            [bbox.min.x, 0, bbox.max.z + offset],
+                        ]}
+                        color="#CCCCCC"
+                        lineWidth={0.5}
+                    />
+                    <Line
+                        points={[
+                            [bbox.max.x, 0, bbox.max.z],
+                            [bbox.max.x, 0, bbox.max.z + offset],
+                        ]}
+                        color="#CCCCCC"
+                        lineWidth={0.5}
+                    />
+                    {/* Main dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x, 0, bbox.max.z + offset],
+                            [bbox.max.x, 0, bbox.max.z + offset],
+                        ]}
+                        color="#AAAAAA"
+                        lineWidth={1}
+                    />
+                    {/* Label */}
+                    <Html
+                        position={[(bbox.min.x + bbox.max.x) / 2, 0, bbox.max.z + offset + 0.1]}
+                        center
+                        transform
+                        occlude={false}
+                        style={{
+                            color: "#999",
+                            fontSize: "7px",
+                            fontFamily: "Arial, sans-serif",
+                            whiteSpace: "nowrap",
+                            userSelect: "none",
+                            pointerEvents: "none",
+                            fontWeight: "300",
+                        }}
+                    >
+                        {formatDimension(width)}
+                    </Html>
+                </group>
+
+                {/* Depth dimension (Z-axis) - left */}
+                <group>
+                    {/* Connecting lines from model to dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x, 0, bbox.min.z],
+                            [bbox.min.x - offset, 0, bbox.min.z],
+                        ]}
+                        color="#CCCCCC"
+                        lineWidth={0.5}
+                    />
+                    <Line
+                        points={[
+                            [bbox.min.x, 0, bbox.max.z],
+                            [bbox.min.x - offset, 0, bbox.max.z],
+                        ]}
+                        color="#CCCCCC"
+                        lineWidth={0.5}
+                    />
+                    {/* Main dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x - offset, 0, bbox.min.z],
+                            [bbox.min.x - offset, 0, bbox.max.z],
+                        ]}
+                        color="#AAAAAA"
+                        lineWidth={1}
+                    />
+                    {/* Label */}
+                    <Html
+                        position={[bbox.min.x - offset - 0.1, 0, (bbox.min.z + bbox.max.z) / 2]}
+                        center
+                        transform
+                        occlude={false}
+                        rotation={[0, 0, Math.PI / 2]}
+                        style={{
+                            color: "#999",
+                            fontSize: "7px",
+                            fontFamily: "Arial, sans-serif",
+                            whiteSpace: "nowrap",
+                            userSelect: "none",
+                            pointerEvents: "none",
+                            fontWeight: "300",
+                        }}
+                    >
+                        {formatDimension(depth)}
+                    </Html>
+                </group>
+            </group>
+        );
+    }
+
+    // Render 3D style dimensions (detailed with ticks)
+    const offset = 0.3;
 
     return (
         <group>

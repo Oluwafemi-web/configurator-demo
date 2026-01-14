@@ -21,7 +21,7 @@ export default function Canvas3DView({
 
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={35} />
+      <PerspectiveCamera makeDefault position={[2, 1, 2]} fov={35} />
 
       <ambientLight intensity={0.5} />
       <directionalLight position={[3, 3, 3]} intensity={0.5} />
@@ -30,7 +30,7 @@ export default function Canvas3DView({
         const resolvedPosition = getResolvedPosition(chair);
 
         return (
-          <group key={chair.id} position={resolvedPosition}>
+          <group key={chair.id} position={resolvedPosition} rotation={[0, chair.rotation || 0, 0]}>
             <Model
               modelPath={chair.sofa.modelPath}
               chairTexturePath={chair.chairTexture || selectedChairTexture}
@@ -63,7 +63,7 @@ export default function Canvas3DView({
 
       {/* Dimension Lines - Shows measurements when enabled */}
       {showDimensions && chairs.length > 0 && (
-        <DimensionLines chairs={chairs} getResolvedPosition={getResolvedPosition} />
+        <DimensionLines chairs={chairs} getResolvedPosition={getResolvedPosition} viewMode="3d" />
       )}
 
       <Environment preset="night" />

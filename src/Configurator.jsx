@@ -50,6 +50,10 @@ export default function Configurator() {
   // State for right sidebar accordion panels
   const [expandedPanel, setExpandedPanel] = useState(null);
 
+  // State for material selection mode
+  const [materialTargetMode, setMaterialTargetMode] = useState("all"); // "single" | "all"
+  const [materialTargetChairId, setMaterialTargetChairId] = useState(null);
+
   const CHAIR_WIDTH = 1.14;
 
   const autoPositions = useMemo(() => {
@@ -252,14 +256,24 @@ export default function Configurator() {
         options: upholsteryTextures,
         selectedOptionId: selectedChairOptionId,
         onSelect: (option) => {
-          setSelectedChairOptionId(option.id);
-          setSelectedChairTexture(option.path);
-          // Apply texture to all chairs
+          // Only update global state when in "all" mode
+          if (materialTargetMode === "all") {
+            setSelectedChairOptionId(option.id);
+            setSelectedChairTexture(option.path);
+          }
+          // Apply texture based on mode
           setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              chairTexture: option.path,
-            }))
+            prev.map((chair) => {
+              // If in "single" mode, only update the target chair
+              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) {
+                return chair;
+              }
+              // Otherwise update all chairs
+              return {
+                ...chair,
+                chairTexture: option.path,
+              };
+            })
           );
         },
       });
@@ -270,14 +284,24 @@ export default function Configurator() {
         options: upholsteryTextures,
         selectedOptionId: selectedPillowOptionId,
         onSelect: (option) => {
-          setSelectedPillowOptionId(option.id);
-          setSelectedPillowTexture(option.path);
-          // Apply texture to all chairs
+          // Only update global state when in "all" mode
+          if (materialTargetMode === "all") {
+            setSelectedPillowOptionId(option.id);
+            setSelectedPillowTexture(option.path);
+          }
+          // Apply texture based on mode
           setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              pillowTexture: option.path,
-            }))
+            prev.map((chair) => {
+              // If in "single" mode, only update the target chair
+              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) {
+                return chair;
+              }
+              // Otherwise update all chairs
+              return {
+                ...chair,
+                pillowTexture: option.path,
+              };
+            })
           );
         },
       });
@@ -288,14 +312,24 @@ export default function Configurator() {
         options: feetTextures,
         selectedOptionId: selectedFeetOptionId,
         onSelect: (option) => {
-          setSelectedFeetOptionId(option.id);
-          setSelectedFeetTexture(option.path);
-          // Apply texture to all chairs
+          // Only update global state when in "all" mode
+          if (materialTargetMode === "all") {
+            setSelectedFeetOptionId(option.id);
+            setSelectedFeetTexture(option.path);
+          }
+          // Apply texture based on mode
           setChairs((prev) =>
-            prev.map((chair) => ({
-              ...chair,
-              feetTexture: option.path,
-            }))
+            prev.map((chair) => {
+              // If in "single" mode, only update the target chair
+              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) {
+                return chair;
+              }
+              // Otherwise update all chairs
+              return {
+                ...chair,
+                feetTexture: option.path,
+              };
+            })
           );
         },
       });
@@ -306,6 +340,8 @@ export default function Configurator() {
     selectedChairOptionId,
     selectedPillowOptionId,
     selectedFeetOptionId,
+    materialTargetMode,
+    materialTargetChairId,
   ]);
 
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
@@ -440,6 +476,8 @@ export default function Configurator() {
       setExpandedPanel={setExpandedPanel}
       setShowActionPanel={setShowActionPanel}
       setSelectedChairId={setSelectedChairId}
+      setMaterialTargetMode={setMaterialTargetMode}
+      setMaterialTargetChairId={setMaterialTargetChairId}
       // Handlers
       onBackToSelection={handleBackToSelection}
       handleDragStart={handleDragStart}
