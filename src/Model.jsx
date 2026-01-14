@@ -2,6 +2,7 @@ import { useGLTF, Center, useTexture } from "@react-three/drei";
 import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { Group } from "three/examples/jsm/libs/tween.module.js";
 
 const useOptionalTexture = (path) => {
   // useLoader from drei/r3f handles caching automatically
@@ -36,8 +37,6 @@ export default function Model({
   chairTexturePath,
   pillowTexturePath,
   feetTexturePath,
-  autoRotate = false,
-  rotationSpeed = 0.01,
 }) {
   const safePath = modelPath || "/models/Jump_Sofa_GLB/jump_Center.glb";
   const { scene } = useGLTF(safePath);
@@ -207,24 +206,14 @@ export default function Model({
     });
   }, [chairTexture, pillowTexture, feetTexture]);
 
-  const rotationRef = useRef(0);
   const groupRef = useRef(null);
 
-  // Continuous rotation using useFrame (runs every frame, independent of texture changes)
-  // This ensures rotation continues smoothly even when textures change
-  useFrame(() => {
-    if (autoRotate && groupRef.current) {
-      rotationRef.current += rotationSpeed;
-      groupRef.current.rotation.y = rotationRef.current;
-    }
-  });
+
 
   return (
-    // <Center>
     <group ref={groupRef}>
       <primitive object={clonedScene} />
     </group>
-    // </Center>
   );
 }
 

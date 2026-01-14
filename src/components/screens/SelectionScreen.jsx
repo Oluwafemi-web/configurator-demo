@@ -142,9 +142,7 @@ export default function SelectionScreen({
                                         <div style={{ fontSize: "0.85rem", color: "#1b1b1b" }}>
                                             {item.dimensionsMetric}
                                         </div>
-                                        <div style={{ fontSize: "0.8rem", color: "#7a7a7a" }}>
-                                            {item.dimensionsImperial}
-                                        </div>
+
                                     </div>
                                 );
                             })}
