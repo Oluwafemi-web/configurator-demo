@@ -21,7 +21,7 @@ export default function Canvas3DView({
 
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[2, 1, 2]} fov={35} />
+      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={35} />
 
       <ambientLight intensity={0.5} />
       <directionalLight position={[3, 3, 3]} intensity={0.5} />
