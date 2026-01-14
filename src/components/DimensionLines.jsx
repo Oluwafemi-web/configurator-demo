@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { getModuleDimensions } from "../utils/configurator/moduleDimensions";
+import { rotate } from "three/tsl";
 
 /**
  * DimensionLines Component
@@ -121,13 +122,16 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
                 <Html
                     position={[(bbox.min.x + bbox.max.x) / 2, bbox.min.y - offset, bbox.max.z + offset]}
                     center
+                    transform
+                    occlude={false}
                     style={{
                         color: "#999",
-                        fontSize: "12px",
+                        fontSize: "8px",
                         fontFamily: "Arial, sans-serif",
                         whiteSpace: "nowrap",
                         userSelect: "none",
                         pointerEvents: "none",
+                        marginTop: '10px'
                     }}
                 >
                     {formatDimension(width)}
@@ -166,13 +170,18 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
                 <Html
                     position={[bbox.min.x - offset, bbox.min.y, (bbox.min.z + bbox.max.z) / 2]}
                     center
+                    transform
+                    occlude={false}
                     style={{
                         color: "#999",
-                        fontSize: "12px",
+                        fontSize: "8px",
                         fontFamily: "Arial, sans-serif",
                         whiteSpace: "nowrap",
                         userSelect: "none",
                         pointerEvents: "none",
+                        marginLeft: "-20px",
+                        transform: "rotateZ(20deg)",
+                        transform: "rotateY(45deg)"
                     }}
                 >
                     {formatDimension(depth)}
@@ -211,13 +220,17 @@ export default function DimensionLines({ chairs, getResolvedPosition }) {
                 <Html
                     position={[bbox.max.x + offset, (bbox.min.y + bbox.max.y) / 2, bbox.max.z]}
                     center
+                    transform
+                    occlude={false}
                     style={{
                         color: "#999",
-                        fontSize: "12px",
+                        fontSize: "8px",
                         fontFamily: "Arial, sans-serif",
                         whiteSpace: "nowrap",
                         userSelect: "none",
                         pointerEvents: "none",
+                        transform: "rotate(90deg)",
+                        marginRight: "-20px"
                     }}
                 >
                     {formatDimension(height)}
