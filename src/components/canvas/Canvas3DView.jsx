@@ -21,23 +21,24 @@ export default function Canvas3DView({
 
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={35} />
+      <PerspectiveCamera position={[10, 5, 10]} fov={35} />
 
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 3, 3]} intensity={0.5} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[3, 3, 3]} intensity={0.6} />
 
       {chairs.map((chair) => {
         const resolvedPosition = getResolvedPosition(chair);
 
         return (
-          <group key={chair.id} position={resolvedPosition} rotation={[0, chair.rotation || 0, 0]}>
-            <Model
-              modelPath={chair.sofa.modelPath}
-              chairTexturePath={chair.chairTexture || selectedChairTexture}
-              pillowTexturePath={chair.pillowTexture || selectedPillowTexture}
-              feetTexturePath={chair.feetTexture || selectedFeetTexture}
-              autoRotate={false} // or true if desired
-            />
+          <group key={chair.id} position={resolvedPosition}>
+            <group rotation={[0, chair.rotation || 0, 0]}>
+              <Model
+                modelPath={chair.sofa.modelPath}
+                chairTexturePath={chair.chairTexture || selectedChairTexture}
+                pillowTexturePath={chair.pillowTexture || selectedPillowTexture}
+                feetTexturePath={chair.feetTexture || selectedFeetTexture}
+              />
+            </group>
           </group>
         );
       })}
@@ -58,7 +59,7 @@ export default function Canvas3DView({
         maxDistance={50}
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
-        makeDefault
+      // makeDefault
       />
 
       {/* Dimension Lines - Shows measurements when enabled */}
