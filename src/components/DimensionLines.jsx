@@ -90,101 +90,105 @@ export default function DimensionLines({ chairs, getResolvedPosition, viewMode =
 
     // Render 2D style dimensions (minimal, clean)
     if (viewMode === "2d") {
-        const offset = 0.5; // Larger offset for cleaner look
+        const offset = 0.3; // Distance from model edges
 
         return (
             <group>
-                {/* Width dimension (X-axis) - bottom */}
+                {/* Width dimension (X-axis) - bottom/front */}
                 <group>
-                    {/* Connecting lines from model to dimension line */}
+                    {/* Connecting lines from model corners to dimension line */}
                     <Line
                         points={[
-                            [bbox.min.x, 0, bbox.max.z],
-                            [bbox.min.x, 0, bbox.max.z + offset],
+                            [bbox.min.x, 0.001, bbox.max.z],
+                            [bbox.min.x, 0.001, bbox.max.z + offset],
                         ]}
-                        color="#CCCCCC"
-                        lineWidth={0.5}
-                    />
-                    <Line
-                        points={[
-                            [bbox.max.x, 0, bbox.max.z],
-                            [bbox.max.x, 0, bbox.max.z + offset],
-                        ]}
-                        color="#CCCCCC"
-                        lineWidth={0.5}
-                    />
-                    {/* Main dimension line */}
-                    <Line
-                        points={[
-                            [bbox.min.x, 0, bbox.max.z + offset],
-                            [bbox.max.x, 0, bbox.max.z + offset],
-                        ]}
-                        color="#AAAAAA"
+                        color="#999999"
                         lineWidth={1}
                     />
-                    {/* Label */}
+                    <Line
+                        points={[
+                            [bbox.max.x, 0.001, bbox.max.z],
+                            [bbox.max.x, 0.001, bbox.max.z + offset],
+                        ]}
+                        color="#999999"
+                        lineWidth={1}
+                    />
+                    {/* Main horizontal dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x, 0.001, bbox.max.z + offset],
+                            [bbox.max.x, 0.001, bbox.max.z + offset],
+                        ]}
+                        color="#999999"
+                        lineWidth={1.5}
+                    />
+                    {/* Dimension text label */}
                     <Html
-                        position={[(bbox.min.x + bbox.max.x) / 2, 0, bbox.max.z + offset + 0.1]}
+                        position={[(bbox.min.x + bbox.max.x) / 2, 0.001, bbox.max.z + offset + 0.15]}
                         center
-                        transform
                         occlude={false}
                         style={{
-                            color: "#999",
-                            fontSize: "7px",
+                            color: "#666",
+                            fontSize: "10px",
                             fontFamily: "Arial, sans-serif",
                             whiteSpace: "nowrap",
                             userSelect: "none",
                             pointerEvents: "none",
-                            fontWeight: "300",
+                            fontWeight: "400",
+                            background: "rgba(238, 238, 238, 0.9)",
+                            padding: "2px 6px",
+                            borderRadius: "2px",
                         }}
                     >
                         {formatDimension(width)}
                     </Html>
                 </group>
 
-                {/* Depth dimension (Z-axis) - left */}
+                {/* Depth dimension (Z-axis) - left/side */}
                 <group>
-                    {/* Connecting lines from model to dimension line */}
+                    {/* Connecting lines from model corners to dimension line */}
                     <Line
                         points={[
-                            [bbox.min.x, 0, bbox.min.z],
-                            [bbox.min.x - offset, 0, bbox.min.z],
+                            [bbox.min.x, 0.001, bbox.min.z],
+                            [bbox.min.x - offset, 0.001, bbox.min.z],
                         ]}
-                        color="#CCCCCC"
-                        lineWidth={0.5}
-                    />
-                    <Line
-                        points={[
-                            [bbox.min.x, 0, bbox.max.z],
-                            [bbox.min.x - offset, 0, bbox.max.z],
-                        ]}
-                        color="#CCCCCC"
-                        lineWidth={0.5}
-                    />
-                    {/* Main dimension line */}
-                    <Line
-                        points={[
-                            [bbox.min.x - offset, 0, bbox.min.z],
-                            [bbox.min.x - offset, 0, bbox.max.z],
-                        ]}
-                        color="#AAAAAA"
+                        color="#999999"
                         lineWidth={1}
                     />
-                    {/* Label */}
+                    <Line
+                        points={[
+                            [bbox.min.x, 0.001, bbox.max.z],
+                            [bbox.min.x - offset, 0.001, bbox.max.z],
+                        ]}
+                        color="#999999"
+                        lineWidth={1}
+                    />
+                    {/* Main vertical dimension line */}
+                    <Line
+                        points={[
+                            [bbox.min.x - offset, 0.001, bbox.min.z],
+                            [bbox.min.x - offset, 0.001, bbox.max.z],
+                        ]}
+                        color="#999999"
+                        lineWidth={1.5}
+                    />
+                    {/* Dimension text label */}
                     <Html
-                        position={[bbox.min.x - offset - 0.1, 0, (bbox.min.z + bbox.max.z) / 2]}
+                        position={[bbox.min.x - offset - 0.15, 0.001, (bbox.min.z + bbox.max.z) / 2]}
                         center
-                        transform
                         occlude={false}
-                        rotation={[0, 0, Math.PI / 2]}
                         style={{
-                            color: "#999",
-                            fontSize: "7px",
+                            color: "#666",
+                            fontSize: "10px",
                             fontFamily: "Arial, sans-serif",
                             whiteSpace: "nowrap",
                             userSelect: "none",
                             pointerEvents: "none",
-                            fontWeight: "300",
+                            fontWeight: "400",
+                            background: "rgba(238, 238, 238, 0.9)",
+                            padding: "2px 6px",
+                            borderRadius: "2px",
+                            transform: "rotate(90deg)",
                         }}
                     >
                         {formatDimension(depth)}
