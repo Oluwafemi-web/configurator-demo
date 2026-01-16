@@ -227,6 +227,6 @@ export default function Model({
   );
 }
 
-useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_CENTER.glb");
-useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_DX.glb");
-useGLTF.preload("/models/Jump_Sofa_GLB/Jump_Sofa_SX.glb");
+useGLTF.preload("/models/Jump_Sofa_GLB/jump_Center.glb");
+useGLTF.preload("/models/Jump_Sofa_GLB/jump_Left.glb");
+
