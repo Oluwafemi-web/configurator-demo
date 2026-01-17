@@ -39,7 +39,7 @@ export default function Model({
   pillowTexturePath,
   feetTexturePath,
 }) {
-  const safePath = modelPath || "/models/Jump_Sofa_GLB/jump_Center.glb";
+  const safePath = modelPath;
   const { scene } = useGLTF(safePath);
 
   // Create a stable cloned scene that persists across renders
@@ -47,12 +47,17 @@ export default function Model({
   const clonedSceneRef = useRef(null);
   const scenePathRef = useRef(null);
 
+  if (scenePathRef.current !== safePath || !clonedSceneRef.current) {
+    clonedSceneRef.current = scene.clone(true);
+    scenePathRef.current = safePath;
+  }
   useEffect(() => {
     if (!scene) return;
 
     clonedSceneRef.current = scene.clone(true);
     scenePathRef.current = safePath;
   }, [scene, safePath]);
+
   const clonedScene = clonedSceneRef.current;
   useEffect(() => {
     if (!clonedScene) return;
