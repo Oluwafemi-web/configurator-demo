@@ -1,6 +1,6 @@
 import { useGLTF, Center, useTexture } from "@react-three/drei";
 import { Box3, Vector3 } from "three";
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useLayoutEffect } from "react";
 
 import * as THREE from "three";
 
@@ -53,7 +53,7 @@ export default function Model({
   }
 
   const clonedScene = clonedSceneRef.current;
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!clonedScene) return;
 
     const box = new Box3().setFromObject(clonedScene);
