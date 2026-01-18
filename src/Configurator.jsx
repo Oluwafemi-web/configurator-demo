@@ -37,7 +37,7 @@ export default function Configurator() {
   const [chairs, setChairs] = useState([]);
   const [showModuleMenu, setShowModuleMenu] = useState(false);
   const [viewMode, setViewMode] = useState("3d"); // "2d" or "3d"
-  const [zoomLevel, setZoomLevel] = useState(1);
+
   const [draggingChairId, setDraggingChairId] = useState(null);
   const [snapPreview, setSnapPreview] = useState(null);
   const [selectedChairId, setSelectedChairId] = useState(null);

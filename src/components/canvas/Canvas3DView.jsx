@@ -32,6 +32,7 @@ export default function Canvas3DView({
         return (
           <group key={chair.id} position={resolvedPosition}>
             <group rotation={[0, chair.rotation || 0, 0]}>
+
               <Model
                 modelPath={chair.sofa.modelPath}
                 chairTexturePath={chair.chairTexture || selectedChairTexture}

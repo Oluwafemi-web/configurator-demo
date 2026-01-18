@@ -1,4 +1,4 @@
-import { useGLTF, Center, useTexture } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { Box3, Vector3 } from "three";
 import { useEffect, useRef, useMemo } from "react";
 
@@ -33,6 +33,7 @@ const useOptionalTexture = (path) => {
   }, [path]);
 };
 
+
 export default function Model({
   modelPath,
   chairTexturePath,
@@ -59,6 +60,10 @@ export default function Model({
   }, [scene, safePath]);
 
   const clonedScene = clonedSceneRef.current;
+
+
+
+
   useEffect(() => {
     if (!clonedScene) return;
 
@@ -230,6 +235,7 @@ export default function Model({
     <group ref={groupRef}>
       <primitive object={clonedScene} />
     </group>
+
   );
 }
 

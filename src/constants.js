@@ -321,3 +321,6 @@ export const VARIANT_CONFIG = [
     image: "/frontimage/Jump_Right.png",
   },
 ];
+
+
+export const GROUND_Y = 0;
