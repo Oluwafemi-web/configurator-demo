@@ -90,7 +90,28 @@ export default function Configurator() {
     return positionsMap;
   }, [chairs]);
 
+  const sceneCenter = useMemo(() => {
+    if (chairs.length === 0) return [0, 0, 0];
 
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+
+    chairs.forEach((c) => {
+      const [x, , z] = getResolvedPosition(c, autoPositions);
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (z < minZ) minZ = z;
+      if (z > maxZ) maxZ = z;
+    });
+
+    if (minX === Infinity) return [0, 0, 0];
+
+    const centerX = (minX + maxX) / 2;
+    const centerZ = (minZ + maxZ) / 2;
+    return [centerX, 0, centerZ];
+  }, [chairs, autoPositions]);
 
   const handleDragStart = (chair) => {
     if (viewMode !== "2d") return;
