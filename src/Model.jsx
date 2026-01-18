@@ -1,9 +1,6 @@
-import { useGLTF, Center, useTexture } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { useEffect, useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Group } from "three/examples/jsm/libs/tween.module.js";
-
 const useOptionalTexture = (path) => {
   // useLoader from drei/r3f handles caching automatically
   // We need to handle the optional case - use a memoized loader
@@ -59,6 +56,7 @@ export default function Model({
   }, [scene, safePath]);
 
   const clonedScene = clonedSceneRef.current;
+
 
   // Use drei's useTexture for proper texture management and caching
   // This ensures textures are reused and properly updated

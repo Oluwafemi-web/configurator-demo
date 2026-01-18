@@ -23,8 +23,8 @@ export default function Canvas3DView({
     <Canvas gl={{ preserveDrawingBuffer: true }}>
       <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={35} />
 
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 3, 3]} intensity={0.5} />
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[3, 3, 3]} intensity={0.7} />
 
       {chairs.map((chair) => {
         const resolvedPosition = getResolvedPosition(chair);
@@ -43,7 +43,7 @@ export default function Canvas3DView({
       })}
 
       <ContactShadows
-        position={[0, -0.5, 0]}
+        position={[0, -0.01, 0]}
         opacity={0.5}
         scale={15}
         blur={2.5}
