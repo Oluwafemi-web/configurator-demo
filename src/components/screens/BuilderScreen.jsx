@@ -54,6 +54,7 @@ export default function BuilderScreen({
     getResolvedPosition,
 }) {
     const [showDimensions, setShowDimensions] = React.useState(false);
+    const [isExporting, setIsExporting] = React.useState(false);
 
     const togglePanel = (panelName) => {
         setExpandedPanel((prev) => (prev === panelName ? null : panelName));
@@ -231,7 +232,7 @@ export default function BuilderScreen({
                             handleRotateChange={handleRotateChange}
                             getResolvedPosition={getResolvedPosition}
                             rotationTargetId={rotationTargetId}
-                            showDimensions={showDimensions}
+                            showDimensions={showDimensions && !isExporting}
                         />
                     ) : (
                         <Canvas3DView
@@ -241,7 +242,7 @@ export default function BuilderScreen({
                             selectedFeetTexture={selectedFeetTexture}
                             canvasContainerRef={canvasContainerRef}
                             getResolvedPosition={getResolvedPosition}
-                            showDimensions={showDimensions}
+                            showDimensions={showDimensions && !isExporting}
                         />
                     )}
 
@@ -618,6 +619,8 @@ export default function BuilderScreen({
                             canvasRef={canvasContainerRef}
                             modules={chairs}
                             selectedFabric={selectedChairTexture}
+                            setIsExporting={setIsExporting}
+                            getResolvedPosition={getResolvedPosition}
                         />
                         <ExportImage canvasRef={canvasContainerRef} />
                         <Export3D modules={chairs} />

@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { getModuleDimensions } from "../utils/configurator/moduleDimensions";
+import { calculateCompositionDimensions } from "../utils/configurator/calculateDimensions";
+
 import { rotate } from "three/tsl";
 
 /**
@@ -10,60 +12,12 @@ import { rotate } from "three/tsl";
  * Shows width, depth, and height measurements in cm and inches using actual module dimensions
  * Different styling for 2D (minimal, clean) vs 3D (detailed with ticks)
  */
-export default function DimensionLines({ chairs, getResolvedPosition, viewMode = "3d" }) {
+export default function DimensionLines({ chairs, getResolvedPosition, viewMode = "3d", visible = true }) {
     // Calculate bounding box and dimensions using actual module sizes
     const dimensions = useMemo(() => {
-        if (!chairs || chairs.length === 0) return null;
-
-        const bbox = new THREE.Box3();
-
-        // Expand bounding box to include all chairs with their actual dimensions
-        chairs.forEach((chair) => {
-            const pos = getResolvedPosition(chair);
-            const moduleDims = getModuleDimensions(chair.sofa.id);
-
-            // Convert cm to meters for Three.js
-            const width = moduleDims.width / 100;
-            const depth = moduleDims.depth / 100;
-            const height = moduleDims.height / 100;
-
-            // Expand bbox considering rotation
-            const rotation = chair.rotation || 0;
-            const cos = Math.abs(Math.cos(rotation));
-            const sin = Math.abs(Math.sin(rotation));
-
-            // Rotated dimensions
-            const rotatedWidth = width * cos + depth * sin;
-            const rotatedDepth = width * sin + depth * cos;
-
-            bbox.expandByPoint(new THREE.Vector3(
-                pos[0] - rotatedWidth / 2,
-                0,
-                pos[2] - rotatedDepth / 2
-            ));
-            bbox.expandByPoint(new THREE.Vector3(
-                pos[0] + rotatedWidth / 2,
-                height,
-                pos[2] + rotatedDepth / 2
-            ));
-        });
-
-        const width = bbox.max.x - bbox.min.x;
-        const depth = bbox.max.z - bbox.min.z;
-        const height = bbox.max.y - bbox.min.y;
-
-        return {
-            bbox,
-            width,
-            depth,
-            height,
-            center: new THREE.Vector3(
-                (bbox.min.x + bbox.max.x) / 2,
-                (bbox.min.y + bbox.max.y) / 2,
-                (bbox.min.z + bbox.max.z) / 2
-            ),
-        };
+        return calculateCompositionDimensions(chairs, getResolvedPosition);
     }, [chairs, getResolvedPosition]);
+
 
     // Convert cm to inches with fractional display
     const cmToInches = (cm) => {
@@ -84,7 +38,8 @@ export default function DimensionLines({ chairs, getResolvedPosition, viewMode =
         return `${cm} cm (${inches})`;
     };
 
-    if (!dimensions) return null;
+    if (!dimensions || !visible) return null;
+
 
     const { bbox, width, depth, height } = dimensions;
 

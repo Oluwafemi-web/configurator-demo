@@ -23,11 +23,11 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
         const centerY = rect.top + rect.height / 2;
         const currentMouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
         let delta = currentMouseAngle - startAngleRef.current;
-        
+
         // Normalize delta to handle wrapping around 360/0 boundary
         if (delta > 180) delta -= 360;
         if (delta < -180) delta += 360;
-        
+
         // Negate delta to fix rotation direction (clockwise ring = clockwise model)
         const newAngle = (currentAngleRef.current - delta + 360) % 360;
         onRotate(newAngle);
@@ -78,6 +78,26 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
                         transform: `translate(0, -50%) rotate(${angle}deg)`,
                     }}
                 />
+
+                {/* Angle Value Display */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        background: "rgba(255, 255, 255, 0.9)",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        pointerEvents: "none",
+                        color: "#1b1b1b",
+                        border: "1px solid #ddd",
+                    }}
+                >
+                    {Math.round(angle)}°
+                </div>
 
                 {/* Close button */}
                 <button

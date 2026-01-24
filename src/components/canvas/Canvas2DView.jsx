@@ -52,7 +52,7 @@ export default function Canvas2DView({
             />
 
             {/* Lighting */}
-            <ambientLight intensity={1} />
+            <ambientLight intensity={2} />
             <directionalLight position={[3, 3, 3]} intensity={1} />
 
             {/* Render all chair modules */}
