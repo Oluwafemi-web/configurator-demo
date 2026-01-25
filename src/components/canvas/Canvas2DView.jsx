@@ -121,9 +121,9 @@ export default function Canvas2DView({
                     >
                         <boxGeometry
                             args={[
-                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.9,
+                                (snapPreview.draggedDims?.width ?? CHAIR_WIDTH) * 0.9,
                                 0.005,
-                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.6,
+                                (snapPreview.draggedDims?.depth ?? CHAIR_WIDTH) * 0.9,
                             ]}
                         />
                         <meshStandardMaterial
