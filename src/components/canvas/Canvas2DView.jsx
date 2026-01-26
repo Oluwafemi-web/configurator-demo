@@ -9,6 +9,8 @@ import Model from "../../Model";
 import DraggableModule from "../DraggableModule";
 import RotationRing from "../RotationRing";
 import DimensionLines from "../DimensionLines";
+import ModuleSnapPoints from "./ModuleSnapPoints";
+import SnapPoint from "./SnapPoint";
 
 const CHAIR_WIDTH = 1.14;
 
@@ -84,6 +86,9 @@ export default function Canvas2DView({
                                     }
                                     position={[0, 0, 0]}
                                 />
+                                {isDragging2D && (
+                                    <ModuleSnapPoints chair={chair} />
+                                )}
                             </group>
                         </DraggableModule>
                     );
@@ -141,6 +146,18 @@ export default function Canvas2DView({
                             opacity={0.15}
                         />
                     </mesh>
+
+                    {/* The Green Dot on the Neighbor - Highlight the snap point */}
+                    {(() => {
+                        const { neighborPosition, neighborDims, side } = snapPreview;
+                        const dotPos = [...neighborPosition];
+                        if (side === 'right') dotPos[0] -= neighborDims.width / 2;
+                        if (side === 'left') dotPos[0] += neighborDims.width / 2;
+                        if (side === 'top') dotPos[2] += neighborDims.depth / 2;
+                        if (side === 'bottom') dotPos[2] -= neighborDims.depth / 2;
+
+                        return <SnapPoint position={[dotPos[0], 0.06, dotPos[2]]} />;
+                    })()}
                 </group>
             )}
 

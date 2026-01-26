@@ -52,6 +52,40 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
     const neighborDims = getWorldDimensions(otherChair);
 
     // Calculate snap centers for 4 sides
+    // Helper to check if a side is the "back" of the chair in local space
+    // and if that chair has a backrest.
+    const isBlockedSide = (side) => {
+        if (!otherChair.sofa.hasBackrest) return false;
+
+        // Map world side to local vector
+        // World UP/Back (-Z) -> [0, -1] (2D logic Z is Y) -> wait, here Z is Z.
+        // candidates define 'top' as z - depth/2. So 'top' is World -Z.
+        // 'bottom' is World +Z.
+        // 'right' is World +X.
+        // 'left' is World -X.
+        
+        let worldDir = [0, 0];
+        if (side === 'top') worldDir = [0, -1];
+        if (side === 'bottom') worldDir = [0, 1];
+        if (side === 'right') worldDir = [1, 0];
+        if (side === 'left') worldDir = [-1, 0];
+
+        // Rotate world vector by -rotation to get local vector
+        const rot = otherChair.rotation || 0;
+        const cos = Math.cos(-rot);
+        const sin = Math.sin(-rot);
+        
+        const localX = worldDir[0] * cos - worldDir[1] * sin;
+        const localZ = worldDir[0] * sin + worldDir[1] * cos;
+
+        // Local Back is usually -Z (0, -1). 
+        // We check if local vector is approx (0, -1)
+        // EPSILON 0.1
+        const isBack = Math.abs(localX) < 0.1 && localZ < -0.9;
+        
+        return isBack;
+    };
+
     const candidates = [
         // RIGHT
         {
@@ -65,7 +99,7 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
             z: neighborPos[2],
             side: 'left'
         },
-        // TOP (Back) - Assuming -Z is "up" in 2D or just considering Z axis
+        // TOP (Back) 
         {
             x: neighborPos[0],
             z: neighborPos[2] - (neighborDims.depth / 2 + draggedDims.depth / 2),
@@ -77,7 +111,7 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
             z: neighborPos[2] + (neighborDims.depth / 2 + draggedDims.depth / 2),
             side: 'bottom'
         }
-    ];
+    ].filter(cand => !isBlockedSide(cand.side));
 
     candidates.forEach(cand => {
         const dx = cand.x - pos.x;

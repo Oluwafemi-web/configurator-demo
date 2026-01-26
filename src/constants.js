@@ -198,6 +198,7 @@ export const sofaCatalog = [
         dimensionsMetric: "82 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_Center.glb",
         fabricGroup: "CENTER",
+        hasBackrest: true,
       },
       {
         id: "jump-left",
@@ -206,6 +207,7 @@ export const sofaCatalog = [
         dimensionsMetric: "102 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_Left.glb",
         fabricGroup: "LEFT",
+        hasBackrest: true,
       },
       {
         id: "jump-right",
@@ -214,6 +216,7 @@ export const sofaCatalog = [
         dimensionsMetric: "102 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_Right.glb",
         fabricGroup: "RIGHT",
+        hasBackrest: true,
       },
     ],
   },
@@ -227,6 +230,7 @@ export const sofaCatalog = [
         dimensionsMetric: "99 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_Angle.glb",
         fabricGroup: "ANGLE",
+        hasBackrest: true,
       },
       {
         id: "jump-bigangle",
@@ -235,6 +239,7 @@ export const sofaCatalog = [
         dimensionsMetric: "152 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_BigAngle.glb",
         fabricGroup: "ANGLE",
+        hasBackrest: true,
       },
     ],
   },
@@ -248,6 +253,7 @@ export const sofaCatalog = [
         dimensionsMetric: "152 x 152 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_BigSeat.glb",
         fabricGroup: "SEAT",
+        hasBackrest: true,
       },
       {
         id: "jump-pouf",
@@ -256,6 +262,7 @@ export const sofaCatalog = [
         dimensionsMetric: "85 x 65 x 42 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_Pouf_Seat.glb",
         fabricGroup: "POUF",
+        hasBackrest: false,
       },
     ],
   },
@@ -269,6 +276,7 @@ export const sofaCatalog = [
         dimensionsMetric: "122 x 155 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_ChaisePouf_left.glb",
         fabricGroup: "CHAISE",
+        hasBackrest: true,
       },
       {
         id: "jump-chaisepouf-right",
@@ -277,6 +285,7 @@ export const sofaCatalog = [
         dimensionsMetric: "122 x 155 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_ChaisePouf_right.glb",
         fabricGroup: "CHAISE",
+        hasBackrest: true,
       },
       {
         id: "jump-seatpouf-left",
@@ -285,6 +294,7 @@ export const sofaCatalog = [
         dimensionsMetric: "122 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_SeatPouf_left.glb",
         fabricGroup: "SEAT_POUF",
+        hasBackrest: true,
       },
       {
         id: "jump-seatpouf-right",
@@ -293,6 +303,7 @@ export const sofaCatalog = [
         dimensionsMetric: "122 x 99 x 100 CM",
         modelPath: "/models/Jump_Sofa_GLB/jump_SeatPouf_right.glb",
         fabricGroup: "SEAT_POUF",
+        hasBackrest: true,
       },
     ],
   },
