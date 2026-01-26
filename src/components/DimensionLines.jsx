@@ -143,6 +143,7 @@ export default function DimensionLines({ chairs, getResolvedPosition, viewMode =
                             background: "rgba(238, 238, 238, 0.9)",
                             padding: "2px 6px",
                             borderRadius: "2px",
+                            marginLeft: "-50px",
                             transform: "rotate(90deg)",
                         }}
                     >
