@@ -9,8 +9,6 @@ import Model from "../../Model";
 import DraggableModule from "../DraggableModule";
 import RotationRing from "../RotationRing";
 import DimensionLines from "../DimensionLines";
-import ModuleSnapPoints from "./ModuleSnapPoints";
-import SnapPoint from "./SnapPoint";
 
 const CHAIR_WIDTH = 1.14;
 
@@ -86,9 +84,6 @@ export default function Canvas2DView({
                                     }
                                     position={[0, 0, 0]}
                                 />
-                                {isDragging2D && (
-                                    <ModuleSnapPoints chair={chair} />
-                                )}
                             </group>
                         </DraggableModule>
                     );
@@ -100,20 +95,11 @@ export default function Canvas2DView({
                 <group>
                     <Line
                         points={[
-                            (() => {
-                                const { neighborPosition, neighborDims, side } = snapPreview;
-                                const start = [...neighborPosition];
-                                // Offset the start point to the far edge of the neighbor
-                                // "Full length of neighbor" + "Half length of new module"
-                                // Current center-to-center = Half neighbor + Half new
-                                // So we need to push the start point back by another Half neighbor
-                                if (side === 'right') start[0] -= neighborDims.width / 2;
-                                if (side === 'left') start[0] += neighborDims.width / 2;
-                                if (side === 'top') start[2] += neighborDims.depth / 2;
-                                if (side === 'bottom') start[2] -= neighborDims.depth / 2;
-
-                                return [start[0], 0.05, start[2]];
-                            })(),
+                            [
+                                snapPreview.neighborPosition[0],
+                                0.05,
+                                snapPreview.neighborPosition[2],
+                            ],
                             [
                                 snapPreview.snappedPosition[0],
                                 0.05,
@@ -135,9 +121,9 @@ export default function Canvas2DView({
                     >
                         <boxGeometry
                             args={[
-                                (snapPreview.draggedDims?.width ?? CHAIR_WIDTH) * 0.9,
+                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.9,
                                 0.005,
-                                (snapPreview.draggedDims?.depth ?? CHAIR_WIDTH) * 0.9,
+                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.6,
                             ]}
                         />
                         <meshStandardMaterial
@@ -146,18 +132,6 @@ export default function Canvas2DView({
                             opacity={0.15}
                         />
                     </mesh>
-
-                    {/* The Green Dot on the Neighbor - Highlight the snap point */}
-                    {(() => {
-                        const { neighborPosition, neighborDims, side } = snapPreview;
-                        const dotPos = [...neighborPosition];
-                        if (side === 'right') dotPos[0] -= neighborDims.width / 2;
-                        if (side === 'left') dotPos[0] += neighborDims.width / 2;
-                        if (side === 'top') dotPos[2] += neighborDims.depth / 2;
-                        if (side === 'bottom') dotPos[2] -= neighborDims.depth / 2;
-
-                        return <SnapPoint position={[dotPos[0], 0.06, dotPos[2]]} />;
-                    })()}
                 </group>
             )}
 
