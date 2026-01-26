@@ -95,11 +95,20 @@ export default function Canvas2DView({
                 <group>
                     <Line
                         points={[
-                            [
-                                snapPreview.neighborPosition[0],
-                                0.05,
-                                snapPreview.neighborPosition[2],
-                            ],
+                            (() => {
+                                const { neighborPosition, neighborDims, side } = snapPreview;
+                                const start = [...neighborPosition];
+                                // Offset the start point to the far edge of the neighbor
+                                // "Full length of neighbor" + "Half length of new module"
+                                // Current center-to-center = Half neighbor + Half new
+                                // So we need to push the start point back by another Half neighbor
+                                if (side === 'right') start[0] -= neighborDims.width / 2;
+                                if (side === 'left') start[0] += neighborDims.width / 2;
+                                if (side === 'top') start[2] += neighborDims.depth / 2;
+                                if (side === 'bottom') start[2] -= neighborDims.depth / 2;
+
+                                return [start[0], 0.05, start[2]];
+                            })(),
                             [
                                 snapPreview.snappedPosition[0],
                                 0.05,

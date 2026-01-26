@@ -91,6 +91,7 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
                 neighborPosition: neighborPos,
                 snappedPosition: [cand.x, 0, cand.z],
                 draggedDims: draggedDims, // Pass full dims for preview
+                neighborDims: neighborDims, // Pass neighbor dims for line calculation
                 side: cand.side
             };
         }
