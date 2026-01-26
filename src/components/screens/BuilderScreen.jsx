@@ -116,7 +116,7 @@ export default function BuilderScreen({
                 </h1>
 
                 {/* Empty space for balance */}
-                <div style={{ width: "150px" }} />
+                {/* <div style={{ width: "150px" }} /> */}
             </div>
 
             {/* Main Content Area */}
