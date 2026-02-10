@@ -168,7 +168,8 @@ export default function DraggableModule({
 
   const handleClick = (event) => {
     // Only handle click if we're not dragging (i.e., it was just a click, not a drag)
-    if (disabled || hasMovedRef.current) return;
+    // Note: we allow clicks even when disabled, so grouped chairs can still be selected for detach
+    if (hasMovedRef.current) return;
     event.stopPropagation();
     if (onSelect) {
       onSelect(event);

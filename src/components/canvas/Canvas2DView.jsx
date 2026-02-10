@@ -79,7 +79,7 @@ export default function Canvas2DView({
                             key={chair.id}
                             position={position}
                             viewMode="2d"
-                            disabled={rotationTargetId === chair.id}
+                            disabled={rotationTargetId === chair.id || !!chair.groupId}
                             onDragStart={() => handleDragStart(chair)}
                             onDrag={(pos) => handleDragMove(chair, pos)}
                             onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}

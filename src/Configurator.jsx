@@ -110,28 +110,12 @@ export default function Configurator() {
     // Track drag position for snap zone calculation
     setDragPosition(pos);
     
-    // Calculate new positions for group members
-    const newPositions = recalculateGroupPositions(chair, pos, chairs, autoPositions);
-    
-    // Update all chairs' customPositions for smooth group dragging
-    setChairs((prev) => {
-      if (!chair.groupId) {
-        // Single chair - just update this one
-        return prev.map((c) =>
-          c.id === chair.id ? { ...c, customPosition: [pos.x, 0, pos.z] } : c
-        );
-      }
-      
-      // Group chair - update all group members
-      return prev.map((c) => {
-        const groupMember = chairs.find((cm) => cm.id === c.id);
-        if (groupMember && groupMember.groupId === chair.groupId) {
-          const newPos = newPositions.get(c.id) || [pos.x, 0, pos.z];
-          return { ...c, customPosition: newPos };
-        }
-        return c;
-      });
-    });
+    // Only update the dragged chair's position (no group dragging)
+    setChairs((prev) =>
+      prev.map((c) =>
+        c.id === chair.id ? { ...c, customPosition: [pos.x, 0, pos.z] } : c
+      )
+    );
     
     // Update snap preview
     const snap = findSnapTarget(chair, pos, chairs, autoPositions);
