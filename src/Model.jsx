@@ -15,7 +15,7 @@ const useOptionalTexture = (path) => {
       return textureCache.current.get(path);
     }
 
-    // Load texture using TextureLoaders
+    // Load texture using TextureLoader
     const loader = new THREE.TextureLoader();
     const texture = loader.load(path);
     texture.flipY = false;
