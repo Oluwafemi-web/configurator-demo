@@ -4,4 +4,12 @@ export { sortVariantKeys } from "./sortVariantKeys";
 export { deriveVariantKeysFromChairs } from "./deriveVariantKeysFromChairs";
 export { getModuleWidth } from "./getModuleWidth";
 export { getItemImagePath } from "./getItemImagePath";
-export { getResolvedPosition, findSnapTarget } from "./positionCalculations";
+export { 
+  getResolvedPosition, 
+  findSnapTarget, 
+  findAttachableNeighbors,
+  shouldDetach,
+  recalculateGroupPositions,
+  createGroupId,
+  getGroupMembers,
+} from "./positionCalculations";

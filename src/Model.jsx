@@ -1,6 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import { useEffect, useRef, useMemo } from "react";
 import * as THREE from "three";
+import { getModuleDimensions } from "./utils/configurator/moduleDimensions";
 const useOptionalTexture = (path) => {
   // useLoader from drei/r3f handles caching automatically
   // We need to handle the optional case - use a memoized loader
@@ -35,6 +36,10 @@ export default function Model({
   chairTexturePath,
   pillowTexturePath,
   feetTexturePath,
+  width = 0.99,
+  depth = 0.99,
+  originX = 0,
+  originZ = 0,
 }) {
   const safePath = modelPath;
   const { scene } = useGLTF(safePath);
@@ -213,13 +218,16 @@ export default function Model({
 
   const groupRef = useRef(null);
 
-
+  // Calculate centering offset based on GLB model's origin point
+  // originX/originZ tell us where the model's actual origin is located
+  // relative to the corner of the module's bounding box
+  const offsetX = (width / 2) - (originX || 0);
+  const offsetZ = (depth / 2) - (originZ || 0);
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[offsetX, 0, offsetZ]}>
       <primitive object={clonedScene} />
     </group>
-
   );
 }
 

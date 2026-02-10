@@ -2,12 +2,12 @@ import { Canvas } from "@react-three/fiber";
 import {
   PerspectiveCamera,
   ContactShadows,
-  Environment,
   CameraControls,
 } from "@react-three/drei";
 import { useRef, useEffect } from "react";
 import Model from "../../Model";
 import DimensionLines from "../DimensionLines";
+import { MODULE_DIMENSIONS } from "../../utils/configurator/moduleDimensions";
 
 export default function Canvas3DView({
   chairs,
@@ -16,18 +16,31 @@ export default function Canvas3DView({
   selectedFeetTexture,
   getResolvedPosition,
   showDimensions,
+  zoom = 100,
 }) {
   const controlsRef = useRef(null);
 
+  // Calculate FOV based on zoom percentage
+  // 100% zoom = 35 FOV, 200% zoom = 17.5 FOV, 50% zoom = 70 FOV
+  const fov = 35 / (zoom / 100);
+
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={35} />
+      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={fov} />
 
       <ambientLight intensity={2} />
       <directionalLight position={[3, 3, 3]} intensity={1} />
 
       {chairs.map((chair) => {
         const resolvedPosition = getResolvedPosition(chair);
+        
+        // Get module dimensions for origin offset
+        const moduleId = chair.sofa.id;
+        const dims = MODULE_DIMENSIONS[moduleId] || { width: 99, depth: 99, originX: 0, originZ: 0 };
+        const width = dims.width / 100;
+        const depth = dims.depth / 100;
+        const originX = dims.originX || 0;
+        const originZ = dims.originZ || 0;
 
         return (
           <group key={chair.id} position={resolvedPosition} rotation={[0, chair.rotation || 0, 0]}>
@@ -36,6 +49,10 @@ export default function Canvas3DView({
               chairTexturePath={chair.chairTexture || selectedChairTexture}
               pillowTexturePath={chair.pillowTexture || selectedPillowTexture}
               feetTexturePath={chair.feetTexture || selectedFeetTexture}
+              width={width}
+              depth={depth}
+              originX={originX}
+              originZ={originZ}
               autoRotate={false} // or true if desired
             />
           </group>
@@ -65,8 +82,6 @@ export default function Canvas3DView({
       {showDimensions && chairs.length > 0 && (
         <DimensionLines chairs={chairs} getResolvedPosition={getResolvedPosition} viewMode="3d" />
       )}
-
-      <Environment preset="night" />
     </Canvas>
   );
 }

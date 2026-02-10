@@ -2,15 +2,15 @@ import { Canvas } from "@react-three/fiber";
 import {
     OrthographicCamera,
     ContactShadows,
-    Environment,
     Line,
 } from "@react-three/drei";
 import Model from "../../Model";
 import DraggableModule from "../DraggableModule";
 import RotationRing from "../RotationRing";
 import DimensionLines from "../DimensionLines";
+import { MODULE_DIMENSIONS } from "../../utils/configurator/moduleDimensions";
 
-const CHAIR_WIDTH = 1.14;
+const SNAP_DISTANCE = 2.5;
 
 /**
  * Canvas2DView Component
@@ -33,20 +33,24 @@ export default function Canvas2DView({
     getResolvedPosition,
     rotationTargetId,
     showDimensions,
+    draggingChairId,
+    dragPosition,
+    zoom = 100,
 }) {
+
     return (
         <Canvas
             gl={{ preserveDrawingBuffer: true }}
             camera={{
                 position: [0, 1.5, 5],
-                zoom: 50,
+                zoom: zoom,
             }}
         >
             {/* Orthographic Camera - Top-down view */}
             <OrthographicCamera
                 makeDefault
                 position={[1, 1, 1]}
-                zoom={100}
+                zoom={zoom}
                 rotation={[-Math.PI / 2, 0, 0]}
                 near={0}
             />
@@ -58,11 +62,22 @@ export default function Canvas2DView({
             {/* Render all chair modules */}
             {chairs.length > 0 ? (
                 chairs.map((chair) => {
-                    const resolvedPosition = getResolvedPosition(chair);
+                    const isDraggingThis = draggingChairId === chair.id;
+                    const position = isDraggingThis && snapPreview
+                        ? snapPreview.snappedPosition
+                        : getResolvedPosition(chair);
+                    
+                    const moduleId = chair.sofa.id;
+                    const dims = MODULE_DIMENSIONS[moduleId] || { width: 99, depth: 99, originX: 0, originZ: 0 };
+                    const width = dims.width / 100;
+                    const depth = dims.depth / 100;
+                    const originX = dims.originX || 0;
+                    const originZ = dims.originZ || 0;
+                    
                     return (
                         <DraggableModule
                             key={chair.id}
-                            position={resolvedPosition}
+                            position={position}
                             viewMode="2d"
                             disabled={rotationTargetId === chair.id}
                             onDragStart={() => handleDragStart(chair)}
@@ -82,58 +97,16 @@ export default function Canvas2DView({
                                     feetTexturePath={
                                         chair.feetTexture || selectedFeetTexture
                                     }
-                                    position={[0, 0, 0]}
+                                    width={width}
+                                    depth={depth}
+                                    originX={originX}
+                                    originZ={originZ}
                                 />
                             </group>
                         </DraggableModule>
                     );
                 })
             ) : null}
-
-            {/* Snap Preview - Shows where module will snap */}
-            {snapPreview && (
-                <group>
-                    <Line
-                        points={[
-                            [
-                                snapPreview.neighborPosition[0],
-                                0.05,
-                                snapPreview.neighborPosition[2],
-                            ],
-                            [
-                                snapPreview.snappedPosition[0],
-                                0.05,
-                                snapPreview.snappedPosition[2],
-                            ],
-                        ]}
-                        color="#222222"
-                        lineWidth={1}
-                        dashed
-                        dashSize={0.2}
-                        gapSize={0.12}
-                    />
-                    <mesh
-                        position={[
-                            snapPreview.snappedPosition[0],
-                            0.01,
-                            snapPreview.snappedPosition[2],
-                        ]}
-                    >
-                        <boxGeometry
-                            args={[
-                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.9,
-                                0.005,
-                                (snapPreview.draggedWidth ?? CHAIR_WIDTH) * 0.6,
-                            ]}
-                        />
-                        <meshStandardMaterial
-                            color="#111111"
-                            transparent
-                            opacity={0.15}
-                        />
-                    </mesh>
-                </group>
-            )}
 
             {/* Rotation Ring - Shows when rotating a module */}
             {rotationTarget && (
@@ -164,9 +137,6 @@ export default function Canvas2DView({
                     viewMode="2d"
                 />
             )}
-
-            {/* Environment lighting */}
-            <Environment preset="night" />
         </Canvas>
     );
 }

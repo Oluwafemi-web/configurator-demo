@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import { Raycaster, Vector3, Plane } from "three";
 
 export default function DraggableModule({
@@ -10,7 +11,8 @@ export default function DraggableModule({
   onDragEnd,
   onSelect,
   disabled = false,
-  viewMode = "2d", // Add viewMode prop to determine rendering strategy
+  viewMode = "2d",
+  isSnapReady = false,
 }) {
   const groupRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);

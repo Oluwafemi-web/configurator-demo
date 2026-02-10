@@ -4,11 +4,15 @@ export default function ModuleActionModal({
     onRotate,
     onDuplicate,
     onDelete,
+    onDetach,
     onAddModules,
     onChangeMaterialModule,
     onChangeMaterialComposition,
 }) {
     if (!selectedChair) return null;
+
+    // Check if the selected chair is part of a group
+    const isAttached = !!selectedChair.groupId;
 
     return (
         <>
@@ -102,6 +106,13 @@ export default function ModuleActionModal({
                         label="ELIMINA"
                         onClick={onDelete}
                         variant="danger"
+                    />
+
+                    {/* Detach button - show for testing */}
+                    <ActionButton
+                        icon="🔗"
+                        label="SCOLLEGA"
+                        onClick={onDetach}
                     />
 
 

@@ -260,7 +260,7 @@ export const sofaCatalog = [
         name: "Jump Pouf Seat",
         description: "Seduta Pouf",
         dimensionsMetric: "85 x 65 x 42 CM",
-        modelPath: "/models/Jump_Sofa_GLB/jump_Pouf_Seat.glb",
+        modelPath: "/models/Jump_Sofa_GLB/jump_Pouf.glb",
         fabricGroup: "POUF",
         hasBackrest: false,
       },

@@ -14,6 +14,10 @@ import {
   getItemImagePath,
   getResolvedPosition,
   findSnapTarget,
+  findAttachableNeighbors,
+  shouldDetach,
+  recalculateGroupPositions,
+  createGroupId,
 } from "./utils/configurator";
 import LandingScreen from "./components/screens/LandingScreen";
 import SelectionScreen from "./components/screens/SelectionScreen";
@@ -40,8 +44,8 @@ export default function Configurator() {
 
   const [draggingChairId, setDraggingChairId] = useState(null);
   const [snapPreview, setSnapPreview] = useState(null);
+  const [dragPosition, setDragPosition] = useState(null);
   const [selectedChairId, setSelectedChairId] = useState(null);
-  const [actionPanelPos, setActionPanelPos] = useState({ x: 0, y: 0 });
   const [showActionPanel, setShowActionPanel] = useState(false);
   const [rotationTargetId, setRotationTargetId] = useState(null);
   const [isDragging2D, setIsDragging2D] = useState(false);
@@ -90,32 +94,10 @@ export default function Configurator() {
     return positionsMap;
   }, [chairs]);
 
-  const sceneCenter = useMemo(() => {
-    if (chairs.length === 0) return [0, 0, 0];
-
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minZ = Infinity;
-    let maxZ = -Infinity;
-
-    chairs.forEach((c) => {
-      const [x, , z] = getResolvedPosition(c, autoPositions);
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (z < minZ) minZ = z;
-      if (z > maxZ) maxZ = z;
-    });
-
-    if (minX === Infinity) return [0, 0, 0];
-
-    const centerX = (minX + maxX) / 2;
-    const centerZ = (minZ + maxZ) / 2;
-    return [centerX, 0, centerZ];
-  }, [chairs, autoPositions]);
-
   const handleDragStart = (chair) => {
     if (viewMode !== "2d") return;
     setDraggingChairId(chair.id);
+    setDragPosition(null);
     setIsDragging2D(true);
     setShowActionPanel(false);
     setRotationTargetId(null);
@@ -124,39 +106,102 @@ export default function Configurator() {
 
   const handleDragMove = (chair, pos) => {
     if (viewMode !== "2d") return;
+    
+    // Track drag position for snap zone calculation
+    setDragPosition(pos);
+    
+    // Calculate new positions for group members
+    const newPositions = recalculateGroupPositions(chair, pos, chairs, autoPositions);
+    
+    // Update all chairs' customPositions for smooth group dragging
+    setChairs((prev) => {
+      if (!chair.groupId) {
+        // Single chair - just update this one
+        return prev.map((c) =>
+          c.id === chair.id ? { ...c, customPosition: [pos.x, 0, pos.z] } : c
+        );
+      }
+      
+      // Group chair - update all group members
+      return prev.map((c) => {
+        const groupMember = chairs.find((cm) => cm.id === c.id);
+        if (groupMember && groupMember.groupId === chair.groupId) {
+          const newPos = newPositions.get(c.id) || [pos.x, 0, pos.z];
+          return { ...c, customPosition: newPos };
+        }
+        return c;
+      });
+    });
+    
+    // Update snap preview
     const snap = findSnapTarget(chair, pos, chairs, autoPositions);
-    if (snap) {
-      setSnapPreview(snap);
-    } else {
-      setSnapPreview(null);
-    }
+    setSnapPreview(snap);
   };
 
   const handleDragEnd = (chair, pos) => {
     if (viewMode !== "2d") return;
     setDraggingChairId(null);
+    setDragPosition(null);
     setIsDragging2D(false);
-    const snap = findSnapTarget(chair, pos, chairs, autoPositions);
-    const targetPosition = snap ? snap.snappedPosition : [pos.x, 0, pos.z];
+    
+    // Check for attach
+    const attachable = findAttachableNeighbors(chair, pos, chairs, autoPositions);
+    const shouldAttach = attachable.length > 0;
+    
+    let targetPosition = [pos.x, 0, pos.z];
+    let newGroupId = chair.groupId;
+    let detachFromGroup = false;
+    
+    if (shouldAttach) {
+      // Attach to the nearest neighbor
+      const nearest = attachable[0];
+      targetPosition = nearest.snappedPosition;
+      
+      if (nearest.attachToGroup) {
+        // Join existing group
+        newGroupId = nearest.attachToGroup;
+      } else {
+        // Create new group with both chairs
+        newGroupId = createGroupId();
+      }
+    } else if (chair.groupId) {
+      // Not attaching to anything - check if should detach
+      detachFromGroup = shouldDetach(chair, pos, chairs, autoPositions);
+    }
+    
     setSnapPreview(null);
-    setChairs((prev) =>
-      prev.map((c) =>
-        c.id === chair.id ? { ...c, customPosition: targetPosition } : c
-      )
-    );
+    
+    setChairs((prev) => {
+      return prev.map((c) => {
+        if (c.id === chair.id) {
+          return {
+            ...c,
+            customPosition: targetPosition,
+            groupId: newGroupId,
+          };
+        }
+        if (shouldAttach && newGroupId && attachable[0] && c.id === attachable[0].chair.id) {
+          // Add the neighbor to the same group
+          return {
+            ...c,
+            groupId: newGroupId,
+          };
+        }
+        if (detachFromGroup && c.groupId === chair.groupId && c.id !== chair.id) {
+          // Detach all group members except the dragged one
+          return {
+            ...c,
+            groupId: null,
+          };
+        }
+        return c;
+      });
+    });
   };
 
   const handleSelectChair = (chair, event) => {
     if (viewMode !== "2d" || draggingChairId) return;
     event.stopPropagation();
-    const nativeEvent = event?.nativeEvent ?? event;
-    const containerRect = canvasContainerRef.current?.getBoundingClientRect();
-    if (containerRect && nativeEvent) {
-      setActionPanelPos({
-        x: nativeEvent.clientX - containerRect.left,
-        y: nativeEvent.clientY - containerRect.top,
-      });
-    }
     setSelectedChairId(chair.id);
     setShowActionPanel(true);
     setRotationTargetId(null);
@@ -420,6 +465,17 @@ export default function Configurator() {
     setChairs((prev) => prev.filter((chair) => chair.id !== chairId));
   };
 
+  const handleDetach = (chair) => {
+    if (!chair.groupId) return; // Already detached
+    
+    // Detach this chair from its group
+    setChairs((prev) =>
+      prev.map((c) =>
+        c.id === chair.id ? { ...c, groupId: null } : c
+      )
+    );
+  };
+
   const handleBackToSelection = () => {
     const existingKeys =
       chairs.length > 0
@@ -471,6 +527,7 @@ export default function Configurator() {
       availableModules={availableModules}
       colorSelectors={colorSelectors}
       isDetectingParts={isDetectingParts}
+      dragPosition={dragPosition}
       // Setters
       setViewMode={setViewMode}
       setExpandedPanel={setExpandedPanel}
@@ -484,6 +541,7 @@ export default function Configurator() {
       handleDragMove={handleDragMove}
       handleDragEnd={handleDragEnd}
       handleSelectChair={handleSelectChair}
+      handleDetach={handleDetach}
       handleRotateRequest={handleRotateRequest}
       handleRotateChange={handleRotateChange}
       handleAddChair={handleAddChair}
