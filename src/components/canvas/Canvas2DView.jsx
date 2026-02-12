@@ -1,10 +1,6 @@
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import {
-    OrthographicCamera,
-    ContactShadows,
-    Line,
-} from "@react-three/drei";
+import { OrthographicCamera, ContactShadows, Line } from "@react-three/drei";
 import Model from "../../Model";
 import DraggableModule from "../DraggableModule";
 import RotationRing from "../RotationRing";
@@ -41,7 +37,6 @@ export default function Canvas2DView({
     zoom = 100,
     focusedChairId,
 }) {
-
     return (
         <Canvas
             gl={{ preserveDrawingBuffer: true }}
