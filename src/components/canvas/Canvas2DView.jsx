@@ -1,9 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import {
-    OrthographicCamera,
-    ContactShadows,
-    Line,
-} from "@react-three/drei";
+import { OrthographicCamera, ContactShadows, Line } from "@react-three/drei";
 import Model from "../../Model";
 import DraggableModule from "../DraggableModule";
 import RotationRing from "../RotationRing";
@@ -17,128 +13,131 @@ const SNAP_DISTANCE = 2.5;
  * Dedicated canvas for 2D top-down orthographic view with drag-and-drop functionality
  */
 export default function Canvas2DView({
-    chairs,
-    selectedChairTexture,
-    selectedPillowTexture,
-    selectedFeetTexture,
-    snapPreview,
-    rotationTarget,
-    isDragging2D,
-    canvasContainerRef,
-    handleDragStart,
-    handleDragMove,
-    handleDragEnd,
-    handleSelectChair,
-    handleDoubleClick,
-    handleRotateChange,
-    getResolvedPosition,
-    rotationTargetId,
-    showDimensions,
-    draggingChairId,
-    dragPosition,
-    zoom = 100,
+  chairs,
+  selectedChairTexture,
+  selectedPillowTexture,
+  selectedFeetTexture,
+  snapPreview,
+  rotationTarget,
+  isDragging2D,
+  canvasContainerRef,
+  handleDragStart,
+  handleDragMove,
+  handleDragEnd,
+  handleSelectChair,
+  handleDoubleClick,
+  handleRotateChange,
+  getResolvedPosition,
+  rotationTargetId,
+  showDimensions,
+  draggingChairId,
+  dragPosition,
+  zoom = 100,
 }) {
+  return (
+    <Canvas
+      gl={{ preserveDrawingBuffer: true }}
+      camera={{
+        position: [0, 1.5, 5],
+        zoom: zoom,
+      }}
+    >
+      {/* Orthographic Camera - Top-down view */}
+      <OrthographicCamera
+        makeDefault
+        position={[1, 1, 1]}
+        zoom={zoom}
+        rotation={[-Math.PI / 2, 0, 0]}
+        near={0}
+      />
 
-    return (
-        <Canvas
-            gl={{ preserveDrawingBuffer: true }}
-            camera={{
-                position: [0, 1.5, 5],
-                zoom: zoom,
-            }}
-        >
-            {/* Orthographic Camera - Top-down view */}
-            <OrthographicCamera
-                makeDefault
-                position={[1, 1, 1]}
-                zoom={zoom}
-                rotation={[-Math.PI / 2, 0, 0]}
-                near={0}
-            />
+      {/* Lighting */}
+      <ambientLight intensity={2} />
+      <directionalLight position={[3, 3, 3]} intensity={1} />
 
-            {/* Lighting */}
-            <ambientLight intensity={2} />
-            <directionalLight position={[3, 3, 3]} intensity={1} />
+      {/* Render all chair modules */}
+      {chairs.length > 0
+        ? chairs.map((chair) => {
+            const isDraggingThis = draggingChairId === chair.id;
+            const position =
+              isDraggingThis && snapPreview
+                ? snapPreview.snappedPosition
+                : getResolvedPosition(chair);
 
-            {/* Render all chair modules */}
-            {chairs.length > 0 ? (
-                chairs.map((chair) => {
-                    const isDraggingThis = draggingChairId === chair.id;
-                    const position = isDraggingThis && snapPreview
-                        ? snapPreview.snappedPosition
-                        : getResolvedPosition(chair);
-                    
-                    const moduleId = chair.sofa.id;
-                    const dims = MODULE_DIMENSIONS[moduleId] || { width: 99, depth: 99, originX: 0, originZ: 0 };
-                    const width = dims.width / 100;
-                    const depth = dims.depth / 100;
-                    const originX = dims.originX || 0;
-                    const originZ = dims.originZ || 0;
-                    
-                    return (
-                        <DraggableModule
-                            key={chair.id}
-                            position={position}
-                            viewMode="2d"
-                            disabled={rotationTargetId === chair.id}
-                            onDragStart={() => handleDragStart(chair)}
-                            onDrag={(pos) => handleDragMove(chair, pos)}
-                            onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
-                            onSelect={(event) => handleSelectChair(chair, event)}
-                            onDoubleClick={(event) => handleDoubleClick(chair, event)}
-                        >
-                            <group rotation={[0, chair.rotation || 0, 0]}>
-                                <Model
-                                    modelPath={chair.sofa.modelPath}
-                                    chairTexturePath={
-                                        chair.chairTexture || selectedChairTexture
-                                    }
-                                    pillowTexturePath={
-                                        chair.pillowTexture || selectedPillowTexture
-                                    }
-                                    feetTexturePath={
-                                        chair.feetTexture || selectedFeetTexture
-                                    }
-                                    width={width}
-                                    depth={depth}
-                                    originX={originX}
-                                    originZ={originZ}
-                                />
-                            </group>
-                        </DraggableModule>
-                    );
-                })
-            ) : null}
+            const moduleId = chair.sofa.id;
+            const dims = MODULE_DIMENSIONS[moduleId] || {
+              width: 99,
+              depth: 99,
+              originX: 0,
+              originZ: 0,
+            };
+            const width = dims.width / 100;
+            const depth = dims.depth / 100;
+            const originX = dims.originX || 0;
+            const originZ = dims.originZ || 0;
 
-            {/* Rotation Ring - Shows when rotating a module */}
-            {rotationTarget && (
-                <RotationRing
-                    position={getResolvedPosition(rotationTarget)}
-                    angle={((rotationTarget.rotation || 0) * 180) / Math.PI}
-                    onRotate={(deg) => handleRotateChange(rotationTarget.id, deg)}
-                    onClose={() => handleRotateChange(null)}
-                />
-            )}
+            return (
+              <DraggableModule
+                key={chair.id}
+                position={position}
+                viewMode="2d"
+                disabled={rotationTargetId === chair.id}
+                onDragStart={() => handleDragStart(chair)}
+                onDrag={(pos) => handleDragMove(chair, pos)}
+                onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
+                onSelect={(event) => handleSelectChair(chair, event)}
+                onDoubleClick={(event) => handleDoubleClick(chair, event)}
+              >
+                <group rotation={[0, chair.rotation || 0, 0]}>
+                  <Model
+                    modelPath={chair.sofa.modelPath}
+                    chairTexturePath={
+                      chair.chairTexture || selectedChairTexture
+                    }
+                    pillowTexturePath={
+                      chair.pillowTexture || selectedPillowTexture
+                    }
+                    feetTexturePath={chair.feetTexture || selectedFeetTexture}
+                    width={width}
+                    depth={depth}
+                    originX={originX}
+                    originZ={originZ}
+                  />
+                </group>
+              </DraggableModule>
+            );
+          })
+        : null}
 
-            {/* Contact Shadows for soft, diffused shadows beneath models */}
-            <ContactShadows
-                position={[0, -0.01, 0]}
-                opacity={0.35}
-                scale={15}
-                blur={2.5}
-                far={4}
-                resolution={512}
-                color="#1a1a1a"
-            />
+      {/* Rotation Ring - Shows when rotating a module */}
+      {rotationTarget && (
+        <RotationRing
+          position={getResolvedPosition(rotationTarget)}
+          angle={((rotationTarget.rotation || 0) * 180) / Math.PI}
+          onRotate={(deg) => handleRotateChange(rotationTarget.id, deg)}
+          onClose={() => handleRotateChange(null)}
+        />
+      )}
 
-            {/* Dimension Lines - Shows measurements when enabled */}
-            {showDimensions && chairs.length > 0 && (
-                <DimensionLines
-                    chairs={chairs}
-                    getResolvedPosition={getResolvedPosition}
-                    viewMode="2d"
-                />
-            )}
-        </Canvas>
-    );
+      {/* Contact Shadows for soft, diffused shadows beneath models */}
+      <ContactShadows
+        position={[0, -0.01, 0]}
+        opacity={0.35}
+        scale={15}
+        blur={2.5}
+        far={4}
+        resolution={512}
+        color="#1a1a1a"
+      />
+
+      {/* Dimension Lines - Shows measurements when enabled */}
+      {showDimensions && chairs.length > 0 && (
+        <DimensionLines
+          chairs={chairs}
+          getResolvedPosition={getResolvedPosition}
+          viewMode="2d"
+        />
+      )}
+    </Canvas>
+  );
 }

@@ -11,7 +11,7 @@ export default function ZoomControls({ zoom, setZoom }) {
 
   const handleChange = (e) => {
     const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value >= 10 && value <= 200) {
+    if (!isNaN(value) && value >= 10 && value <= 400) {
       setZoom(value);
     }
   };
@@ -52,7 +52,7 @@ export default function ZoomControls({ zoom, setZoom }) {
             textAlign: "center",
           }}
           min="10"
-          max="200"
+          max="400"
         />
         <span style={{ fontSize: "12px", color: "#666" }}>%</span>
       </div>

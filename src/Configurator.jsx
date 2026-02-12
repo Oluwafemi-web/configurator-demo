@@ -58,9 +58,15 @@ export default function Configurator() {
 
   const autoPositions = useMemo(() => {
     const positionsMap = new Map();
-    const leftChairs = chairs.filter((c) => c.position === "left" && !c.customPosition);
-    const centerChairs = chairs.filter((c) => c.position === "center" && !c.customPosition);
-    const rightChairs = chairs.filter((c) => c.position === "right" && !c.customPosition);
+    const leftChairs = chairs.filter(
+      (c) => c.position === "left" && !c.customPosition
+    );
+    const centerChairs = chairs.filter(
+      (c) => c.position === "center" && !c.customPosition
+    );
+    const rightChairs = chairs.filter(
+      (c) => c.position === "right" && !c.customPosition
+    );
 
     let leftOffset = 0;
     for (let i = leftChairs.length - 1; i >= 0; i -= 1) {
@@ -103,13 +109,13 @@ export default function Configurator() {
   const handleDragMove = (chair, pos) => {
     if (viewMode !== "2d") return;
     setDragPosition(pos);
-    
+
     // Update customPosition for the dragged chair
     const updatedChairs = chairs.map((c) =>
       c.id === chair.id ? { ...c, customPosition: [pos.x, 0, pos.z] } : c
     );
     setChairs(updatedChairs);
-    
+
     // Build a current position map that includes:
     // - customPositions for all chairs
     // - autoPositions for chairs without customPosition
@@ -128,7 +134,7 @@ export default function Configurator() {
         }
       }
     });
-    
+
     const snap = findSnapTarget(chair, pos, updatedChairs, currentPositions);
     setSnapPreview(snap);
   };
@@ -138,7 +144,7 @@ export default function Configurator() {
     setDraggingChairId(null);
     setDragPosition(null);
     setIsDragging2D(false);
-    
+
     // Build a current position map that includes:
     // - customPositions for all chairs
     // - autoPositions for chairs without customPosition
@@ -157,14 +163,19 @@ export default function Configurator() {
         }
       }
     });
-    
-    const attachable = findAttachableNeighbors(chair, pos, chairs, currentPositions);
+
+    const attachable = findAttachableNeighbors(
+      chair,
+      pos,
+      chairs,
+      currentPositions
+    );
     const shouldAttach = attachable.length > 0;
-    
+
     let targetPosition = [pos.x, 0, pos.z];
     let newGroupId = chair.groupId;
     let saveOriginalGroupId = chair.originalGroupId;
-    
+
     if (shouldAttach) {
       const nearest = attachable[0];
       targetPosition = nearest.snappedPosition;
@@ -179,40 +190,46 @@ export default function Configurator() {
       // Create a new group for the detached chair so the original group stays intact
       newGroupId = createGroupId();
     }
-    
+
     // Check if we should re-attach to original group (for detached modules)
     // If not attaching to a new group, check if near original group members
     if (!shouldAttach && !chair.groupId && saveOriginalGroupId) {
-      const originalGroupMembers = chairs.filter((c) => c.groupId === saveOriginalGroupId);
+      const originalGroupMembers = chairs.filter(
+        (c) => c.groupId === saveOriginalGroupId
+      );
       for (const member of originalGroupMembers) {
         const memberPos = getResolvedPosition(member, currentPositions);
         const dx = memberPos[0] - pos.x;
         const dz = memberPos[2] - pos.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
-        if (dist < 1.5) { // SNAP_DISTANCE
+        if (dist < 1.5) {
+          // SNAP_DISTANCE
           // Re-attach to original group!
           newGroupId = saveOriginalGroupId;
           targetPosition = [
-            memberPos[0] + (pos.x < memberPos[0] ? -1 : 1) * (getActualModuleWidth(member) / 2 + getActualModuleWidth(chair) / 2),
+            memberPos[0] +
+              (pos.x < memberPos[0] ? -1 : 1) *
+                (getActualModuleWidth(member) / 2 +
+                  getActualModuleWidth(chair) / 2),
             0,
-            memberPos[2]
+            memberPos[2],
           ];
           saveOriginalGroupId = null; // Clear since we re-attached
           break;
         }
       }
     }
-    
+
     setSnapPreview(null);
-    
+
     setChairs((prev) => {
       return prev.map((c) => {
         if (c.id === chair.id) {
-          return { 
-            ...c, 
-            customPosition: targetPosition, 
+          return {
+            ...c,
+            customPosition: targetPosition,
             groupId: newGroupId,
-            originalGroupId: saveOriginalGroupId
+            originalGroupId: saveOriginalGroupId,
           };
         }
         // Don't modify other chairs' groupId - keep original group intact
@@ -232,15 +249,20 @@ export default function Configurator() {
   const handleDoubleClick = (chair, event) => {
     if (viewMode !== "2d") return;
     event.stopPropagation();
-    
+
     // Detach the chair from its group if it has one
     // Store originalGroupId so we can re-attach later
     // Create a new group for the detached chair so the original group stays intact
     if (chair.groupId) {
       setChairs((prev) =>
         prev.map((c) =>
-          c.id === chair.id 
-            ? { ...c, customPosition: null, groupId: createGroupId(), originalGroupId: chair.groupId } 
+          c.id === chair.id
+            ? {
+                ...c,
+                customPosition: null,
+                groupId: createGroupId(),
+                originalGroupId: chair.groupId,
+              }
             : c
         )
       );
@@ -260,13 +282,17 @@ export default function Configurator() {
     }
     setChairs((prev) =>
       prev.map((chair) =>
-        chair.id === chairId ? { ...chair, rotation: (degrees * Math.PI) / 180 } : chair
+        chair.id === chairId
+          ? { ...chair, rotation: (degrees * Math.PI) / 180 }
+          : chair
       )
     );
   };
 
-  const selectedChair = chairs.find((chair) => chair.id === selectedChairId) ?? null;
-  const rotationTarget = chairs.find((chair) => chair.id === rotationTargetId) ?? null;
+  const selectedChair =
+    chairs.find((chair) => chair.id === selectedChairId) ?? null;
+  const rotationTarget =
+    chairs.find((chair) => chair.id === rotationTargetId) ?? null;
 
   useEffect(() => {
     if (selectedSofa?.modelPath) {
@@ -294,7 +320,8 @@ export default function Configurator() {
     };
     if (showModuleMenu) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showModuleMenu]);
 
@@ -307,7 +334,8 @@ export default function Configurator() {
     };
     if (showActionPanel) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showActionPanel]);
 
@@ -335,7 +363,11 @@ export default function Configurator() {
           }
           setChairs((prev) =>
             prev.map((chair) => {
-              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) return chair;
+              if (
+                materialTargetMode === "single" &&
+                chair.id !== materialTargetChairId
+              )
+                return chair;
               return { ...chair, chairTexture: option.path };
             })
           );
@@ -354,7 +386,11 @@ export default function Configurator() {
           }
           setChairs((prev) =>
             prev.map((chair) => {
-              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) return chair;
+              if (
+                materialTargetMode === "single" &&
+                chair.id !== materialTargetChairId
+              )
+                return chair;
               return { ...chair, pillowTexture: option.path };
             })
           );
@@ -373,7 +409,11 @@ export default function Configurator() {
           }
           setChairs((prev) =>
             prev.map((chair) => {
-              if (materialTargetMode === "single" && chair.id !== materialTargetChairId) return chair;
+              if (
+                materialTargetMode === "single" &&
+                chair.id !== materialTargetChairId
+              )
+                return chair;
               return { ...chair, feetTexture: option.path };
             })
           );
@@ -381,7 +421,14 @@ export default function Configurator() {
       });
     }
     return selectors;
-  }, [availableParts, selectedChairOptionId, selectedPillowOptionId, selectedFeetOptionId, materialTargetMode, materialTargetChairId]);
+  }, [
+    availableParts,
+    selectedChairOptionId,
+    selectedPillowOptionId,
+    selectedFeetOptionId,
+    materialTargetMode,
+    materialTargetChairId,
+  ]);
 
   const handleLaunchConfigurator = () => setStage(STAGES.selection);
 
@@ -435,7 +482,9 @@ export default function Configurator() {
       customPosition: null,
       rotation: 0,
     };
-    setChairs((prev) => (position === "left" ? [newChair, ...prev] : [...prev, newChair]));
+    setChairs((prev) =>
+      position === "left" ? [newChair, ...prev] : [...prev, newChair]
+    );
     setShowModuleMenu(false);
   };
 
@@ -446,9 +495,14 @@ export default function Configurator() {
   };
 
   const handleBackToSelection = () => {
-    const existingKeys = chairs.length > 0
-      ? deriveVariantKeysFromChairs(chairs)
-      : sortVariantKeys([getVariantKeyFromModelPath(selectedSofa?.modelPath)].filter(Boolean));
+    const existingKeys =
+      chairs.length > 0
+        ? deriveVariantKeysFromChairs(chairs)
+        : sortVariantKeys(
+            [getVariantKeyFromModelPath(selectedSofa?.modelPath)].filter(
+              Boolean
+            )
+          );
     setPendingVariantKeys(existingKeys);
     setStage(STAGES.selection);
   };
