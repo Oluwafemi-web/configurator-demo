@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useThree } from "@react-three/fiber";
+import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { Raycaster, Vector3, Plane } from "three";
 
@@ -14,6 +15,9 @@ export default function DraggableModule({
   disabled = false,
   viewMode = "2d",
   isSnapReady = false,
+  selected = false,
+  moduleWidth = 1.14,
+  moduleDepth = 1,
 }) {
   const groupRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -190,9 +194,30 @@ export default function DraggableModule({
     if (disabled) return;
     
     event.stopPropagation();
+    
+    // Pass click info to parent - parent decides whether to show menu
     if (onSelect) {
-      onSelect(event);
+      onSelect(event, true); // true = this is the first click (show highlight only)
     }
+  };
+
+  // Selection highlight - gray filled box with border
+  const SelectionHighlight = () => {
+    if (!selected) return null;
+    return (
+      <group position={[0, 0.015, 0]}>
+        {/* Gray filled box */}
+        <mesh>
+          <boxGeometry args={[moduleWidth, 0.01, moduleDepth]} />
+          <meshBasicMaterial color="#888888" transparent opacity={0.5} />
+        </mesh>
+        {/* Gray border outline */}
+        <lineSegments>
+          <edgesGeometry args={[new THREE.BoxGeometry(moduleWidth, 0.01, moduleDepth)]} />
+          <lineBasicMaterial color="#888888" linewidth={1} />
+        </lineSegments>
+      </group>
+    );
   };
 
   // In 2D mode, use custom drag implementation with raycasting
@@ -206,6 +231,7 @@ export default function DraggableModule({
         onPointerUp={handlePointerUp}
       >
         {children}
+        <SelectionHighlight />
       </group>
     );
   }
@@ -214,6 +240,7 @@ export default function DraggableModule({
   return (
     <group ref={groupRef} position={position} onClick={handleClick}>
       {children}
+      <SelectionHighlight />
     </group>
   );
 }

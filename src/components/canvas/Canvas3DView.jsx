@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import {
   PerspectiveCamera,
@@ -17,6 +18,7 @@ export default function Canvas3DView({
   getResolvedPosition,
   showDimensions,
   zoom = 100,
+  focusedChairId,
 }) {
   const controlsRef = useRef(null);
 
@@ -53,7 +55,7 @@ export default function Canvas3DView({
               depth={depth}
               originX={originX}
               originZ={originZ}
-              autoRotate={false} // or true if desired
+              isFocused={chair.id === focusedChairId}
             />
           </group>
         );

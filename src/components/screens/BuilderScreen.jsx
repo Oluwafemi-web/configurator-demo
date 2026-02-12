@@ -21,6 +21,7 @@ export default function BuilderScreen({
     expandedPanel,
     snapPreview,
     selectedChair,
+    selectedChairId,
     rotationTarget,
     showActionPanel,
     canvasContainerRef,
@@ -31,6 +32,8 @@ export default function BuilderScreen({
     availableModules,
     colorSelectors,
     isDetectingParts,
+    focusedChairId,
+    setFocusedChairId,
     setViewMode,
     setExpandedPanel,
     setShowActionPanel,
@@ -120,7 +123,9 @@ export default function BuilderScreen({
                             showDimensions={showDimensions && !isExporting}
                             draggingChairId={draggingChairId}
                             dragPosition={dragPosition}
+                            selectedChairId={selectedChairId}
                             zoom={zoom}
+                            focusedChairId={focusedChairId}
                         />
                     ) : (
                         <Canvas3DView
@@ -132,19 +137,20 @@ export default function BuilderScreen({
                             getResolvedPosition={getResolvedPosition}
                             showDimensions={showDimensions && !isExporting}
                             zoom={zoom}
+                            focusedChairId={focusedChairId}
                         />
                     )}
 
                     {showActionPanel && selectedChair && viewMode === "2d" && (
                         <ModuleActionModal
                             selectedChair={selectedChair}
-                            onClose={() => { setShowActionPanel(false); setSelectedChairId(null); }}
+                            onClose={() => { setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
                             onRotate={() => { handleRotateRequest(); }}
-                            onDuplicate={() => { handleAddChair(selectedChair.sofa); setShowActionPanel(false); setSelectedChairId(null); }}
-                            onDelete={() => { handleRemoveChair(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); }}
-                            onAddModules={() => { setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("addModule"); }}
-                            onChangeMaterialModule={() => { setMaterialTargetMode("single"); setMaterialTargetChairId(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("materials"); }}
-                            onChangeMaterialComposition={() => { setMaterialTargetMode("all"); setMaterialTargetChairId(null); setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("materials"); }}
+                            onDuplicate={() => { handleAddChair(selectedChair.sofa); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
+                            onDelete={() => { handleRemoveChair(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
+                            onAddModules={() => { setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("addModule"); }}
+                            onChangeMaterialModule={() => { setMaterialTargetMode("single"); setMaterialTargetChairId(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
+                            onChangeMaterialComposition={() => { setMaterialTargetMode("all"); setMaterialTargetChairId(null); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
                         />
                     )}
                 </div>

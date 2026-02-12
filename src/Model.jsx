@@ -40,6 +40,7 @@ export default function Model({
   depth = 0.99,
   originX = 0,
   originZ = 0,
+  isFocused = false,
 }) {
   const safePath = modelPath;
   const { scene } = useGLTF(safePath);
@@ -224,8 +225,21 @@ export default function Model({
   const offsetX = (width / 2) - (originX || 0);
   const offsetZ = (depth / 2) - (originZ || 0);
 
+  // Model group highlight - unified outline around all wrappers
+  // Only shows when the model is focused (clicked)
+  const ModelGroupHighlight = () => {
+    if (!isFocused) return null;
+    return (
+      <lineSegments position={[0, 0.03, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(width + 0.8, 0.02, depth + 0.8)]} />
+        <lineBasicMaterial color="#000000" linewidth={5} />
+      </lineSegments>
+    );
+  };
+
   return (
     <group ref={groupRef} position={[offsetX, 0, offsetZ]}>
+      <ModelGroupHighlight />
       <primitive object={clonedScene} />
     </group>
   );

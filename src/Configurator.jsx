@@ -47,10 +47,12 @@ export default function Configurator() {
   const [dragPosition, setDragPosition] = useState(null);
   const dragPositionRef = useRef(null); // Ref to track current drag position
   const [selectedChairId, setSelectedChairId] = useState(null);
+  const selectedChairIdRef = useRef(null); // Ref for immediate access
   const [showActionPanel, setShowActionPanel] = useState(false);
   const [rotationTargetId, setRotationTargetId] = useState(null);
   const [isDragging2D, setIsDragging2D] = useState(false);
   const canvasContainerRef = useRef(null);
+  const [focusedChairId, setFocusedChairId] = useState(null);
 
   const [expandedPanel, setExpandedPanel] = useState(null);
   const [materialTargetMode, setMaterialTargetMode] = useState("all");
@@ -224,8 +226,26 @@ export default function Configurator() {
   const handleSelectChair = (chair, event) => {
     if (viewMode !== "2d" || draggingChairId) return;
     event.stopPropagation();
-    setSelectedChairId(chair.id);
-    setShowActionPanel(true);
+    
+    // Set focus to the clicked model
+    setFocusedChairId(chair.id);
+    
+    // Use ref for immediate access to current selected state
+    const wasSelected = selectedChairIdRef.current === chair.id;
+    
+    if (wasSelected && showActionPanel) {
+      // Already selected and menu is open - shouldn't happen, but just in case
+      setShowActionPanel(true);
+    } else if (wasSelected && !showActionPanel) {
+      // Second click on same model - show menu
+      setShowActionPanel(true);
+    } else {
+      // First click on a different model - just select, don't show menu
+      setSelectedChairId(chair.id);
+      selectedChairIdRef.current = chair.id;
+      setShowActionPanel(false);
+    }
+    
     setRotationTargetId(null);
   };
 
@@ -319,6 +339,11 @@ export default function Configurator() {
       setDraggingChairId(null);
     }
   }, [viewMode]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedChairIdRef.current = selectedChairId;
+  }, [selectedChairId]);
 
   const availableParts = detectedParts.length > 0 ? detectedParts : [];
   const colorSelectors = useMemo(() => {
@@ -481,6 +506,7 @@ export default function Configurator() {
       expandedPanel={expandedPanel}
       snapPreview={snapPreview}
       selectedChair={selectedChair}
+      selectedChairId={selectedChairId}
       rotationTarget={rotationTarget}
       showActionPanel={showActionPanel}
       canvasContainerRef={canvasContainerRef}
@@ -496,6 +522,8 @@ export default function Configurator() {
       setSelectedChairId={setSelectedChairId}
       setMaterialTargetMode={setMaterialTargetMode}
       setMaterialTargetChairId={setMaterialTargetChairId}
+      focusedChairId={focusedChairId}
+      setFocusedChairId={setFocusedChairId}
       onBackToSelection={handleBackToSelection}
       handleDragStart={handleDragStart}
       handleDragMove={handleDragMove}

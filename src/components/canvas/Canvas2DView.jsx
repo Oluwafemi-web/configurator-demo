@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import {
     OrthographicCamera,
@@ -36,7 +37,9 @@ export default function Canvas2DView({
     showDimensions,
     draggingChairId,
     dragPosition,
+    selectedChairId,
     zoom = 100,
+    focusedChairId,
 }) {
 
     return (
@@ -75,16 +78,24 @@ export default function Canvas2DView({
                     const originX = dims.originX || 0;
                     const originZ = dims.originZ || 0;
                     
+                    // Debug log for pouf dimensions
+                    if (moduleId?.includes('pouf')) {
+                      console.log('Pouf moduleId:', moduleId, 'dims:', dims, 'width:', width, 'depth:', depth);
+                    }
+
                     return (
                         <DraggableModule
                             key={chair.id}
                             position={position}
                             viewMode="2d"
                             disabled={rotationTargetId === chair.id}
+                            selected={chair.id === selectedChairId}
+                            moduleWidth={width}
+                            moduleDepth={depth}
                             onDragStart={() => handleDragStart(chair)}
                             onDrag={(pos) => handleDragMove(chair, pos)}
                             onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
-                            onSelect={(event) => handleSelectChair(chair, event)}
+                            onSelect={(event, isFirstClick) => handleSelectChair(chair, event, isFirstClick)}
                             onDoubleClick={(event) => handleDoubleClick(chair, event)}
                         >
                             <group rotation={[0, chair.rotation || 0, 0]}>
@@ -103,6 +114,7 @@ export default function Canvas2DView({
                                     depth={depth}
                                     originX={originX}
                                     originZ={originZ}
+                                    isFocused={chair.id === focusedChairId}
                                 />
                             </group>
                         </DraggableModule>
