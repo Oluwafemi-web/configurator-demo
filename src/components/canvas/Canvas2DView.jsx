@@ -29,6 +29,7 @@ export default function Canvas2DView({
     handleDragMove,
     handleDragEnd,
     handleSelectChair,
+    handleDoubleClick,
     handleRotateChange,
     getResolvedPosition,
     rotationTargetId,
@@ -79,11 +80,12 @@ export default function Canvas2DView({
                             key={chair.id}
                             position={position}
                             viewMode="2d"
-                            disabled={rotationTargetId === chair.id || !!chair.groupId}
+                            disabled={rotationTargetId === chair.id}
                             onDragStart={() => handleDragStart(chair)}
                             onDrag={(pos) => handleDragMove(chair, pos)}
                             onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
                             onSelect={(event) => handleSelectChair(chair, event)}
+                            onDoubleClick={(event) => handleDoubleClick(chair, event)}
                         >
                             <group rotation={[0, chair.rotation || 0, 0]}>
                                 <Model

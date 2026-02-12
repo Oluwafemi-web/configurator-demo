@@ -10,6 +10,7 @@ export default function DraggableModule({
   onDrag,
   onDragEnd,
   onSelect,
+  onDoubleClick,
   disabled = false,
   viewMode = "2d",
   isSnapReady = false,
@@ -23,6 +24,8 @@ export default function DraggableModule({
   const isPointerDownRef = useRef(false);
   const hasMovedRef = useRef(false);
   const initialPointerPosRef = useRef({ x: 0, y: 0 });
+  const lastClickTimeRef = useRef(0);
+  const DOUBLE_CLICK_DELAY = 300; // ms
 
   // Sync position when prop changes or when switching modes
   useEffect(() => {
@@ -168,8 +171,24 @@ export default function DraggableModule({
 
   const handleClick = (event) => {
     // Only handle click if we're not dragging (i.e., it was just a click, not a drag)
-    // Note: we allow clicks even when disabled, so grouped chairs can still be selected for detach
     if (hasMovedRef.current) return;
+    
+    // Check for double-click (works even when disabled)
+    const currentTime = Date.now();
+    const timeSinceLastClick = currentTime - lastClickTimeRef.current;
+    lastClickTimeRef.current = currentTime;
+    
+    if (timeSinceLastClick < DOUBLE_CLICK_DELAY) {
+      // Double click detected
+      if (onDoubleClick) {
+        onDoubleClick(event);
+      }
+      return;
+    }
+    
+    // Regular click - only works when not disabled
+    if (disabled) return;
+    
     event.stopPropagation();
     if (onSelect) {
       onSelect(event);

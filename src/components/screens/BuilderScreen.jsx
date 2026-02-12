@@ -42,7 +42,7 @@ export default function BuilderScreen({
     handleDragMove,
     handleDragEnd,
     handleSelectChair,
-    handleDetach,
+    handleDoubleClick,
     handleRotateRequest,
     handleRotateChange,
     handleAddChair,
@@ -113,6 +113,7 @@ export default function BuilderScreen({
                             handleDragMove={handleDragMove}
                             handleDragEnd={handleDragEnd}
                             handleSelectChair={handleSelectChair}
+                            handleDoubleClick={handleDoubleClick}
                             handleRotateChange={handleRotateChange}
                             getResolvedPosition={getResolvedPosition}
                             rotationTargetId={rotationTargetId}
@@ -141,7 +142,6 @@ export default function BuilderScreen({
                             onRotate={() => { handleRotateRequest(); }}
                             onDuplicate={() => { handleAddChair(selectedChair.sofa); setShowActionPanel(false); setSelectedChairId(null); }}
                             onDelete={() => { handleRemoveChair(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); }}
-                            onDetach={() => { handleDetach(selectedChair); setShowActionPanel(false); setSelectedChairId(null); }}
                             onAddModules={() => { setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("addModule"); }}
                             onChangeMaterialModule={() => { setMaterialTargetMode("single"); setMaterialTargetChairId(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("materials"); }}
                             onChangeMaterialComposition={() => { setMaterialTargetMode("all"); setMaterialTargetChairId(null); setShowActionPanel(false); setSelectedChairId(null); setExpandedPanel("materials"); }}

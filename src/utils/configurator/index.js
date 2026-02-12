@@ -12,4 +12,5 @@ export {
   recalculateGroupPositions,
   createGroupId,
   getGroupMembers,
+  getActualModuleWidth,
 } from "./positionCalculations";

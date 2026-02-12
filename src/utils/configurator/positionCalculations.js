@@ -1,13 +1,13 @@
 import { getModuleWidth } from "./getModuleWidth";
 import { MODULE_DIMENSIONS } from "./moduleDimensions";
 
-const SNAP_DISTANCE = 1.5; // Snap distance - matches SnapZone visual radius
-const DETACH_DISTANCE = 2.5; // Distance to trigger detach (larger to match stronger snap)
+export const SNAP_DISTANCE = 1.5; // Snap distance - matches SnapZone visual radius
+export const DETACH_DISTANCE = 2.5; // Distance to trigger detach (larger to match stronger snap)
 
 /**
  * Check if a module is a pouf (doesn't snap to other modules)
  */
-const isPouf = (chair) => {
+export const isPouf = (chair) => {
   const id = chair?.sofa?.id || "";
   return id.includes("pouf");
 };
@@ -16,7 +16,7 @@ const isPouf = (chair) => {
  * Get actual module width in meters from moduleDimensions
  * Falls back to getModuleWidth if not found
  */
-const getActualModuleWidth = (chair) => {
+export const getActualModuleWidth = (chair) => {
   const id = chair?.sofa?.id;
   if (id && MODULE_DIMENSIONS[id]) {
     return MODULE_DIMENSIONS[id].width / 100;
@@ -172,6 +172,7 @@ export const shouldDetach = (chair, pos, chairs, autoPositions) => {
   const groupMembers = chairs.filter((c) => c.groupId === chair.groupId && c.id !== chair.id);
   
   for (const member of groupMembers) {
+    // Use getResolvedPosition to handle both autoPositions and customPositions
     const memberPos = getResolvedPosition(member, autoPositions);
     const dx = memberPos[0] - pos.x;
     const dz = memberPos[2] - pos.z;
