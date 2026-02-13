@@ -201,20 +201,15 @@ export default function DraggableModule({
     }
   };
 
-  // Selection highlight - gray filled box with border
+  // Selection highlight - black outline only
   const SelectionHighlight = () => {
     if (!selected) return null;
     return (
       <group position={[0, 0.015, 0]}>
-        {/* Gray filled box */}
-        <mesh>
-          <boxGeometry args={[moduleWidth, 0.01, moduleDepth]} />
-          <meshBasicMaterial color="#888888" transparent opacity={0.5} />
-        </mesh>
-        {/* Gray border outline */}
+        {/* Black outline */}
         <lineSegments>
           <edgesGeometry args={[new THREE.BoxGeometry(moduleWidth, 0.01, moduleDepth)]} />
-          <lineBasicMaterial color="#888888" linewidth={1} />
+          <lineBasicMaterial color="#000000" />
         </lineSegments>
       </group>
     );
