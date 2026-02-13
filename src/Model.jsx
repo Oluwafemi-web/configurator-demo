@@ -231,7 +231,7 @@ export default function Model({
     if (!isFocused) return null;
     return (
       <lineSegments position={[0, 0.03, 0]}>
-        <edgesGeometry args={[new THREE.BoxGeometry(width + 0.8, 0.02, depth + 0.8)]} />
+        <edgesGeometry args={[new THREE.BoxGeometry(width + 0.5, 0.01, depth + 0.5)]} />
         <lineBasicMaterial color="#000000" linewidth={5} />
       </lineSegments>
     );

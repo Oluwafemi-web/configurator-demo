@@ -55,7 +55,7 @@ export default function Canvas3DView({
               depth={depth}
               originX={originX}
               originZ={originZ}
-              isFocused={chair.id === focusedChairId}
+              //isFocused={chair.id === focusedChairId}
             />
           </group>
         );
