@@ -248,4 +248,3 @@ export default function Model({
 
 useGLTF.preload("/models/Jump_Sofa_GLB/jump_Center.glb");
 useGLTF.preload("/models/Jump_Sofa_GLB/jump_Left.glb");
-
