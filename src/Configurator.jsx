@@ -62,15 +62,11 @@ export default function Configurator() {
     const positionsMap = new Map();
     const SPACING = 0.2; // 20cm spacing between auto-placed modules
 
-    const leftChairs = chairs.filter(
-      (c) => c.position === "left" && !c.customPosition
-    );
-    const centerChairs = chairs.filter(
-      (c) => c.position === "center" && !c.customPosition
-    );
-    const rightChairs = chairs.filter(
-      (c) => c.position === "right" && !c.customPosition
-    );
+    // Include ALL chairs in the calculation to maintain stable slots,
+    // even if some are currently being dragged (have customPosition).
+    const leftChairs = chairs.filter((c) => c.position === "left");
+    const centerChairs = chairs.filter((c) => c.position === "center");
+    const rightChairs = chairs.filter((c) => c.position === "right");
 
     let leftOffset = 0;
     for (let i = leftChairs.length - 1; i >= 0; i -= 1) {
@@ -514,7 +510,8 @@ export default function Configurator() {
 
   const handleAddChair = (sofa) => {
     if (!sofa) return;
-    const position = getVariantKeyFromModelPath(sofa?.modelPath) ?? "right";
+    // Always place new models to the right
+    const position = "right";
     const newChair = {
       id: Date.now(),
       sofa,
@@ -525,9 +522,7 @@ export default function Configurator() {
       customPosition: null,
       rotation: 0,
     };
-    setChairs((prev) =>
-      position === "left" ? [newChair, ...prev] : [...prev, newChair]
-    );
+    setChairs((prev) => [...prev, newChair]);
     setShowModuleMenu(false);
   };
 
