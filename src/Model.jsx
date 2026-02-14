@@ -41,6 +41,7 @@ export default function Model({
   originX = 0,
   originZ = 0,
   isFocused = false,
+  isPouf = false,
 }) {
   const safePath = modelPath;
   const { scene } = useGLTF(safePath);
@@ -226,9 +227,9 @@ export default function Model({
   const offsetZ = (depth / 2) - (originZ || 0);
 
   // Model group highlight - unified outline around all wrappers
-  // Only shows when the model is focused (clicked)
+  // Only shows when the model is focused (clicked) and NOT a pouf
   const ModelGroupHighlight = () => {
-    if (!isFocused) return null;
+    if (!isFocused || isPouf) return null;
     return (
       <lineSegments position={[0, 0.03, 0]}>
         <edgesGeometry args={[new THREE.BoxGeometry(width + 0.5, 0.01, depth + 0.5)]} />

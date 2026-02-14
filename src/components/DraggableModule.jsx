@@ -18,6 +18,7 @@ export default function DraggableModule({
   selected = false,
   moduleWidth = 1.14,
   moduleDepth = 1,
+  isPouf = false,
 }) {
   const groupRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -201,20 +202,16 @@ export default function DraggableModule({
     }
   };
 
-  // Selection highlight - gray filled box with border
+  // Selection highlight - black outline only (unfilled)
+  // Only shows for poufs when selected
   const SelectionHighlight = () => {
-    if (!selected) return null;
+    if (!selected || !isPouf) return null;
     return (
       <group position={[0, 0.015, 0]}>
-        {/* Gray filled box */}
-        <mesh>
-          <boxGeometry args={[moduleWidth, 0.01, moduleDepth]} />
-          <meshBasicMaterial color="#888888" transparent opacity={0.5} />
-        </mesh>
-        {/* Gray border outline */}
+        {/* Black border outline only - no fill */}
         <lineSegments>
           <edgesGeometry args={[new THREE.BoxGeometry(moduleWidth, 0.01, moduleDepth)]} />
-          <lineBasicMaterial color="#888888" linewidth={1} />
+          <lineBasicMaterial color="#000000" linewidth={2} />
         </lineSegments>
       </group>
     );

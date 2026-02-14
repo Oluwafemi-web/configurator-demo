@@ -73,10 +73,9 @@ export default function Canvas2DView({
                     const originX = dims.originX || 0;
                     const originZ = dims.originZ || 0;
                     
-                    // Debug log for pouf dimensions
-                    if (moduleId?.includes('pouf')) {
-                      console.log('Pouf moduleId:', moduleId, 'dims:', dims, 'width:', width, 'depth:', depth);
-                    }
+                    // Check if this is a chaise or seat pouf (not the regular jump-pouf)
+                    const moduleIdLower = moduleId?.toLowerCase() || '';
+                    const isPouf = moduleIdLower.includes('chaisepouf') || moduleIdLower.includes('seatpouf');
 
                     return (
                         <DraggableModule
@@ -87,6 +86,7 @@ export default function Canvas2DView({
                             selected={chair.id === selectedChairId}
                             moduleWidth={width}
                             moduleDepth={depth}
+                            isPouf={isPouf}
                             onDragStart={() => handleDragStart(chair)}
                             onDrag={(pos) => handleDragMove(chair, pos)}
                             onDragEnd={(finalPos) => handleDragEnd(chair, finalPos)}
@@ -110,6 +110,7 @@ export default function Canvas2DView({
                                     originX={originX}
                                     originZ={originZ}
                                     isFocused={chair.id === focusedChairId}
+                                    isPouf={isPouf}
                                 />
                             </group>
                         </DraggableModule>
