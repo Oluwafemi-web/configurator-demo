@@ -17,7 +17,7 @@ import {
   findSnapTarget,
   findAttachableNeighbors,
   shouldDetach,
-  recalculateGroupPositions,
+  calculateCompositionDimensions,
   createGroupId,
 } from "./utils/configurator";
 import LandingScreen from "./components/screens/LandingScreen";
@@ -510,17 +510,44 @@ export default function Configurator() {
 
   const handleAddChair = (sofa) => {
     if (!sofa) return;
-    // Always place new models to the right
-    const position = "right";
+
+    // Calculate new position based on all existing chairs (including disjoint groups)
+    const groups = calculateCompositionDimensions(chairs, (c) => getResolvedPosition(c, autoPositions));
+
+    // Find the global max X (rightmost edge) across all groups
+    let maxX = 0;
+    if (groups && groups.length > 0) {
+      // Initialize with correct min to ensure we find real max
+      maxX = -Infinity;
+      groups.forEach(g => {
+        if (g.bbox.max.x > maxX) maxX = g.bbox.max.x;
+      });
+    } else {
+      // If no chairs, start at 0
+      maxX = 0;
+    }
+
+    // New chair width
+    // We need to create a temp chair object to get width, or look it up
+    const tempChair = { sofa };
+    const width = getModuleWidth(tempChair);
+    const half = width / 2;
+
+    // Place strictly to the right of the entire scene
+    // If scene is empty (maxX=0), place at 0 (center of module)
+    // If scene exists, place at maxX + spacing + halfWidth
+    const newX = (chairs.length > 0) ? (maxX + 0.2 + half) : 0;
+
     const newChair = {
       id: Date.now(),
       sofa,
       chairTexture: selectedChairTexture,
       pillowTexture: selectedPillowTexture,
       feetTexture: selectedFeetTexture,
-      position,
-      customPosition: null,
+      position: "right", // Legacy metadata
+      customPosition: [newX, 0, 0], // Strict explicit position
       rotation: 0,
+      groupId: createGroupId(), // Start as separate group
     };
     setChairs((prev) => [...prev, newChair]);
     setShowModuleMenu(false);
