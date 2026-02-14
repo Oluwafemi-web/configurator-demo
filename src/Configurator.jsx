@@ -95,6 +95,19 @@ export default function Configurator() {
       rightCursor += width;
     });
 
+    // Calculate centering offset
+    // The range is [-leftOffset, rightCursor]
+    const totalMinX = -leftOffset;
+    const totalMaxX = rightCursor;
+    const midpoint = (totalMinX + totalMaxX) / 2;
+
+    // Apply offset to all positions to center the group
+    if (midpoint !== 0) {
+      for (const [id, pos] of positionsMap) {
+        positionsMap.set(id, [pos[0] - midpoint, pos[1], pos[2]]);
+      }
+    }
+
     return positionsMap;
   }, [chairs]);
 

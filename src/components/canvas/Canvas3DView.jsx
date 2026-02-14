@@ -28,14 +28,14 @@ export default function Canvas3DView({
 
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[10, 5, 10]} fov={fov} />
+      <PerspectiveCamera makeDefault position={[3, 5, 10]} fov={fov} />
 
       <ambientLight intensity={2} />
       <directionalLight position={[3, 3, 3]} intensity={1} />
 
       {chairs.map((chair) => {
         const resolvedPosition = getResolvedPosition(chair);
-        
+
         // Get module dimensions for origin offset
         const moduleId = chair.sofa.id;
         const dims = MODULE_DIMENSIONS[moduleId] || { width: 99, depth: 99, originX: 0, originZ: 0 };
@@ -55,7 +55,7 @@ export default function Canvas3DView({
               depth={depth}
               originX={originX}
               originZ={originZ}
-              //isFocused={chair.id === focusedChairId}
+            //isFocused={chair.id === focusedChairId}
             />
           </group>
         );
