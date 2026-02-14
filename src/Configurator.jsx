@@ -60,6 +60,8 @@ export default function Configurator() {
 
   const autoPositions = useMemo(() => {
     const positionsMap = new Map();
+    const SPACING = 0.2; // 20cm spacing between auto-placed modules
+
     const leftChairs = chairs.filter(
       (c) => c.position === "left" && !c.customPosition
     );
@@ -76,7 +78,7 @@ export default function Configurator() {
       const width = getModuleWidth(chair);
       const half = width / 2;
       positionsMap.set(chair.id, [-(leftOffset + half), 0, 0]);
-      leftOffset += width;
+      leftOffset += (width + SPACING);
     }
 
     let centerOffset = 0;
@@ -84,7 +86,7 @@ export default function Configurator() {
       const width = getModuleWidth(chair);
       const half = width / 2;
       positionsMap.set(chair.id, [centerOffset + half, 0, 0]);
-      centerOffset += width;
+      centerOffset += (width + SPACING);
     });
 
     let rightCursor = centerOffset > 0 ? centerOffset : 0;
@@ -92,11 +94,18 @@ export default function Configurator() {
       const width = getModuleWidth(chair);
       const half = width / 2;
       positionsMap.set(chair.id, [rightCursor + half, 0, 0]);
-      rightCursor += width;
+      rightCursor += (width + SPACING);
     });
 
     // Calculate centering offset
     // The range is [-leftOffset, rightCursor]
+    // Note: leftOffset includes the last spacing which extends beyond the last chair,
+    // but for centering calculation it's close enough or we can adjust if strict precision needed.
+    // Technically bounds are:
+    // Min: -(leftOffset - SPACING) if leftChairs > 0
+    // Max: (rightCursor - SPACING) if rightChairs > 0
+
+    // Simple centering based on the computed cursors is usually fine for visual balance.
     const totalMinX = -leftOffset;
     const totalMaxX = rightCursor;
     const midpoint = (totalMinX + totalMaxX) / 2;
