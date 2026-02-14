@@ -106,6 +106,8 @@ export default function Configurator() {
     setShowActionPanel(false);
     setRotationTargetId(null);
     setSnapPreview(null);
+    // Ensure the chair is focused (highlighted) when dragging starts
+    setFocusedChairId(chair.id);
   };
 
   const handleDragMove = (chair, pos) => {
@@ -210,9 +212,9 @@ export default function Configurator() {
           newGroupId = saveOriginalGroupId;
           targetPosition = [
             memberPos[0] +
-              (pos.x < memberPos[0] ? -1 : 1) *
-                (getActualModuleWidth(member) / 2 +
-                  getActualModuleWidth(chair) / 2),
+            (pos.x < memberPos[0] ? -1 : 1) *
+            (getActualModuleWidth(member) / 2 +
+              getActualModuleWidth(chair) / 2),
             0,
             memberPos[2],
           ];
@@ -243,26 +245,13 @@ export default function Configurator() {
   const handleSelectChair = (chair, event) => {
     if (viewMode !== "2d" || draggingChairId) return;
     event.stopPropagation();
-    
-    // Set focus to the clicked model
+
+    // Always select and show menu on first click
     setFocusedChairId(chair.id);
-    
-    // Use ref for immediate access to current selected state
-    const wasSelected = selectedChairIdRef.current === chair.id;
-    
-    if (wasSelected && showActionPanel) {
-      // Already selected and menu is open - shouldn't happen, but just in case
-      setShowActionPanel(true);
-    } else if (wasSelected && !showActionPanel) {
-      // Second click on same model - show menu
-      setShowActionPanel(true);
-    } else {
-      // First click on a different model - just select, don't show menu
-      setSelectedChairId(chair.id);
-      selectedChairIdRef.current = chair.id;
-      setShowActionPanel(false);
-    }
-    
+    setSelectedChairId(chair.id);
+    selectedChairIdRef.current = chair.id;
+    setShowActionPanel(true);
+
     setRotationTargetId(null);
   };
 
@@ -278,11 +267,11 @@ export default function Configurator() {
         prev.map((c) =>
           c.id === chair.id
             ? {
-                ...c,
-                customPosition: null,
-                groupId: createGroupId(),
-                originalGroupId: chair.groupId,
-              }
+              ...c,
+              customPosition: null,
+              groupId: createGroupId(),
+              originalGroupId: chair.groupId,
+            }
             : c
         )
       );
@@ -307,6 +296,13 @@ export default function Configurator() {
           : chair
       )
     );
+  };
+
+  const handleCanvasMissed = () => {
+    setFocusedChairId(null);
+    setSelectedChairId(null);
+    setShowActionPanel(false);
+    setRotationTargetId(null);
   };
 
   const selectedChair =
@@ -524,10 +520,10 @@ export default function Configurator() {
       chairs.length > 0
         ? deriveVariantKeysFromChairs(chairs)
         : sortVariantKeys(
-            [getVariantKeyFromModelPath(selectedSofa?.modelPath)].filter(
-              Boolean
-            )
-          );
+          [getVariantKeyFromModelPath(selectedSofa?.modelPath)].filter(
+            Boolean
+          )
+        );
     setPendingVariantKeys(existingKeys);
     setStage(STAGES.selection);
   };
@@ -589,6 +585,7 @@ export default function Configurator() {
       handleAddChair={handleAddChair}
       handleRemoveChair={handleRemoveChair}
       getResolvedPosition={(chair) => getResolvedPosition(chair, autoPositions)}
+      onEmptyClick={handleCanvasMissed}
     />
   );
 }

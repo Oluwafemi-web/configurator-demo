@@ -36,9 +36,15 @@ export default function Canvas2DView({
     selectedChairId,
     zoom = 100,
     focusedChairId,
+    onEmptyClick,
 }) {
     return (
         <Canvas
+            onPointerMissed={(e) => {
+                if (e.type === 'click') {
+                    onEmptyClick?.();
+                }
+            }}
             gl={{ preserveDrawingBuffer: true }}
             camera={{
                 position: [0, 1.5, 5],
@@ -65,14 +71,14 @@ export default function Canvas2DView({
                     const position = isDraggingThis && snapPreview
                         ? snapPreview.snappedPosition
                         : getResolvedPosition(chair);
-                    
+
                     const moduleId = chair.sofa.id;
                     const dims = MODULE_DIMENSIONS[moduleId] || { width: 99, depth: 99, originX: 0, originZ: 0 };
                     const width = dims.width / 100;
                     const depth = dims.depth / 100;
                     const originX = dims.originX || 0;
                     const originZ = dims.originZ || 0;
-                    
+
                     // Check if this is a chaise or seat pouf (not the regular jump-pouf)
                     const moduleIdLower = moduleId?.toLowerCase() || '';
                     const isPouf = moduleIdLower.includes('chaisepouf') || moduleIdLower.includes('seatpouf');

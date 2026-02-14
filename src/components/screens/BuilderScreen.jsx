@@ -12,45 +12,46 @@ import SnapIndicator from "../SnapIndicator";
 const CHAIR_WIDTH = 1.14;
 
 export default function BuilderScreen({
-    chairs,
-    viewMode,
-    selectedSofa,
-    selectedChairTexture,
-    selectedPillowTexture,
-    selectedFeetTexture,
-    expandedPanel,
-    snapPreview,
-    selectedChair,
-    selectedChairId,
-    rotationTarget,
-    showActionPanel,
-    canvasContainerRef,
-    isDragging2D,
-    rotationTargetId,
-    draggingChairId,
-    dragPosition,
-    availableModules,
-    colorSelectors,
-    isDetectingParts,
-    focusedChairId,
-    setFocusedChairId,
-    setViewMode,
-    setExpandedPanel,
-    setShowActionPanel,
-    setSelectedChairId,
-    setMaterialTargetMode,
-    setMaterialTargetChairId,
-    onBackToSelection,
-    handleDragStart,
-    handleDragMove,
-    handleDragEnd,
-    handleSelectChair,
-    handleDoubleClick,
-    handleRotateRequest,
-    handleRotateChange,
-    handleAddChair,
-    handleRemoveChair,
-    getResolvedPosition,
+  chairs,
+  viewMode,
+  selectedSofa,
+  selectedChairTexture,
+  selectedPillowTexture,
+  selectedFeetTexture,
+  expandedPanel,
+  snapPreview,
+  selectedChair,
+  selectedChairId,
+  rotationTarget,
+  showActionPanel,
+  canvasContainerRef,
+  isDragging2D,
+  rotationTargetId,
+  draggingChairId,
+  dragPosition,
+  availableModules,
+  colorSelectors,
+  isDetectingParts,
+  focusedChairId,
+  setFocusedChairId,
+  setViewMode,
+  setExpandedPanel,
+  setShowActionPanel,
+  setSelectedChairId,
+  setMaterialTargetMode,
+  setMaterialTargetChairId,
+  onBackToSelection,
+  handleDragStart,
+  handleDragMove,
+  handleDragEnd,
+  handleSelectChair,
+  handleDoubleClick,
+  handleRotateRequest,
+  handleRotateChange,
+  handleAddChair,
+  handleRemoveChair,
+  getResolvedPosition,
+  onEmptyClick,
 }) {
   const [showDimensions, setShowDimensions] = React.useState(false);
   const [isExporting, setIsExporting] = React.useState(false);
@@ -166,79 +167,80 @@ export default function BuilderScreen({
           </button>
         </div>
 
-                <div ref={canvasContainerRef} className="canvas-container" style={{ flex: 1, position: "relative", margin: "0 20px" }}>
-                    {/* Snap indicator */}
-                    {snapPreview?.snappedPosition && (
-                        <div style={{
-                            position: "absolute",
-                            top: "20px",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            background: "linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)",
-                            color: "#fff",
-                            padding: "14px 32px",
-                            borderRadius: "30px",
-                            fontSize: "15px",
-                            fontWeight: "600",
-                            zIndex: 1000,
-                            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
-                        }}>
-                            Let go off the model now
-                        </div>
-                    )}
-                    
-                    {viewMode === "2d" ? (
-                        <Canvas2DView
-                            chairs={chairs}
-                            selectedChairTexture={selectedChairTexture}
-                            selectedPillowTexture={selectedPillowTexture}
-                            selectedFeetTexture={selectedFeetTexture}
-                            snapPreview={snapPreview}
-                            rotationTarget={rotationTarget}
-                            isDragging2D={isDragging2D}
-                            canvasContainerRef={canvasContainerRef}
-                            handleDragStart={handleDragStart}
-                            handleDragMove={handleDragMove}
-                            handleDragEnd={handleDragEnd}
-                            handleSelectChair={handleSelectChair}
-                            handleDoubleClick={handleDoubleClick}
-                            handleRotateChange={handleRotateChange}
-                            getResolvedPosition={getResolvedPosition}
-                            rotationTargetId={rotationTargetId}
-                            showDimensions={showDimensions && !isExporting}
-                            draggingChairId={draggingChairId}
-                            dragPosition={dragPosition}
-                            selectedChairId={selectedChairId}
-                            zoom={zoom}
-                            focusedChairId={focusedChairId}
-                        />
-                    ) : (
-                        <Canvas3DView
-                            chairs={chairs}
-                            selectedChairTexture={selectedChairTexture}
-                            selectedPillowTexture={selectedPillowTexture}
-                            selectedFeetTexture={selectedFeetTexture}
-                            canvasContainerRef={canvasContainerRef}
-                            getResolvedPosition={getResolvedPosition}
-                            showDimensions={showDimensions && !isExporting}
-                            zoom={zoom}
-                            focusedChairId={focusedChairId}
-                        />
-                    )}
+        <div ref={canvasContainerRef} className="canvas-container" style={{ flex: 1, position: "relative", margin: "0 20px" }}>
+          {/* Snap indicator */}
+          {snapPreview?.snappedPosition && (
+            <div style={{
+              position: "absolute",
+              top: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)",
+              color: "#fff",
+              padding: "14px 32px",
+              borderRadius: "30px",
+              fontSize: "15px",
+              fontWeight: "600",
+              zIndex: 1000,
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)"
+            }}>
+              Let go off the model now
+            </div>
+          )}
 
-                    {showActionPanel && selectedChair && viewMode === "2d" && (
-                        <ModuleActionModal
-                            selectedChair={selectedChair}
-                            onClose={() => { setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
-                            onRotate={() => { handleRotateRequest(); }}
-                            onDuplicate={() => { handleAddChair(selectedChair.sofa); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
-                            onDelete={() => { handleRemoveChair(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
-                            onAddModules={() => { setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("addModule"); }}
-                            onChangeMaterialModule={() => { setMaterialTargetMode("single"); setMaterialTargetChairId(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
-                            onChangeMaterialComposition={() => { setMaterialTargetMode("all"); setMaterialTargetChairId(null); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
-                        />
-                    )}
-                </div>
+          {viewMode === "2d" ? (
+            <Canvas2DView
+              chairs={chairs}
+              selectedChairTexture={selectedChairTexture}
+              selectedPillowTexture={selectedPillowTexture}
+              selectedFeetTexture={selectedFeetTexture}
+              snapPreview={snapPreview}
+              rotationTarget={rotationTarget}
+              isDragging2D={isDragging2D}
+              canvasContainerRef={canvasContainerRef}
+              handleDragStart={handleDragStart}
+              handleDragMove={handleDragMove}
+              handleDragEnd={handleDragEnd}
+              handleSelectChair={handleSelectChair}
+              handleDoubleClick={handleDoubleClick}
+              handleRotateChange={handleRotateChange}
+              getResolvedPosition={getResolvedPosition}
+              rotationTargetId={rotationTargetId}
+              showDimensions={showDimensions && !isExporting}
+              draggingChairId={draggingChairId}
+              dragPosition={dragPosition}
+              selectedChairId={selectedChairId}
+              zoom={zoom}
+              focusedChairId={focusedChairId}
+              onEmptyClick={onEmptyClick}
+            />
+          ) : (
+            <Canvas3DView
+              chairs={chairs}
+              selectedChairTexture={selectedChairTexture}
+              selectedPillowTexture={selectedPillowTexture}
+              selectedFeetTexture={selectedFeetTexture}
+              canvasContainerRef={canvasContainerRef}
+              getResolvedPosition={getResolvedPosition}
+              showDimensions={showDimensions && !isExporting}
+              zoom={zoom}
+              focusedChairId={focusedChairId}
+            />
+          )}
+
+          {showActionPanel && selectedChair && viewMode === "2d" && (
+            <ModuleActionModal
+              selectedChair={selectedChair}
+              onClose={() => { setShowActionPanel(false); }}
+              onRotate={() => { handleRotateRequest(); }}
+              onDuplicate={() => { handleAddChair(selectedChair.sofa); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
+              onDelete={() => { handleRemoveChair(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); }}
+              onAddModules={() => { setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("addModule"); }}
+              onChangeMaterialModule={() => { setMaterialTargetMode("single"); setMaterialTargetChairId(selectedChair.id); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
+              onChangeMaterialComposition={() => { setMaterialTargetMode("all"); setMaterialTargetChairId(null); setShowActionPanel(false); setSelectedChairId(null); setFocusedChairId(null); setExpandedPanel("materials"); }}
+            />
+          )}
+        </div>
 
         <div
           style={{
