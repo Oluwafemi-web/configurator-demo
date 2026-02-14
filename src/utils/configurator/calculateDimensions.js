@@ -72,6 +72,7 @@ const calculateGroupDimensions = (groupChairs, getResolvedPosition) => {
 const groupChairsByProximity = (chairs, getResolvedPosition) => {
     const groups = [];
     const visited = new Set();
+    const CONNECTION_THRESHOLD = 0.05; // 5cm - Only group if effectively touching/snapped
 
     chairs.forEach((chair) => {
         if (visited.has(chair.id)) return;
@@ -84,18 +85,32 @@ const groupChairsByProximity = (chairs, getResolvedPosition) => {
             const current = queue.shift();
             currentGroup.push(current);
             const currentPos = getResolvedPosition(current);
+            
+            // Get dimensions for current chair
+            const currentDims = getModuleDimensions(current.sofa.id);
+            const currentWidth = currentDims.width / 100;
+            // Simple approximation: check if bounding circles/boxes are close
+            // For furniture, usually width is the main dimension for side-by-side
+            const currentRadius = currentWidth / 2;
 
             // Find neighbors
             chairs.forEach((other) => {
                 if (visited.has(other.id)) return;
 
                 const otherPos = getResolvedPosition(other);
+                const otherDims = getModuleDimensions(other.sofa.id);
+                const otherWidth = otherDims.width / 100;
+                const otherRadius = otherWidth / 2;
+
                 const dx = currentPos[0] - otherPos[0];
                 const dz = currentPos[2] - otherPos[2];
-                const dist = Math.sqrt(dx * dx + dz * dz);
+                const centerDist = Math.sqrt(dx * dx + dz * dz);
 
-                // Use a slightly larger threshold than snap distance to ensure grouping works seamlessly
-                if (dist < SNAP_DISTANCE) {
+                // Calculate edge-to-edge distance
+                // We assume alignment along axes for simplicity, which holds for most cases here
+                const edgeDist = centerDist - (currentRadius + otherRadius);
+
+                if (edgeDist < CONNECTION_THRESHOLD) {
                     visited.add(other.id);
                     queue.push(other);
                 }
