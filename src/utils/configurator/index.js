@@ -14,4 +14,5 @@ export {
   getGroupMembers,
   getActualModuleWidth,
 } from "./positionCalculations";
-export { calculateCompositionDimensions } from "./calculateDimensions";
+export { calculateCompositionDimensions, calculateTotalDimensions } from "./calculateDimensions";
+

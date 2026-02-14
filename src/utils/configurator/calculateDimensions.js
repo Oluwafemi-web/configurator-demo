@@ -12,7 +12,10 @@ const SNAP_DISTANCE = 1.6; // Slightly larger than snap distance to catch adjace
 /**
  * Calculates dimensions for a specific group of chairs
  */
-const calculateGroupDimensions = (groupChairs, getResolvedPosition) => {
+/**
+ * Calculates dimensions for a specific group of chairs
+ */
+const calculateDimensionsForChairs = (groupChairs, getResolvedPosition) => {
     if (!groupChairs || groupChairs.length === 0) return null;
 
     const bbox = new THREE.Box3();
@@ -53,7 +56,7 @@ const calculateGroupDimensions = (groupChairs, getResolvedPosition) => {
     const height = bbox.max.y - bbox.min.y;
 
     return {
-        id: groupChairs[0].id, // Use first chair ID as stable key
+        id: groupChairs.length > 0 ? groupChairs[0].id : "total", // Use first chair ID as stable key
         bbox,
         width,
         depth,
@@ -130,5 +133,12 @@ export const calculateCompositionDimensions = (chairs, getResolvedPosition) => {
     if (!chairs || chairs.length === 0) return [];
 
     const groups = groupChairsByProximity(chairs, getResolvedPosition);
-    return groups.map(group => calculateGroupDimensions(group, getResolvedPosition)).filter(Boolean);
+    return groups.map(group => calculateDimensionsForChairs(group, getResolvedPosition)).filter(Boolean);
+};
+
+/**
+ * Calculates the total dimensions including ALL chairs regardless of grouping
+ */
+export const calculateTotalDimensions = (chairs, getResolvedPosition) => {
+    return calculateDimensionsForChairs(chairs, getResolvedPosition);
 };
