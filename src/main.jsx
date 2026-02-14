@@ -4,7 +4,6 @@ import './index.css'
 import App from './App.jsx'
 
 
-//redeploy
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
