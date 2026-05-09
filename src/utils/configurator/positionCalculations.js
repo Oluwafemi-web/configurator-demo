@@ -36,15 +36,81 @@ export const getActualModuleDepth = (chair) => {
 };
 
 /**
+ * Get the originX for a module in meters.
+ * originX = distance from the module's LEFT visual edge to the GLB world origin.
+ */
+export const getOriginX = (chair) => {
+  const id = chair?.sofa?.id;
+  if (id && MODULE_DIMENSIONS[id]) {
+    return MODULE_DIMENSIONS[id].originX || 0;
+  }
+  return getActualModuleWidth(chair) / 2; // fallback: centered
+};
+
+/**
+ * Get the originZ for a module in meters.
+ */
+export const getOriginZ = (chair) => {
+  const id = chair?.sofa?.id;
+  if (id && MODULE_DIMENSIONS[id]) {
+    return MODULE_DIMENSIONS[id].originZ || 0;
+  }
+  return getActualModuleDepth(chair) / 2;
+};
+
+/**
+ * Distance from the module's GROUP ORIGIN to its RIGHT visual edge.
+ * Because Model.jsx applies offsetX = (width/2 - originX) to the primitive,
+ * the visual right edge in group space is at:
+ *   (width - originX) + offsetX correction... but actually after the Bug #5 fix,
+ *   the primitive is shifted by offsetX INSIDE the group, and the group itself
+ *   is at the world position. So the visual right edge in group space = width - originX.
+ *
+ *   right edge = (width - originX)  from the group origin
+ *   left edge  = -originX           from the group origin  (i.e. originX to the left)
+ */
+export const getRightEdgeDistance = (chair) => {
+  const w = getActualModuleWidth(chair);
+  const ox = getOriginX(chair);
+  return w - ox;
+};
+
+export const getLeftEdgeDistance = (chair) => {
+  return getOriginX(chair); // distance from origin to left edge
+};
+
+/**
  * Get the projected half-width of a module along the X axis after rotation.
- * For a box of width W and depth D rotated by angle θ, the half-extent along X is:
- *   W/2 * |cos θ| + D/2 * |sin θ|
+ * Used for distance-based snap detection (not for placement).
+ * For a box of width W and depth D rotated by angle θ:
+ *   half-extent along X = W/2 * |cos θ| + D/2 * |sin θ|
  */
 export const getProjectedHalfWidth = (chair) => {
   const w = getActualModuleWidth(chair) / 2;
   const d = getActualModuleDepth(chair) / 2;
   const angle = chair.rotation || 0;
   return w * Math.abs(Math.cos(angle)) + d * Math.abs(Math.sin(angle));
+};
+
+/**
+ * Calculate the correct center-to-center spacing for a flush edge join.
+ *
+ * When draggedChair is to the LEFT of neighborChair (direction = -1 from neighbor's POV):
+ *   dragged right edge meets neighbor left edge
+ *   spacing = getRightEdgeDistance(dragged) + getLeftEdgeDistance(neighbor)
+ *
+ * When draggedChair is to the RIGHT of neighborChair (direction = +1):
+ *   dragged left edge meets neighbor right edge
+ *   spacing = getLeftEdgeDistance(dragged) + getRightEdgeDistance(neighbor)
+ */
+export const getSnapSpacing = (draggedChair, neighborChair, draggedIsLeft) => {
+  if (draggedIsLeft) {
+    // dragged is left, neighbor is right
+    return getRightEdgeDistance(draggedChair) + getLeftEdgeDistance(neighborChair);
+  } else {
+    // dragged is right, neighbor is left
+    return getLeftEdgeDistance(draggedChair) + getRightEdgeDistance(neighborChair);
+  }
 };
 
 /**
@@ -91,12 +157,11 @@ export const findAttachableNeighbors = (draggedChair, pos, chairs, autoPositions
     const dist = Math.sqrt(dx * dx + dz * dz);
 
     if (dist < SNAP_DISTANCE) {
-      const direction = pos.x < chairPos[0] ? -1 : 1;
+      const draggedIsLeft = pos.x < chairPos[0];
+      const direction = draggedIsLeft ? -1 : 1;
 
-      // Use rotation-aware projected half-widths for accurate edge-to-edge placement
-      const neighborHalfWidth = getProjectedHalfWidth(otherChair);
-      const draggedHalfWidth = getProjectedHalfWidth(draggedChair);
-      const spacing = neighborHalfWidth + draggedHalfWidth;
+      // Origin-aware flush edge spacing: accounts for asymmetric GLB origins
+      const spacing = getSnapSpacing(draggedChair, otherChair, draggedIsLeft);
 
       attachable.push({
         chair: otherChair,
@@ -144,12 +209,11 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
   if (!nearest || nearestDist >= SNAP_DISTANCE) return null;
 
   const neighborPos = getResolvedPosition(nearest, autoPositions);
-  const direction = pos.x < neighborPos[0] ? -1 : 1;
+  const draggedIsLeft = pos.x < neighborPos[0];
+  const direction = draggedIsLeft ? -1 : 1;
 
-  // Use rotation-aware projected half-widths
-  const neighborHalfWidth = getProjectedHalfWidth(nearest);
-  const draggedHalfWidth = getProjectedHalfWidth(draggedChair);
-  const spacing = neighborHalfWidth + draggedHalfWidth;
+  // Origin-aware flush edge spacing
+  const spacing = getSnapSpacing(draggedChair, nearest, draggedIsLeft);
 
   return {
     neighborId: nearest.id,

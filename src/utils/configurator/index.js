@@ -14,6 +14,7 @@ export {
   getGroupMembers,
   getActualModuleWidth,
   getProjectedHalfWidth,
+  getSnapSpacing,
 } from "./positionCalculations";
 export { calculateCompositionDimensions, calculateTotalDimensions } from "./calculateDimensions";
 

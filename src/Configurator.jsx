@@ -13,6 +13,7 @@ import {
   getModuleWidth,
   getActualModuleWidth,
   getProjectedHalfWidth,
+  getSnapSpacing,
   getItemImagePath,
   getResolvedPosition,
   findSnapTarget,
@@ -222,11 +223,11 @@ export default function Configurator() {
         const dist = Math.sqrt(dx * dx + dz * dz);
         if (dist < 1.5) {
           newGroupId = saveOriginalGroupId;
-          const draggedHalf = getProjectedHalfWidth(chair);
-          const memberHalf = getProjectedHalfWidth(member);
+          const draggedIsLeft = pos.x < memberPos[0];
+          const direction = draggedIsLeft ? -1 : 1;
+          const spacing = getSnapSpacing(chair, member, draggedIsLeft);
           targetPosition = [
-            memberPos[0] +
-              (pos.x < memberPos[0] ? -1 : 1) * (memberHalf + draggedHalf),
+            memberPos[0] + direction * spacing,
             0,
             memberPos[2],
           ];
