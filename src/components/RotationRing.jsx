@@ -5,46 +5,63 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
     const [isDragging, setIsDragging] = useState(false);
     const startAngleRef = useRef(0);
     const currentAngleRef = useRef(angle);
+    // FIX: store the container ref so we always measure the ring's own center,
+    // not whatever child element happens to be under the pointer.
+    const containerRef = useRef(null);
+
+    const getRingCenter = () => {
+        if (!containerRef.current) return { x: 0, y: 0 };
+        const rect = containerRef.current.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+    };
 
     const handlePointerDown = (e) => {
         e.stopPropagation();
+        // Capture the pointer so pointermove fires even if cursor leaves the element
+        e.target.setPointerCapture(e.pointerId);
         setIsDragging(true);
-        const rect = e.target.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        startAngleRef.current = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const { x: centerX, y: centerY } = getRingCenter();
+        startAngleRef.current =
+            Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
         currentAngleRef.current = angle;
     };
 
     const handlePointerMove = (e) => {
         if (!isDragging) return;
-        const rect = e.target.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const currentMouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const { x: centerX, y: centerY } = getRingCenter();
+        const currentMouseAngle =
+            Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
         let delta = currentMouseAngle - startAngleRef.current;
 
         // Normalize delta to handle wrapping around 360/0 boundary
         if (delta > 180) delta -= 360;
         if (delta < -180) delta += 360;
 
-        // Negate delta to fix rotation direction (clockwise ring = clockwise model)
+        // Negate delta: clockwise drag = clockwise model rotation
         const newAngle = (currentAngleRef.current - delta + 360) % 360;
         onRotate(newAngle);
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (e) => {
+        if (isDragging) {
+            e.target.releasePointerCapture(e.pointerId);
+        }
         setIsDragging(false);
     };
 
     return (
         <Html position={position} center>
             <div
+                ref={containerRef}
                 style={{
                     position: "relative",
                     width: "120px",
                     height: "120px",
                     pointerEvents: "auto",
+                    touchAction: "none",
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
@@ -65,7 +82,7 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
                     }}
                 />
 
-                {/* Angle indicator */}
+                {/* Angle indicator line */}
                 <div
                     style={{
                         position: "absolute",
@@ -76,10 +93,11 @@ export default function RotationRing({ position, angle, onRotate, onClose }) {
                         background: "#1b1b1b",
                         transformOrigin: "left center",
                         transform: `translate(0, -50%) rotate(${angle}deg)`,
+                        pointerEvents: "none",
                     }}
                 />
 
-                {/* Angle Value Display */}
+                {/* Angle value display */}
                 <div
                     style={{
                         position: "absolute",

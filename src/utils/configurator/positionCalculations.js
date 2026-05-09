@@ -25,10 +25,30 @@ export const getActualModuleWidth = (chair) => {
 };
 
 /**
+ * Get actual module depth in meters from moduleDimensions
+ */
+export const getActualModuleDepth = (chair) => {
+  const id = chair?.sofa?.id;
+  if (id && MODULE_DIMENSIONS[id]) {
+    return MODULE_DIMENSIONS[id].depth / 100;
+  }
+  return getActualModuleWidth(chair); // fallback: assume square
+};
+
+/**
+ * Get the projected half-width of a module along the X axis after rotation.
+ * For a box of width W and depth D rotated by angle θ, the half-extent along X is:
+ *   W/2 * |cos θ| + D/2 * |sin θ|
+ */
+export const getProjectedHalfWidth = (chair) => {
+  const w = getActualModuleWidth(chair) / 2;
+  const d = getActualModuleDepth(chair) / 2;
+  const angle = chair.rotation || 0;
+  return w * Math.abs(Math.cos(angle)) + d * Math.abs(Math.sin(angle));
+};
+
+/**
  * Resolves custom or auto-calculated position for a chair
- * @param {Object} chair - Chair object
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {number[]} - Position array [x, y, z]
  */
 export const getResolvedPosition = (chair, autoPositions) => {
   return chair.customPosition ?? autoPositions.get(chair.id) ?? [0, 0, 0];
@@ -36,9 +56,6 @@ export const getResolvedPosition = (chair, autoPositions) => {
 
 /**
  * Gets all chairs in the same group as the given chair
- * @param {Object} chair - Chair to check
- * @param {Array} chairs - All chairs
- * @returns {Array} - Array of chairs in the same group
  */
 export const getGroupMembers = (chair, chairs) => {
   if (!chair.groupId) return [chair];
@@ -53,41 +70,34 @@ export const createGroupId = () => {
 };
 
 /**
- * Finds attachable neighbors for a chair
- * @param {Object} draggedChair - The chair being dragged
- * @param {Object} pos - Current position {x, z}
- * @param {Array} chairs - Array of all chairs
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {Array} - Array of attachable neighbors with info
+ * Finds attachable neighbors for a chair being dropped.
+ * Uses rotation-aware projected widths so snapped positions are edge-to-edge.
  */
 export const findAttachableNeighbors = (draggedChair, pos, chairs, autoPositions) => {
   const attachable = [];
-  
-  // Poufs don't snap to anything
+
   if (isPouf(draggedChair)) return attachable;
-  
+
   chairs.forEach((otherChair) => {
     if (otherChair.id === draggedChair.id) return;
-    
-    // Don't snap to poufs
     if (isPouf(otherChair)) return;
-    
-    // Don't attach if already in same group
+
+    // Don't re-snap within the same group
     if (draggedChair.groupId && otherChair.groupId === draggedChair.groupId) return;
-    
+
     const chairPos = getResolvedPosition(otherChair, autoPositions);
     const dx = chairPos[0] - pos.x;
     const dz = chairPos[2] - pos.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
-    
+
     if (dist < SNAP_DISTANCE) {
       const direction = pos.x < chairPos[0] ? -1 : 1;
-      const neighborWidth = getActualModuleWidth(otherChair);
-      const draggedWidth = getActualModuleWidth(draggedChair);
-      
-      // Edge-to-edge: distance between centers = half of each width
-      const spacing = (neighborWidth / 2) + (draggedWidth / 2);
-      
+
+      // Use rotation-aware projected half-widths for accurate edge-to-edge placement
+      const neighborHalfWidth = getProjectedHalfWidth(otherChair);
+      const draggedHalfWidth = getProjectedHalfWidth(draggedChair);
+      const spacing = neighborHalfWidth + draggedHalfWidth;
+
       attachable.push({
         chair: otherChair,
         distance: dist,
@@ -100,31 +110,27 @@ export const findAttachableNeighbors = (draggedChair, pos, chairs, autoPositions
       });
     }
   });
-  
+
   return attachable;
 };
 
 /**
- * Finds snap target for dragging modules
- * @param {Object} draggedChair - The chair being dragged
- * @param {Object} pos - Current position {x, z}
- * @param {Array} chairs - Array of all chairs
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {Object|null} - Snap target info or null
+ * Finds snap target for previewing where a dragged module will land.
+ * Uses rotation-aware projected widths and excludes same-group members.
  */
 export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
-  // Poufs don't snap to anything
   if (isPouf(draggedChair)) return null;
-  
+
   let nearest = null;
   let nearestDist = Infinity;
-  
+
   chairs.forEach((otherChair) => {
     if (otherChair.id === draggedChair.id) return;
-    
-    // Don't snap to poufs
     if (isPouf(otherChair)) return;
-    
+
+    // FIX: exclude same-group members from snap preview (was missing before)
+    if (draggedChair.groupId && otherChair.groupId === draggedChair.groupId) return;
+
     const chairPos = getResolvedPosition(otherChair, autoPositions);
     const dx = chairPos[0] - pos.x;
     const dz = chairPos[2] - pos.z;
@@ -134,17 +140,17 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
       nearest = otherChair;
     }
   });
-  
+
   if (!nearest || nearestDist >= SNAP_DISTANCE) return null;
-  
+
   const neighborPos = getResolvedPosition(nearest, autoPositions);
   const direction = pos.x < neighborPos[0] ? -1 : 1;
-  const neighborWidth = getActualModuleWidth(nearest);
-  const draggedWidth = getActualModuleWidth(draggedChair);
-  
-  // Edge-to-edge: distance between centers = half of each width
-  const spacing = (neighborWidth / 2) + (draggedWidth / 2);
-  
+
+  // Use rotation-aware projected half-widths
+  const neighborHalfWidth = getProjectedHalfWidth(nearest);
+  const draggedHalfWidth = getProjectedHalfWidth(draggedChair);
+  const spacing = neighborHalfWidth + draggedHalfWidth;
+
   return {
     neighborId: nearest.id,
     neighborPosition: neighborPos,
@@ -153,94 +159,83 @@ export const findSnapTarget = (draggedChair, pos, chairs, autoPositions) => {
       0,
       neighborPos[2],
     ],
-    draggedWidth,
+    draggedWidth: getActualModuleWidth(draggedChair),
     neighborGroupId: nearest.groupId,
   };
 };
 
 /**
- * Check if a chair should be detached from its group
- * @param {Object} chair - Chair to check
- * @param {Object} pos - Current position {x, z}
- * @param {Array} chairs - Array of all chairs
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {boolean} - True if should detach
+ * Check if a chair should be detached from its group based on drag distance.
  */
 export const shouldDetach = (chair, pos, chairs, autoPositions) => {
   if (!chair.groupId) return false;
-  
-  const groupMembers = chairs.filter((c) => c.groupId === chair.groupId && c.id !== chair.id);
-  
+
+  const groupMembers = chairs.filter(
+    (c) => c.groupId === chair.groupId && c.id !== chair.id
+  );
+
   for (const member of groupMembers) {
-    // Use getResolvedPosition to handle both autoPositions and customPositions
     const memberPos = getResolvedPosition(member, autoPositions);
     const dx = memberPos[0] - pos.x;
     const dz = memberPos[2] - pos.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
-    
-    // Only detach if far enough from ALL group members
+
     if (dist < DETACH_DISTANCE) {
       return false;
     }
   }
-  
+
   return true;
 };
 
 /**
  * Get the group center position (average of all member positions)
- * @param {Array} groupMembers - Array of chairs in the group
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {number[]} - Center position [x, y, z]
  */
 export const getGroupCenter = (groupMembers, autoPositions) => {
   if (groupMembers.length === 0) return [0, 0, 0];
-  
+
   let totalX = 0;
   let totalZ = 0;
-  
+
   groupMembers.forEach((chair) => {
     const pos = getResolvedPosition(chair, autoPositions);
     totalX += pos[0];
     totalZ += pos[2];
   });
-  
+
   return [totalX / groupMembers.length, 0, totalZ / groupMembers.length];
 };
 
 /**
- * Recalculate positions for all group members when one is moved
- * @param {Object} draggedChair - The chair being dragged
- * @param {Object} newPos - New position {x, y, z}
- * @param {Array} chairs - Array of all chairs
- * @param {Map} autoPositions - Map of auto-calculated positions
- * @returns {Map} - New positions map for all affected chairs
+ * Recalculate positions for all group members when one is moved.
+ * Translates all members by the same delta so the group moves together.
  */
-export const recalculateGroupPositions = (draggedChair, newPos, chairs, autoPositions) => {
+export const recalculateGroupPositions = (
+  draggedChair,
+  newPos,
+  chairs,
+  autoPositions
+) => {
   const newPositions = new Map(autoPositions);
-  
+
   if (!draggedChair.groupId) {
-    // Not in a group, just update this chair
     newPositions.set(draggedChair.id, [newPos.x, newPos.y, newPos.z]);
     return newPositions;
   }
-  
-  // Get all group members
-  const groupMembers = chairs.filter((c) => c.groupId === draggedChair.groupId);
-  
+
+  const groupMembers = chairs.filter(
+    (c) => c.groupId === draggedChair.groupId
+  );
+
   if (groupMembers.length <= 1) {
     newPositions.set(draggedChair.id, [newPos.x, newPos.y, newPos.z]);
     return newPositions;
   }
-  
-  // Calculate offset from dragged chair to group center
+
   const draggedPos = getResolvedPosition(draggedChair, autoPositions);
-  const currentCenter = getGroupCenter(groupMembers, autoPositions);
-  
   const offsetX = newPos.x - draggedPos[0];
   const offsetZ = newPos.z - draggedPos[2];
-  
-  // Move all group members by the same offset
+
   groupMembers.forEach((member) => {
     if (member.id === draggedChair.id) {
       newPositions.set(member.id, [newPos.x, newPos.y, newPos.z]);
@@ -253,6 +248,6 @@ export const recalculateGroupPositions = (draggedChair, newPos, chairs, autoPosi
       ]);
     }
   });
-  
+
   return newPositions;
 };

@@ -12,6 +12,7 @@ import {
   deriveVariantKeysFromChairs,
   getModuleWidth,
   getActualModuleWidth,
+  getProjectedHalfWidth,
   getItemImagePath,
   getResolvedPosition,
   findSnapTarget,
@@ -167,14 +168,10 @@ export default function Configurator() {
     setDragPosition(null);
     setIsDragging2D(false);
 
-    // Build a current position map that includes:
-    // - customPositions for all chairs
-    // - autoPositions for chairs without customPosition
-    // - the dragged chair's new position
+    // Build a current position map
     const currentPositions = new Map();
     chairs.forEach((c) => {
       if (c.id === chair.id) {
-        // Use the new position for the dragged chair
         currentPositions.set(c.id, [pos.x, 0, pos.z]);
       } else if (c.customPosition) {
         currentPositions.set(c.id, c.customPosition);
@@ -194,6 +191,9 @@ export default function Configurator() {
     );
     const shouldAttach = attachable.length > 0;
 
+    // FIX: actually use shouldDetach to detach when dragged far from the group
+    const detach = !shouldAttach && shouldDetach(chair, pos, chairs, currentPositions);
+
     let targetPosition = [pos.x, 0, pos.z];
     let newGroupId = chair.groupId;
     let saveOriginalGroupId = chair.originalGroupId;
@@ -206,16 +206,12 @@ export default function Configurator() {
       } else {
         newGroupId = createGroupId();
       }
-    } else if (chair.groupId) {
-      // Save original group ID before detaching
+    } else if (detach) {
+      // Detach: save original group so re-attach is possible later
       saveOriginalGroupId = chair.groupId;
-      // Create a new group for the detached chair so the original group stays intact
       newGroupId = createGroupId();
-    }
-
-    // Check if we should re-attach to original group (for detached modules)
-    // If not attaching to a new group, check if near original group members
-    if (!shouldAttach && !chair.groupId && saveOriginalGroupId) {
+    } else if (!chair.groupId && saveOriginalGroupId) {
+      // Check if near original group members to re-attach
       const originalGroupMembers = chairs.filter(
         (c) => c.groupId === saveOriginalGroupId
       );
@@ -225,18 +221,16 @@ export default function Configurator() {
         const dz = memberPos[2] - pos.z;
         const dist = Math.sqrt(dx * dx + dz * dz);
         if (dist < 1.5) {
-          // SNAP_DISTANCE
-          // Re-attach to original group!
           newGroupId = saveOriginalGroupId;
+          const draggedHalf = getProjectedHalfWidth(chair);
+          const memberHalf = getProjectedHalfWidth(member);
           targetPosition = [
             memberPos[0] +
-            (pos.x < memberPos[0] ? -1 : 1) *
-            (getActualModuleWidth(member) / 2 +
-              getActualModuleWidth(chair) / 2),
+              (pos.x < memberPos[0] ? -1 : 1) * (memberHalf + draggedHalf),
             0,
             memberPos[2],
           ];
-          saveOriginalGroupId = null; // Clear since we re-attached
+          saveOriginalGroupId = null;
           break;
         }
       }
@@ -244,8 +238,8 @@ export default function Configurator() {
 
     setSnapPreview(null);
 
-    setChairs((prev) => {
-      return prev.map((c) => {
+    setChairs((prev) =>
+      prev.map((c) => {
         if (c.id === chair.id) {
           return {
             ...c,
@@ -254,10 +248,9 @@ export default function Configurator() {
             originalGroupId: saveOriginalGroupId,
           };
         }
-        // Don't modify other chairs' groupId - keep original group intact
         return c;
-      });
-    });
+      })
+    );
   };
 
   const handleSelectChair = (chair, event) => {

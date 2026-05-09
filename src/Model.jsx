@@ -238,10 +238,16 @@ export default function Model({
     );
   };
 
+  // offsetX/offsetZ are exported as props so the parent rotation group
+  // can apply them as a pre-rotation translation, keeping the rotation
+  // pivot at the module's visual center rather than its GLB origin.
+  // We still expose them on the group so callers that don't need the
+  // rotation-pivot fix continue to work unchanged.
   return (
-    <group ref={groupRef} position={[offsetX, 0, offsetZ]}>
+    <group ref={groupRef}>
       <ModelGroupHighlight />
-      <primitive object={clonedScene} />
+      {/* Shift primitive so its visual center is at group origin */}
+      <primitive object={clonedScene} position={[offsetX, 0, offsetZ]} />
     </group>
   );
 }

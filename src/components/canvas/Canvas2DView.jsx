@@ -87,6 +87,7 @@ export default function Canvas2DView({
                         <DraggableModule
                             key={chair.id}
                             position={position}
+                            rotation={[0, chair.rotation || 0, 0]}
                             viewMode="2d"
                             disabled={rotationTargetId === chair.id}
                             selected={chair.id === selectedChairId}
@@ -99,26 +100,24 @@ export default function Canvas2DView({
                             onSelect={(event, isFirstClick) => handleSelectChair(chair, event, isFirstClick)}
                             onDoubleClick={(event) => handleDoubleClick(chair, event)}
                         >
-                            <group rotation={[0, chair.rotation || 0, 0]}>
-                                <Model
-                                    modelPath={chair.sofa.modelPath}
-                                    chairTexturePath={
-                                        chair.chairTexture || selectedChairTexture
-                                    }
-                                    pillowTexturePath={
-                                        chair.pillowTexture || selectedPillowTexture
-                                    }
-                                    feetTexturePath={
-                                        chair.feetTexture || selectedFeetTexture
-                                    }
-                                    width={width}
-                                    depth={depth}
-                                    originX={originX}
-                                    originZ={originZ}
-                                    isFocused={chair.id === focusedChairId}
-                                    isPouf={isPouf}
-                                />
-                            </group>
+                            <Model
+                                modelPath={chair.sofa.modelPath}
+                                chairTexturePath={
+                                    chair.chairTexture || selectedChairTexture
+                                }
+                                pillowTexturePath={
+                                    chair.pillowTexture || selectedPillowTexture
+                                }
+                                feetTexturePath={
+                                    chair.feetTexture || selectedFeetTexture
+                                }
+                                width={width}
+                                depth={depth}
+                                originX={originX}
+                                originZ={originZ}
+                                isFocused={chair.id === focusedChairId}
+                                isPouf={isPouf}
+                            />
                         </DraggableModule>
                     );
                 })

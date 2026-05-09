@@ -7,6 +7,7 @@ import { Raycaster, Vector3, Plane } from "three";
 export default function DraggableModule({
   children,
   position,
+  rotation = [0, 0, 0],
   onDragStart,
   onDrag,
   onDragEnd,
@@ -223,6 +224,7 @@ export default function DraggableModule({
       <group
         ref={groupRef}
         position={position}
+        rotation={rotation}
         onClick={handleClick}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
@@ -235,7 +237,7 @@ export default function DraggableModule({
 
   // 3D mode: no drag controls
   return (
-    <group ref={groupRef} position={position} onClick={handleClick}>
+    <group ref={groupRef} position={position} rotation={rotation} onClick={handleClick}>
       {children}
       <SelectionHighlight />
     </group>

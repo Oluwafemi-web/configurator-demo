@@ -13,6 +13,7 @@ export {
   createGroupId,
   getGroupMembers,
   getActualModuleWidth,
+  getProjectedHalfWidth,
 } from "./positionCalculations";
 export { calculateCompositionDimensions, calculateTotalDimensions } from "./calculateDimensions";
 
