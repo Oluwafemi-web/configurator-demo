@@ -28,7 +28,7 @@ export default function Canvas3DView({
 
   return (
     <Canvas gl={{ preserveDrawingBuffer: true }}>
-      <PerspectiveCamera makeDefault position={[3, 5, 10]} fov={fov} />
+      <PerspectiveCamera makeDefault position={[2, 3, 6]} fov={fov} />
 
       <ambientLight intensity={2} />
       <directionalLight position={[3, 3, 3]} intensity={1} />
@@ -73,8 +73,8 @@ export default function Canvas3DView({
 
       <CameraControls
         ref={controlsRef}
-        minDistance={5}
-        maxDistance={50}
+        minDistance={2}
+        maxDistance={15}
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         makeDefault
